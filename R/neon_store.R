@@ -49,8 +49,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
                     name = fs::path_file(zips), 
                     date = Sys.time(),
                     product = dpID,
-                    stringsAsFactors = FALSE,
-                    row.names = FALSE)
+                    stringsAsFactors = FALSE)
 
   readr::write_csv(entry, registry, append=TRUE)
   
@@ -68,7 +67,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 #' @inheritParams neonUtilities::stackByTable
 #' @return ids and names of stacked tables
 #' @export
-#' @examples \donntest{
+#' @examples \donttest{
 #' neon_store("DP1.10003.001")
 #' neon_stack("DP1.10003.001")
 #' }
@@ -140,4 +139,11 @@ neon_registry <- function(path = neon_registry_default()){
 #br_count <- contenturi::retrieve(
 # "hash://sha256/3544e9345cc9ff9e235ff49e2d446dfea1ce5fb2be2c82c66f4e58516bf8a3bd")
 
-
+#stacked_products(dpID) <- function(){
+#  neon_registry() %>% 
+#      dplyr::filter(product == paste0("stacked-", dpID)) %>% 
+#      dplyr::select(id, name) %>% 
+#      dplyr::distinct()
+#  
+#  ## if name isn't unique, could re-join hash against original table to get dates?
+#}

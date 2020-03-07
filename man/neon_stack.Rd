@@ -27,7 +27,7 @@ ids and names of stacked tables
 Stack zip files into combined tables using the local store
 }
 \examples{
-\donntest{
+\donttest{
 neon_store("DP1.10003.001")
 neon_stack("DP1.10003.001")
 }
