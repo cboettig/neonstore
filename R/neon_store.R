@@ -95,7 +95,7 @@ neon_stack <- function(dpID=NA,
   lapply(as.data.frame(t(meta)), function(m){
     x <- m[["id"]]
     y <- m[["name"]]
-    fs::link_create(contenturi::retrieve(x), fs::path(workdir, y))
+    fs::link_create(contenturi::retrieve(x, dir = dir), fs::path(workdir, y))
   })
   
   
@@ -105,7 +105,7 @@ neon_stack <- function(dpID=NA,
 
   ## Now let's also store the stacked CSVs
   stacked_csvs <- fs::dir_ls(fs::path(workdir, "stackedFiles"))
-  csv_ids <- vapply(stacked_csvs, contenturi::store, character(1L))
+  csv_ids <- vapply(stacked_csvs, contenturi::store, character(1L), dir = dir)
 
   entry <- data.frame(id = unname(csv_ids), name = path_file(stacked_csvs),  
                       date = Sys.time(), product = paste0("stacked-", dpID),
