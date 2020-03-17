@@ -14,7 +14,7 @@ neon_store(
   check.size = TRUE,
   savepath = NA,
   load = F,
-  registry = neon_registry()
+  dir = neonstore_home()
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ neon_store(
 
 \item{load}{T or F, are files saved locally or loaded directly? Used silently with loadByProduct(), do not set manually.}
 
-\item{registry}{location to write the local neon data registry}
+\item{dir}{location to write the local neon data registry}
 }
 \value{
 path to the neon data registry csv file (invisibly)

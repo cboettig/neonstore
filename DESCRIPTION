@@ -14,6 +14,7 @@ Imports:
     contenturi (>= 0.0.1),
     readr,
     fs,
+    rappdirs,
     neonUtilities
 Remotes: 
     cboettig/contenturi

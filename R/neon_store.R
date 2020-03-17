@@ -18,9 +18,9 @@
 #' 
 neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basic",
                        avg="all", check.size=TRUE, savepath=NA, load=F, 
-                       registry = neon_registry()) {
+                       dir = neonstore_home()) {
 
-  
+  registry <- neon_registry(dir)
   if(is.na(savepath))
     savepath <- tempdir()
 
@@ -40,7 +40,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
   ## Add all downloaded files to the (local) content store.  
   workdir <- paste(savepath, "/filesToStack", substr(dpID, 5, 9), sep="")
   zips <- fs::dir_ls(workdir)
-  ids <- vapply(zips, contenturi::store, character(1L))
+  ids <- vapply(zips, contenturi::store, character(1L), dir)
   
 
   ## NOTE: if we re-download NEON data and a file has changed, it will not 
@@ -62,7 +62,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 ## Stack NEON data files into a combined data product
 #' Stack zip files into combined tables using the local store
 #' 
-#' @param registry location to write the local neon data registry
+#' @param dir location to write the local neon data registry
 #' @param workdir Location to use for temporary storage
 #' @inheritParams neonUtilities::stackByTable
 #' @return ids and names of stacked tables
@@ -72,11 +72,12 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 #' neon_stack("DP1.10003.001")
 #' }
 neon_stack <- function(dpID=NA, 
-                       registry = neon_registry(),
+                       dir = neonstore_home(),
                        workdir = tempdir(), 
                        nCores=parallel::detectCores() 
                        ){
 
+  registry <- neon_registry(dir)
   
   meta <- readr::read_csv(registry, col_types = "ccTc")
   if(!is.na(dpID))
@@ -91,8 +92,11 @@ neon_stack <- function(dpID=NA,
   
   
   ## Populate workdir with symlinks that point to the content expected by stackByTable
-  walk2(meta$id, meta$name, function(x, y) 
-    fs::link_create(contenturi::retrieve(x), fs::path(workdir, y)))
+  lapply(as.data.frame(t(meta)), function(m){
+    x <- m[["id"]]
+    y <- m[["name"]]
+    fs::link_create(contenturi::retrieve(x), fs::path(workdir, y))
+  })
   
   
   ## Now lets stack all this many many zips into csvs
@@ -101,7 +105,7 @@ neon_stack <- function(dpID=NA,
 
   ## Now let's also store the stacked CSVs
   stacked_csvs <- fs::dir_ls(fs::path(workdir, "stackedFiles"))
-  csv_ids <- map_chr(stacked_csvs, contenturi::store)
+  csv_ids <- vapply(stacked_csvs, contenturi::store, character(1L))
 
   entry <- data.frame(id = unname(csv_ids), name = path_file(stacked_csvs),  
                       date = Sys.time(), product = paste0("stacked-", dpID),
@@ -112,8 +116,8 @@ neon_stack <- function(dpID=NA,
   entry
 }
 
-
-neon_registry_default <- function(){
+#' importFrom rappdirs user_data_dir
+neonstore_home <- function(){
   Sys.getenv("NEON_REGISTRY", 
              fs::path_abs("registry.csv", 
                           start = rappdirs::user_data_dir("neon")))
@@ -125,7 +129,7 @@ neon_registry_default <- function(){
 #' @return Will create an empty cv file at the registry if no exists
 #' @export
 #' @importFrom fs file_exists dir_create path_dir
-neon_registry <- function(path = neon_registry_default()){
+neon_registry <- function(path = neonstore_home()){
   if(!fs::file_exists(path) ){
     fs::dir_create(fs::path_dir(path))
     df <- data.frame(id = NA, name = NA, date = NA, product = NA,

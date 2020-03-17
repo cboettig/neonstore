@@ -4,7 +4,7 @@
 \alias{neon_registry}
 \title{neon registry}
 \usage{
-neon_registry(path = neon_registry_default())
+neon_registry(path = neonstore_home())
 }
 \arguments{
 \item{path}{specify a path for the registry, or use the default}

@@ -6,7 +6,7 @@
 \usage{
 neon_stack(
   dpID = NA,
-  registry = neon_registry(),
+  dir = neonstore_home(),
   workdir = tempdir(),
   nCores = parallel::detectCores()
 )
@@ -14,7 +14,7 @@ neon_stack(
 \arguments{
 \item{dpID}{Data product ID of product to stack. Not needed; defaults to NA, included for back compatibility}
 
-\item{registry}{location to write the local neon data registry}
+\item{dir}{location to write the local neon data registry}
 
 \item{workdir}{Location to use for temporary storage}
 
