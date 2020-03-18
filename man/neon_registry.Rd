@@ -4,10 +4,10 @@
 \alias{neon_registry}
 \title{neon registry}
 \usage{
-neon_registry(path = neonstore_home())
+neon_registry(path = neon_default_registry())
 }
 \arguments{
-\item{path}{specify a path for the registry, or use the default}
+\item{path}{specify a directory for the registry, or use the default}
 }
 \value{
 Will create an empty cv file at the registry if no exists

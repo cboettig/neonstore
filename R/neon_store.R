@@ -18,9 +18,9 @@
 #' 
 neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basic",
                        avg="all", check.size=TRUE, savepath=NA, load=F, 
-                       dir = neonstore_home()) {
+                       registry = neon_registry(),
+                       dir = contenturi::content_dir()) {
 
-  registry <- neon_registry(dir)
   if(is.na(savepath))
     savepath <- tempdir()
 
@@ -62,7 +62,8 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 ## Stack NEON data files into a combined data product
 #' Stack zip files into combined tables using the local store
 #' 
-#' @param dir location to write the local neon data registry
+#' @param registry location to write the local neon data registry
+#' @param dir location to use for the content store
 #' @param workdir Location to use for temporary storage
 #' @inheritParams neonUtilities::stackByTable
 #' @return ids and names of stacked tables
@@ -72,13 +73,13 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 #' neon_stack("DP1.10003.001")
 #' }
 neon_stack <- function(dpID=NA, 
-                       dir = neonstore_home(),
+                       dir = contenturi::content_dir(),
+                       registry = neon_registry(),
                        workdir = tempdir(), 
                        nCores=parallel::detectCores() 
                        ){
 
-  registry <- neon_registry(dir)
-  
+
   meta <- readr::read_csv(registry, col_types = "ccTc")
   if(!is.na(dpID))
     meta <- meta[meta$product == dpID, ]
@@ -117,7 +118,7 @@ neon_stack <- function(dpID=NA,
 }
 
 #' importFrom rappdirs user_data_dir
-neonstore_home <- function(){
+neon_default_registry <- function(){
   Sys.getenv("NEON_REGISTRY", 
              fs::path_abs("registry.csv", 
                           start = rappdirs::user_data_dir("neon")))
@@ -125,13 +126,13 @@ neonstore_home <- function(){
 
 #' neon registry
 #' 
-#' @param path specify a path for the registry, or use the default
+#' @param path specify a directory for the registry, or use the default
 #' @return Will create an empty cv file at the registry if no exists
 #' @export
 #' @importFrom fs file_exists dir_create path_dir
-neon_registry <- function(path = neonstore_home()){
+neon_registry <- function(path = neon_default_registry()){
   if(!fs::file_exists(path) ){
-    fs::dir_create(fs::path_dir(path))
+    fs::dir_create(dir)
     df <- data.frame(id = NA, name = NA, date = NA, product = NA,
                      stringsAsFactors = FALSE)
     readr::write_csv( df[0,], path)
