@@ -64,7 +64,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 #' 
 #' @param registry location to write the local neon data registry
 #' @param dir location to use for the content store
-#' @param workdir Location to use for temporary storage
+#' @param workdir Location to use for temporary storage, will be purged after use
 #' @inheritParams neonUtilities::stackByTable
 #' @return ids and names of stacked tables
 #' @export
@@ -75,11 +75,11 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 neon_stack <- function(dpID=NA, 
                        dir = contenturi::content_dir(),
                        registry = neon_registry(),
-                       workdir = tempdir(), 
+                       workdir = fs::path_temp("temporary"), 
                        nCores=parallel::detectCores() 
                        ){
 
-
+  fs::dir_create(workdir)
   meta <- readr::read_csv(registry, col_types = "ccTc")
   if(!is.na(dpID))
     meta <- meta[meta$product == dpID, ]
@@ -102,17 +102,26 @@ neon_stack <- function(dpID=NA,
   
   ## Now lets stack all this many many zips into csvs
   ## Note: stackByTable's messages ain't suppressable
+  suppressMessages({
   neonUtilities::stackByTable(workdir, dpID = dpID, nCores = nCores)
+  })
 
-  ## Now let's also store the stacked CSVs
+    
+  ## Now let's also store the stacked CSVs -- filter these for the dpID
   stacked_csvs <- fs::dir_ls(fs::path(workdir, "stackedFiles"))
-  csv_ids <- vapply(stacked_csvs, contenturi::store, character(1L), dir = dir)
+  
+  ## Careful, avoid double-zipping?
+  lapply(stacked_csvs, R.utils::gzip)
+  csv_gz <- paste0(stacked_csvs, ".gz")
+  csv_ids <- vapply(csv_gz, contenturi::store, character(1L), dir = dir)
 
-  entry <- data.frame(id = unname(csv_ids), name = path_file(stacked_csvs),  
+  entry <- data.frame(id = unname(csv_ids), name = path_file(csv_gz),  
                       date = Sys.time(), product = paste0("stacked-", dpID),
                       stringsAsFactors = FALSE)
   
   readr::write_csv(entry, registry, append=TRUE)
+  
+  fs::dir_delete(workdir)
 
   entry
 }
