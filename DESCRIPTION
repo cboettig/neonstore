@@ -11,11 +11,11 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports: 
-    contenturi (>= 0.0.1),
+    contentid (>= 0.0.1),
     readr,
     fs,
     rappdirs,
     neonUtilities
 Remotes: 
-    cboettig/contenturi
-RoxygenNote: 7.0.2
+    cboettig/contentid
+RoxygenNote: 7.1.0

@@ -6,9 +6,9 @@
 \usage{
 neon_stack(
   dpID = NA,
-  dir = contenturi::content_dir(),
+  dir = contentid::content_dir(),
   registry = neon_registry(),
-  workdir = tempdir(),
+  workdir = fs::path_temp("temporary"),
   nCores = parallel::detectCores()
 )
 }
@@ -19,7 +19,7 @@ neon_stack(
 
 \item{registry}{location to write the local neon data registry}
 
-\item{workdir}{Location to use for temporary storage}
+\item{workdir}{Location to use for temporary storage, will be purged after use}
 
 \item{nCores}{The number of cores to parallelize the stacking procedure. To automatically use the maximum number of cores on your machine we suggest setting nCores=parallel::detectCores(). By default it is set to a single core.}
 }

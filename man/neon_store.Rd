@@ -15,7 +15,7 @@ neon_store(
   savepath = NA,
   load = F,
   registry = neon_registry(),
-  dir = contenturi::content_dir()
+  dir = contentid::content_dir()
 )
 }
 \arguments{

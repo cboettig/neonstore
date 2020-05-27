@@ -9,7 +9,7 @@
 #' @export
 #' @importFrom readr read_csv write_csv
 #' @importFrom neonUtilities zipsByProduct stackByTable
-#' @importFrom contenturi store retrieve
+#' @importFrom contentid store retrieve
 #' @importFrom fs dir_ls path_file path path_abs link_create
 #' @examples \donttest{
 #' neon_store("DP1.10003.001")
@@ -19,7 +19,7 @@
 neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basic",
                        avg="all", check.size=TRUE, savepath=NA, load=F, 
                        registry = neon_registry(),
-                       dir = contenturi::content_dir()) {
+                       dir = contentid::content_dir()) {
 
   if(is.na(savepath))
     savepath <- tempdir()
@@ -40,7 +40,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
   ## Add all downloaded files to the (local) content store.  
   workdir <- paste(savepath, "/filesToStack", substr(dpID, 5, 9), sep="")
   zips <- fs::dir_ls(workdir)
-  ids <- vapply(zips, contenturi::store, character(1L), dir)
+  ids <- vapply(zips, contentid::store, character(1L), dir)
   
 
   ## NOTE: if we re-download NEON data and a file has changed, it will not 
@@ -73,7 +73,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
 #' neon_stack("DP1.10003.001")
 #' }
 neon_stack <- function(dpID=NA, 
-                       dir = contenturi::content_dir(),
+                       dir = contentid::content_dir(),
                        registry = neon_registry(),
                        workdir = fs::path_temp("temporary"), 
                        nCores=parallel::detectCores() 
@@ -86,18 +86,13 @@ neon_stack <- function(dpID=NA,
   
   ## What do you do if name maps to two different content files?  We don't want to stack both!
   ## Grab the more recent one and throw a warning?
-  
   ## Meanwhile, let's throw a cold stop
   if(length(unique(meta$name)) != length(unique(meta$id)))
     stop("Found conflicting versions of the same file, please consult the registry")
   
-  
-  ## Populate workdir with symlinks that point to the content expected by stackByTable
-  lapply(as.data.frame(t(meta)), function(m){
-    x <- m[["id"]]
-    y <- m[["name"]]
-    fs::link_create(contenturi::retrieve(x, dir = dir), fs::path(workdir, y))
-  })
+  for(i in seq_along(meta[[1]])){
+    fs::link_create(contentid::retrieve(meta[i,"id"], dir = dir), fs::path(workdir, meta[i, "name"]))
+  }
   
   
   ## Now lets stack all this many many zips into csvs
@@ -113,7 +108,7 @@ neon_stack <- function(dpID=NA,
   ## Careful, avoid double-zipping?
   lapply(stacked_csvs, R.utils::gzip)
   csv_gz <- paste0(stacked_csvs, ".gz")
-  csv_ids <- vapply(csv_gz, contenturi::store, character(1L), dir = dir)
+  csv_ids <- vapply(csv_gz, contentid::store, character(1L), dir = dir)
 
   entry <- data.frame(id = unname(csv_ids), name = path_file(csv_gz),  
                       date = Sys.time(), product = paste0("stacked-", dpID),
@@ -141,6 +136,7 @@ neon_default_registry <- function(){
 #' @importFrom fs file_exists dir_create path_dir
 neon_registry <- function(path = neon_default_registry()){
   if(!fs::file_exists(path) ){
+    dir <- fs::path_dir(path)
     fs::dir_create(dir)
     df <- data.frame(id = NA, name = NA, date = NA, product = NA,
                      stringsAsFactors = FALSE)
@@ -150,7 +146,7 @@ neon_registry <- function(path = neon_default_registry()){
     
 }
 
-#br_count <- contenturi::retrieve(
+#br_count <- contentid::retrieve(
 # "hash://sha256/3544e9345cc9ff9e235ff49e2d446dfea1ce5fb2be2c82c66f4e58516bf8a3bd")
 
 #stacked_products(dpID) <- function(){
