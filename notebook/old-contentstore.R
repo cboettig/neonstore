@@ -81,7 +81,7 @@ neon_stack <- function(dpID=NA,
                        ){
 
   fs::dir_create(workdir)
-  meta <- readr::read_csv(registry, col_types = "ccTc")
+  meta <- readr::read_csv(registry, col_types = "ccTcc")
   if(!is.na(dpID))
     meta <- meta[meta$product == dpID, ]
   

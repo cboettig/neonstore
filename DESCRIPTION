@@ -1,21 +1,22 @@
 Package: neonstore
-Title: A local Content-Based Storage System for 'NEON' Data
+Title: NEON Data Store
 Version: 0.0.0.9000
 Authors@R: 
      person("Carl", "Boettiger", , "cboettig@gmail.com", c("aut", "cre"),
                    comment = c(ORCID = "0000-0002-1642-628X"))
-Description: Download and store NEON Data files locally, and then access
-  data resource by unique version strings. 
+Description: The National Ecological Observatory Network (NEON) provides access
+  to its numerous data products through its REST API. This package provides a
+  high-level user interface for downloading and storing NEON data products.
+  While each of NEON's data products consist of hundreds or thousands of individual
+  files.  Unlike neonUtilities, this package will avoid repeated downloading,
+  provides persistent storage, and improves performance.  This package does not 
+  provide expose interactions with the individual low-level NEON API endpoints.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports: 
-    contentid (>= 0.0.1),
-    readr,
-    fs,
-    rappdirs,
-    neonUtilities
-Remotes: 
-    cboettig/contentid
+    httr,
+    jsonlite,
+    rappdirs
 RoxygenNote: 7.1.0
