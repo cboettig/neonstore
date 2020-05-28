@@ -49,6 +49,7 @@ neon_store <- function(dpID, site="all", startdate=NA, enddate=NA, package="basi
                     name = fs::path_file(zips), 
                     date = Sys.time(),
                     product = dpID,
+                    type = "raw_csv",
                     stringsAsFactors = FALSE)
 
   readr::write_csv(entry, registry, append=TRUE)
@@ -111,7 +112,7 @@ neon_stack <- function(dpID=NA,
   csv_ids <- vapply(csv_gz, contentid::store, character(1L), dir = dir)
 
   entry <- data.frame(id = unname(csv_ids), name = path_file(csv_gz),  
-                      date = Sys.time(), product = paste0("stacked-", dpID),
+                      date = Sys.time(), product = dpID, type = "stacked_csv",
                       stringsAsFactors = FALSE)
   
   readr::write_csv(entry, registry, append=TRUE)
@@ -138,7 +139,7 @@ neon_registry <- function(path = neon_default_registry()){
   if(!fs::file_exists(path) ){
     dir <- fs::path_dir(path)
     fs::dir_create(dir)
-    df <- data.frame(id = NA, name = NA, date = NA, product = NA,
+    df <- data.frame(id = NA, name = NA, date = NA, product = NA, type = NA,
                      stringsAsFactors = FALSE)
     readr::write_csv( df[0,], path)
   }
