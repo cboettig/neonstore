@@ -11,6 +11,18 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
  
 }
 
+neon_products <- function(api = "https://data.neonscience.org/api/v0", 
+                       .token = Sys.getenv("NEON_TOKEN")){
+  
+  resp <- httr::GET(paste0(api, "/products"), httr::add_headers("X-API-Token" = .token))
+  products <- httr::content(resp, as="text")
+  jsonlite::fromJSON(products)[[1]]
+  
+}
+
+
+
+
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
 neon_data <- function(product, api = "https://data.neonscience.org/api/v0", .token = Sys.getenv("NEON_TOKEN")){
@@ -71,25 +83,40 @@ neon_download <- function(product, dest = neon_dir(), file_regex = "[.]csv", api
   files <- new_data[grepl(file_regex, new_data$name),]
   files$dest <- file.path(dest, files$name)
   
+  ## Filter duplicate files, e.g. have identical crc32 values
+  unique_files <- take_first_match(files, "crc32")
+  
+
+  
   ## make sure destination exists
   dir.create(dest, showWarnings = FALSE, recursive = TRUE)
   
   ## download time!
   handle <- curl::new_handle()
-  for(i in seq_along(files$url)){
-    curl::curl_download(files[i, "url"], files[i, "dest"], quiet = quiet, handle = handle)
+  for(i in seq_along(unique_files$url)){
+    curl::curl_download(unique_files[i, "url"], unique_files[i, "dest"], quiet = quiet, handle = handle)
   }
 
   invisible(dest)  
 }
 
-#' file_regex = "brd_countdata.*basic.*"
 
-neon_read_table <- function(table_string, dest, ...){
-  tables <- list.files(dest, pattern = table_string, full.names = TRUE)
-  vroom::vroom(tables, ...)
+take_first_match <- function(df, col){
+  
+  uid <- unique(df[[col]])
+  na <- df[1,]
+  na[1,] <- NA
+  rownames(na) <- NULL
+  out <- data.frame(uid, na)
+  
+  ## Should really figure out vectorized implementation here...
+  ## but in any event download step will be far more rate-limiting.
+  for(i in seq_along(uid)){
+    match <- df[[col]] == uid[i]
+    first <- which(match)[[1]]
+    out[i,-1] <- df[first, ]
+  }
+  out
 }
-
-# birds <- fs::dir_ls("birds") %>% vroom::vroom()
 
 
