@@ -1,0 +1,123 @@
+
+# Import
+
+```{r birds}
+bench_time(
+  neon_download("DP1.10003.001", file_regex = ".*basic.*[.]csv")
+)
+```
+
+
+```{r beetles}
+bench::bench_time(
+  neon_download("DP1.10022.001")
+)
+```
+
+
+```{r ticks}
+bench::bench_time(
+  neon_download("DP1.10093.001", quiet = TRUE)
+)
+```
+
+```{r mammals}
+bench::bench_time(
+  neon_download("DP1.10072.001",  quiet = TRUE)
+)
+```
+
+```{r zooplankton}
+bench::bench_time(
+  neon_download("DP1.20219.001",  quiet = TRUE)
+)
+```
+
+```{r macroinvert}
+bench::bench_time(neon_download("DP1.20120.001", quiet = TRUE))
+```
+
+
+```{r mozzies}
+bench::bench_time(
+  neon_download("DP1.10043.001", quiet = TRUE)
+)
+```
+
+
+# Explore
+
+
+```{r}
+library(dplyr)
+
+meta <- neon_index()
+meta %>% count(product)
+```
+
+
+```{r}
+meta %>% count(name)
+```
+
+
+```{r}
+
+bench::bench_time({
+f <- meta %>% filter(name == "brd_countdata", type == "basic") %>% pull(path)
+df <- neon_read(f) # vroom with error handler
+})
+
+
+
+```
+
+
+```{r}
+
+bench::bench_time({
+f <- meta %>% filter(name == "mam_perplotnight", type == "basic") %>% pull(path)
+df <- neon_read(f) # vroom with error handler
+})
+
+
+
+```
+
+
+```{r}
+as_tibble(df)
+```
+
+
+
+
+# Distribute
+
+
+```{r}
+library(contentid)
+library(fs)
+library(dplyr)
+
+```
+
+
+
+```{r}
+meta <- neon_index()
+d <- fs::dir_info(neon_dir())
+```
+
+how much data?
+
+```{r}
+dim(d)[[1]]
+d %>% summarise(sum(size))
+```
+
+
+```{r}
+ids <- contentid::store(meta$path, dir = "/zpool/content-store")
+```
+

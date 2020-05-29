@@ -36,7 +36,7 @@ neon_index <- function(dir = neon_dir()){
 
 
 
-
+## Consider using conditionally
 neon_read <- function(files){
   ## vroom can read in a list of files, but only if columns are consistent
   ## dplyr::bind_rows can bind and fill missing columns

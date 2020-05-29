@@ -37,7 +37,10 @@ neon_data <- function(product, api = "https://data.neonscience.org/api/v0", .tok
   data_api <- unlist(available$availableDataUrls)
   
   ## Extract the file list from the data endpoint.  O(sites * months) calls
+  ## Consider optional progress indicator here!
   resp <- lapply(data_api, httr::GET, httr::add_headers("X-API-Token" = .token))
+  
+  
   
   ## Format the result as a data.frame
   data <- do.call(rbind,
@@ -86,7 +89,8 @@ neon_download <- function(product, dest = neon_dir(), file_regex = "[.]csv", api
   ## Filter duplicate files, e.g. have identical crc32 values
   unique_files <- take_first_match(files, "crc32")
   
-
+  ## Report total expected download size:
+  
   
   ## make sure destination exists
   dir.create(dest, showWarnings = FALSE, recursive = TRUE)
