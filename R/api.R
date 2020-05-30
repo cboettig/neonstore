@@ -121,6 +121,8 @@ neon_download <- function(product,
 
 take_first_match <- function(df, col){
   
+  if(nrow(df) < 2) return(df)
+  
   uid <- unique(df[[col]])
   na <- df[1,]
   na[1,] <- NA

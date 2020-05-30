@@ -1,5 +1,5 @@
 
-
+#' @export
 neon_index <- function(table = NULL, dir = neon_dir()){
   into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
   
@@ -38,13 +38,15 @@ neon_index <- function(table = NULL, dir = neon_dir()){
 
 }
 
-
+#' @export
 neon_tables <- function(dir = neon_dir()){
   meta <- neon_index()
   unique(meta$table)
 }
 
 ## Consider using conditionally
+
+#' @export
 neon_read <- function(files){
   
   ## allow files to be a data.frame, e.g. from neon_index()

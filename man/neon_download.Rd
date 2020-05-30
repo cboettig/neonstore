@@ -9,7 +9,8 @@ neon_download(
   product,
   dest = neon_dir(),
   file_regex = "[.]csv",
-  api = "https://data.neonscience.org/api/v0"
+  api = "https://data.neonscience.org/api/v0",
+  quiet = FALSE
 )
 }
 \description{

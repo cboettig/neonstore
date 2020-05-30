@@ -18,17 +18,12 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of neonstore is to ...
+The goal of neonstore is to provide access and persistent storage of NEON data tables
 
 ## Installation
 
-You can install the released version of neonstore from [CRAN](https://CRAN.R-project.org) with:
 
-``` r
-install.packages("neonstore")
-```
-
-And the development version from [GitHub](https://github.com/) with:
+Install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -38,18 +33,34 @@ devtools::install_github("cboettig/neonstore")
 
 Download all CSV files in the bird survey data products.  This will omit downloads of any existing data files. 
 
-```{r example}
+```{r example, cache=TRUE}
 library(neonstore)
 neon_download("DP1.10003.001", file_regex = "[.]csv")
 
 ```
 
 
-Now, view your library of NEON products:
+Now, view your library of NEON products.  These will persist between sessions, 
+so you only need to download once, or to retrieve updates.
 
 ```{r }
-meta <- neon_index()
+neon_tables()
+```
+See files associated with a given table, 
+
+```{r output="hide"}
+meta <- neon_index("brd_countdata") 
+meta
 ```
 
+```{r echo=FALSE}
+# pretty-print
+tibble::as_tibble(meta)
+```
 
+Read in all the component tables into a single data.frame
+
+```{r}
+brd_countdata <- neon_read(meta)
+```
 
