@@ -118,6 +118,41 @@ d %>% summarise(sum(size))
 
 
 ```{r}
-ids <- contentid::store(meta$path, dir = "/zpool/content-store")
+ids <- contentid::store(meta$path, dir = "/home/content-store")
 ```
+
+
+
+```{r}
+registry <- vroom::vroom("content_id.tsv")
+
+meta <- dplyr::left_join(meta, registry) %>% as_tibble()
+vroom::vroom_write(meta, "neonstore.tsv")
+
+```
+
+
+```{r}
+## read from the content-store instead
+meta <- vroom::vroom("neonstore.tsv")
+metab <- meta %>%  mutate(store = retrieve(id, "/home/content-store"))
+```
+
+
+```{r}
+birds <- metab %>% filter(name == "brd_countdata", type == "basic") %>% pull(store) %>% neon_read()
+
+```
+
+```{r}
+metab <- metab %>% mutate(mirror = gsub("/home/content-store", "https://data.carlboettiger.info", store))
+
+request <- paste0("https://hash-archive.jetstream.carlboettiger.info/api/enqueue/", metab$mirror)
+request2 <- paste0("https://hash-archive.org/api/enqueue/", metab$mirror)
+x <- lapply(request2, httr::GET)
+
+#xml2::url_escape("https://data.carlboettiger.info/data/10/c9/10c9e39af827ecdba4255ded08ab7f8e2b6895ce58561236d1e26ff3fa097d20")
+```
+
+
 

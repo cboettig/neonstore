@@ -1,0 +1,55 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# neonstore
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of neonstore is to ...
+
+## Installation
+
+You can install the released version of neonstore from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("neonstore")
+```
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("cboettig/neonstore")
+```
+## Example
+
+Download all CSV files in the bird survey data products.  This will omit downloads of any existing data files. 
+
+```{r example}
+library(neonstore)
+neon_download("DP1.10003.001", file_regex = "[.]csv")
+
+```
+
+
+Now, view your library of NEON products:
+
+```{r }
+meta <- neon_index()
+```
+
+
+

@@ -5,7 +5,8 @@
 neon_sites <- function(api = "https://data.neonscience.org/api/v0", 
                        .token = Sys.getenv("NEON_TOKEN")){
   
-  resp <- httr::GET(paste0(api, "/sites"), httr::add_headers("X-API-Token" = .token))
+  resp <- httr::GET(paste0(api, "/sites"), 
+                    httr::add_headers("X-API-Token" = .token))
   sites <- httr::content(resp, as="text")
   jsonlite::fromJSON(sites)[[1]]
  
@@ -14,7 +15,8 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
 neon_products <- function(api = "https://data.neonscience.org/api/v0", 
                        .token = Sys.getenv("NEON_TOKEN")){
   
-  resp <- httr::GET(paste0(api, "/products"), httr::add_headers("X-API-Token" = .token))
+  resp <- httr::GET(paste0(api, "/products"),
+                    httr::add_headers("X-API-Token" = .token))
   products <- httr::content(resp, as="text")
   jsonlite::fromJSON(products)[[1]]
   
@@ -25,11 +27,16 @@ neon_products <- function(api = "https://data.neonscience.org/api/v0",
 
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
-neon_data <- function(product, api = "https://data.neonscience.org/api/v0", .token = Sys.getenv("NEON_TOKEN")){
+neon_data <- function(product, 
+                      api = "https://data.neonscience.org/api/v0", 
+                      .token = Sys.getenv("NEON_TOKEN")){
 
   ## A single API call to sites, includes product & month at each site    
   sites_df <- neon_sites(api)
   dataProducts <- do.call(rbind, sites_df$dataProducts)
+  
+  ## FIXME allow a filter by time -- requesting only current month
+  ## will speed things up.
   
   ## Consider all/only the sites including the requested product.
   ## The DataUrl column gives the API endpoint data/{ProductCode}/{SiteCode}{Month}
@@ -72,8 +79,14 @@ neon_dir <- neon_default_registry <- function(){
 #' product <- "DP1.10003.001"
 #' ".*basic.*[.]zip"
 
+
+#' 
 #' @export
-neon_download <- function(product, dest = neon_dir(), file_regex = "[.]csv", api = "https://data.neonscience.org/api/v0", quiet = FALSE){
+neon_download <- function(product, 
+                          dest = neon_dir(), 
+                          file_regex = "[.]csv", 
+                          api = "https://data.neonscience.org/api/v0", 
+                          quiet = FALSE){
   
   ## Query the API for a list of all files associated with this data product.
   data <- neon_data(product)
@@ -95,10 +108,11 @@ neon_download <- function(product, dest = neon_dir(), file_regex = "[.]csv", api
   ## make sure destination exists
   dir.create(dest, showWarnings = FALSE, recursive = TRUE)
   
-  ## download time!
+  ## now time to download!
   handle <- curl::new_handle()
   for(i in seq_along(unique_files$url)){
-    curl::curl_download(unique_files[i, "url"], unique_files[i, "dest"], quiet = quiet, handle = handle)
+    curl::curl_download(unique_files[i, "url"], unique_files[i, "dest"], 
+                        quiet = quiet, handle = handle)
   }
 
   invisible(dest)  
