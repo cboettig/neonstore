@@ -5,14 +5,14 @@ neon_index <- function(table = NULL, dir = neon_dir()){
   
   site <- "(NEON\\.D\\d\\d\\.\\w{4})"                     # \\1
   product <- "(DP\\d\\.\\d{5}\\.\\d{3})"                  # \\2
-  table <- "(\\w+)"                                        # \\3 
+  name <- "(\\w+)"                                        # \\3 
   month <- "(:?\\d{4}-\\d{2})?\\.?"                       # \\5
   type <- "(:?basic|expanded)?\\.?"                       # \\6
   timestamp <- "(\\d{8}T\\d{6}Z)"                         # \\7
   stamp <- paste0("(:?", month, type, ")?", timestamp)    # \\4
   ext <- "(csv)"                                          # \\8
   
-  regex <- paste(site, product, table, stamp, ext, sep = "\\.")
+  regex <- paste(site, product, name, stamp, ext, sep = "\\.")
 
     
   files <- list.files(neon_dir())
@@ -31,7 +31,8 @@ neon_index <- function(table = NULL, dir = neon_dir()){
   meta_c$path <- file.path(dir, filenames)
   
   if(!is.null(table)){
-    meta_c[grepl(table, meta_c$table), ]
+    meta_c <- meta_c[grepl(table, meta_c$table), ]
+    meta_c <- meta_c[!grepl("basic", meta_c$type), ]
   }
   meta_c
 
