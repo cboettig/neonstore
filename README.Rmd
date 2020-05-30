@@ -1,5 +1,7 @@
 ---
-output: github_document
+output: 
+  github_document:
+    df_print: tibble
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -11,6 +13,8 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+library(neonstore)
+
 ```
 
 # neonstore
@@ -18,7 +22,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of neonstore is to provide access and persistent storage of NEON data tables
+The goal of neonstore is to provide access and persistent storage of NEON data tables.
 
 ## Installation
 
@@ -48,19 +52,16 @@ neon_tables()
 ```
 See files associated with a given table, 
 
-```{r output="hide"}
+```{r}
 meta <- neon_index("brd_countdata") 
 meta
 ```
 
-```{r echo=FALSE}
-# pretty-print
-tibble::as_tibble(meta)
-```
 
 Read in all the component tables into a single data.frame
 
-```{r}
+```{r message = FALSE}
 brd_countdata <- neon_read(meta)
+brd_countdata
 ```
 
