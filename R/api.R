@@ -44,7 +44,7 @@ neon_data <- function(product,
   
   ## Consider all/only the sites including the requested product.
   ## The DataUrl column gives the API endpoint data/{ProductCode}/{SiteCode}{Month}
-  available <- dataProducts[dataProducts$dataProductCode == product,]
+  available <- dataProducts[dataProducts$dataProductCode %in% product,]
   
   data_api <- unlist(available$availableDataUrls)
 
