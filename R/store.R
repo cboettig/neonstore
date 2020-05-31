@@ -32,8 +32,12 @@ neon_index <- function(table = NULL, dir = neon_dir()){
   
   if(!is.null(table)){
     meta_c <- meta_c[grepl(table, meta_c$table), ]
-    meta_c <- meta_c[!grepl("basic", meta_c$type), ]
   }
+  # Prefer 'extended' format if available
+  if(any(grepl("extended", meta_c$type))){
+    meta_c <- meta_c[grepl("extended", meta_c$type), ]
+  }
+  
   meta_c
 
 }
@@ -53,12 +57,13 @@ neon_products <- function(dir = neon_dir()){
 ## Consider using conditionally
 
 #' @export
-neon_read <- function(files){
+neon_read <- function(table, dir = neon_dir()){
   
+  
+  meta <- neon_index(table = table, dir = dir)
+  files <- meta$path
   ## What about .zip files?
   
-  ## allow files to be a data.frame, e.g. from neon_index()
-  if(is.data.frame(files)) files <- files$path
   
   ## vroom can read in a list of files, but only if columns are consistent
   ## dplyr::bind_rows can bind and fill missing columns
