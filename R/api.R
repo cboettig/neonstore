@@ -17,32 +17,47 @@ neon_products <- function(api = "https://data.neonscience.org/api/v0",
   
   resp <- httr::GET(paste0(api, "/products"),
                     httr::add_headers("X-API-Token" = .token))
-  products <- httr::content(resp, as="text")
-  jsonlite::fromJSON(products)[[1]]
+  txt <- httr::content(resp, as="text")
+  products <-jsonlite::fromJSON(txt)[[1]]
+  products
   
 }
 
 
-
+#' product <- "DP1.10003.001"
 
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
 neon_data <- function(product, 
+                      start_date = NA,
+                      end_date = NA,
+                      quiet = FALSE,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
 
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
+  
   ## A single API call to sites, includes product & month at each site    
   sites_df <- neon_sites(api)
   dataProducts <- do.call(rbind, sites_df$dataProducts)
   
-  ## FIXME allow a filter by time -- requesting only current month
-  ## will speed things up.
-  
   ## Consider all/only the sites including the requested product.
   ## The DataUrl column gives the API endpoint data/{ProductCode}/{SiteCode}{Month}
   available <- dataProducts[dataProducts$dataProductCode == product,]
-  data_api <- unlist(available$availableDataUrls)
   
+  data_api <- unlist(available$availableDataUrls)
+
+  ## Filter by time -- year-month is included at end of data_api list
+  dates <- as.Date( gsub(".*(\\d{4}-\\d{2})$", "\\1-01", data_api) )
+  if(!is.na(start_date)){
+   data_api <- data_api[dates >= start_date]
+  }
+  if(!is.na(end_date)){
+    data_api <- data_api[dates <= end_date]
+  }  
+  
+    
   ## Extract the file list from the data endpoint.  O(sites * months) calls
   ## Consider optional progress indicator here!
   resp <- lapply(data_api, httr::GET, httr::add_headers("X-API-Token" = .token))
@@ -82,14 +97,29 @@ neon_dir <- neon_default_registry <- function(){
 
 #' 
 #' @export
+#' @examples 
+#' \donttest{
+#'  
+#'  neon_download("DP1.10003.001", 
+#'                start_date = "2019-01-01", 
+#'                file_regex = "[.]csv")
+#' 
+#' }
 neon_download <- function(product, 
+                          start_date = NA,
+                          end_date = NA,
+                          file_regex = "[.]csv",
+                          quiet = FALSE,
                           dest = neon_dir(), 
-                          file_regex = "[.]csv", 
-                          api = "https://data.neonscience.org/api/v0", 
-                          quiet = FALSE){
+                          api = "https://data.neonscience.org/api/v0",
+                          .token =  Sys.getenv("NEON_TOKEN")){
   
   ## Query the API for a list of all files associated with this data product.
-  data <- neon_data(product)
+  data <- neon_data(product, 
+                    start_date = start_date, 
+                    end_date = end_date, 
+                    api = api,
+                    .token = .token)
   
   ## Omit those files we already have
   already_have <- list.files(dest)

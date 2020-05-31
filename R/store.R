@@ -44,10 +44,18 @@ neon_tables <- function(dir = neon_dir()){
   unique(meta$table)
 }
 
+#' @export
+neon_products <- function(dir = neon_dir()){
+  meta <- neon_index()
+  unique(meta$product)
+}
+
 ## Consider using conditionally
 
 #' @export
 neon_read <- function(files){
+  
+  ## What about .zip files?
   
   ## allow files to be a data.frame, e.g. from neon_index()
   if(is.data.frame(files)) files <- files$path
