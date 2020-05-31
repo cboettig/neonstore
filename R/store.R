@@ -1,33 +1,40 @@
 
-#' @export
-neon_index <- function(table = NULL, dir = neon_dir()){
-  into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
-  
-  site <- "(NEON\\.D\\d\\d\\.\\w{4})"                     # \\1
-  product <- "(DP\\d\\.\\d{5}\\.\\d{3})"                  # \\2
-  name <- "(\\w+)"                                        # \\3 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                       # \\5
-  type <- "(:?basic|expanded)?\\.?"                       # \\6
-  timestamp <- "(\\d{8}T\\d{6}Z)"                         # \\7
-  stamp <- paste0("(:?", month, type, ")?", timestamp)    # \\4
-  ext <- "(csv)"                                          # \\8
-  
-  regex <- paste(site, product, name, stamp, ext, sep = "\\.")
 
-    
+#' Show information about all files downloaded to the local store
+#' 
+#' @param table a table name (or regex pattern) to filter on.
+#' @inheritParams neon_download
+#' 
+#' @export
+neon_store <- function(table = NULL, dir = neon_dir()){
+  
   files <- list.files(neon_dir())
+  
+  ## Parse metadata from NEON file names
+  into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
+  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
+  product <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."                  # \\2
+  name <- "(:?\\w+)?\\.?"                                    # \\3 
+  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\5
+  type <- "(:?basic|expanded)?\\.?"                          # \\6
+  timestamp <- "(\\d{8}T\\d{6}Z)\\."                         # \\7
+  stamp <- paste0("(:?", month, type, ")?", timestamp)       # \\4
+  ext <- "(\\w+$)"                                           # \\8
+  regex <- paste0(site, product, name, stamp, ext)
   meta <- strsplit(gsub(regex, "\\1  \\2  \\3  \\5  \\6  \\7  \\8", files), "  ")
   
+  ## Confirm parsing was successful
   parts <- vapply(meta, length, integer(1L))
   meta <- meta[parts == length(into)]
-  filenames <- files[parts == length(into)]
   
+  ## Drop unparse-able file names
+  filenames <- files[parts == length(into)]
   dropped <- files[parts != length(into)]
   
+  ## Format as tidy data.frame
   meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
   colnames(meta_b) <- into
   meta_c <- as.data.frame(meta_b)
-  
   meta_c$path <- file.path(dir, filenames)
   
   if(!is.null(table)){
@@ -43,16 +50,11 @@ neon_index <- function(table = NULL, dir = neon_dir()){
 }
 
 #' @export
-neon_tables <- function(dir = neon_dir()){
+neon_stored_tables <- function(dir = neon_dir()){
   meta <- neon_index()
   unique(meta$table)
 }
 
-#' @export
-neon_products <- function(dir = neon_dir()){
-  meta <- neon_index()
-  unique(meta$product)
-}
 
 ## Consider using conditionally
 
@@ -82,12 +84,13 @@ neon_read <- function(table, dir = neon_dir()){
 # birds <- fs::dir_ls("birds") %>% vroom::vroom()
 
 
-# x <- c(
-# "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
-# "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
-# "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
-# "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv"
-# )
-# strsplit(gsub(regex, "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
+#' x <- c(
+#' "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
+#' "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
+#' "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
+#' "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
+#' "NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip"
+#' )
+#' strsplit(gsub(regex, "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
 
 
