@@ -3,17 +3,62 @@
 \name{neon_download}
 \alias{neon_download}
 \title{product <- "DP1.10003.001"
-".\emph{basic.}\link{.}zip"}
+".\emph{basic.}\link{.}zip"
+Download NEON data products into a local store}
 \usage{
 neon_download(
   product,
-  dest = neon_dir(),
+  start_date = NA,
+  end_date = NA,
   file_regex = "[.]csv",
+  quiet = FALSE,
+  dir = neon_dir(),
   api = "https://data.neonscience.org/api/v0",
-  quiet = FALSE
+  .token = Sys.getenv("NEON_TOKEN")
 )
+}
+\arguments{
+\item{product}{A NEON productCode. See \link{neon_download}.}
+
+\item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
+as \code{NA} to download up to the most recent avaialble data.}
+
+\item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
+\code{NA} to download all prior data.}
+
+\item{file_regex}{Download only files matching this pattern.  See details.}
+
+\item{quiet}{Should progress be displayed?}
+
+\item{dir}{Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
+setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
+\link{Renviron}.}
+
+\item{api}{the URL to the NEON API, leave as default.}
+
+\item{.token}{an authentication token from NEON. A token is not
+required but will allow access to a higher number of requests before
+rate limiting applies, see
+\url{https://data.neonscience.org/data-api/rate-limiting/#api-tokens}.
+Note that once files are downloaded once, \code{neonstore} provides persitent
+access to them without further interaction required with the API.}
 }
 \description{
 product <- "DP1.10003.001"
 ".\emph{basic.}\link{.}zip"
+Download NEON data products into a local store
+}
+\details{
+\verb{"*basic*.zip}
+}
+\examples{
+\donttest{
+ 
+ neon_download("DP1.10003.001", 
+               start_date = "2019-01-01", 
+               file_regex = "*basic*[.]zip")
+
+}
 }
