@@ -10,7 +10,8 @@ neon_download(
   product,
   start_date = NA,
   end_date = NA,
-  file_regex = "[.]csv",
+  type = "expanded",
+  file_regex = "[.]zip",
   quiet = FALSE,
   dir = neon_dir(),
   api = "https://data.neonscience.org/api/v0",
@@ -57,8 +58,7 @@ Download NEON data products into a local store
 \donttest{
  
  neon_download("DP1.10003.001", 
-               start_date = "2019-01-01", 
-               file_regex = "*basic*[.]zip")
+               start_date = "2019-01-01"
 
 }
 }

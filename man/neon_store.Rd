@@ -2,19 +2,31 @@
 % Please edit documentation in R/store.R
 \name{neon_store}
 \alias{neon_store}
-\title{Show information about all files downloaded to the local store}
+\title{Show tables that have been downloaded to the neon store}
 \usage{
-neon_store(table = NULL, dir = neon_dir())
-}
-\arguments{
-\item{table}{a table name (or regex pattern) to filter on.}
-
-\item{dir}{Location where files should be downloaded. By default will
-use the appropriate applications directory for your system
-(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
-setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
-\link{Renviron}.}
+neon_store(product = NULL, dir = neon_dir())
 }
 \description{
-Show information about all files downloaded to the local store
+Show tables that have been downloaded to the neon store
+}
+\details{
+The table names displayed can be read in using \link{neon_read}.
+Optionally, specify a NEON productCode to view only tables associated
+with a specific product.
+
+Only downloaded tables will be displayed.  Users can view all available
+NEON data products using \link{neon_products} to choose which ones to download
+into the store.
+
+\code{neon_store()} does not need to access the API and thus does not require
+an internet connection or incur rate limiting on requests.
+}
+\examples{
+
+neon_store()
+
+
+}
+\seealso{
+\link{neon_products}, \link{neon_download}, \link{neon_index}
 }

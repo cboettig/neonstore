@@ -28,19 +28,17 @@ bench::bench_time(
 ```
 
 ```{r zooplankton}
-bench::bench_time(
-  neon_download("DP1.20219.001",  quiet = TRUE)
-)
+neon_download("DP1.20219.001")
 ```
 
 ```{r macroinvert}
-bench::bench_time(neon_download("DP1.20120.001", quiet = TRUE))
+neon_download("DP1.20120.001")
 ```
 
 
 ```{r mozzies}
 bench::bench_time(
-  neon_download("DP1.10043.001", quiet = TRUE)
+  neon_download("DP1.10043.001")
 )
 ```
 

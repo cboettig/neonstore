@@ -199,14 +199,15 @@ neon_dir <- function(){
 neon_download <- function(product, 
                           start_date = NA,
                           end_date = NA,
-                          file_regex =  ".*basic.*[.]zip",
+                          type = "expanded",
+                          file_regex =  "[.]zip",
                           quiet = FALSE,
                           dir = neon_dir(), 
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
   
   ## Query the API for a list of all files associated with this data product.
-  data <- neon_data(product, 
+  files <- neon_data(product, 
                     start_date = start_date, 
                     end_date = end_date, 
                     api = api,
@@ -214,23 +215,27 @@ neon_download <- function(product,
   
   ## Omit those files we already have
   already_have <- list.files(dir)
-  new_data <- data[!(data$name %in% already_have), ]
+  files <- files[!(files$name %in% already_have), ]
   
   ## Filter for only files matching the file regex
-  files <- new_data[grepl(file_regex, new_data$name),]
+  files <- files[grepl(file_regex, files$name), ]
   files$dir <- file.path(dir, files$name)
   
-  ## Filter duplicate files, e.g. have identical crc32 values
+  
+  ## Filter to have only expanded or basic (not both)
+  if(type == "expanded")
+    files <- files[!grepl("basic", files$name), ]
+  if(type == "basic")
+    files <- files[!grepl("expanded", files$name), ]
+  
+  
+  ## Filter out duplicate files, e.g. have identical crc32 values
   unique_files <- take_first_match(files, "crc32")
-  
-  ## Report total expected download size:
-  
   
   ## make sure destination exists
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   
   ## now time to download!
-  f
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent eta: :eta",
     total = length(unique_files$url), 
@@ -254,6 +259,11 @@ neon_download <- function(product,
 }
 
 
+
+
+## helper method for filtering out duplicate tables
+## NEON API loves returning metadata files with identical content but 
+## different names associated with each site and sampling month.
 take_first_match <- function(df, col){
   
   if(nrow(df) < 2) return(df)

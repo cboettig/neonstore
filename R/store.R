@@ -1,25 +1,52 @@
+### Functions in store.R do not require API access, but interact only with
+### the local persistent storage
 
 
 #' Show information about all files downloaded to the local store
 #' 
-#' @param table a table name (or regex pattern) to filter on.
+#' 
+#' NEON products consist of several individual components, which are in turn
+#' broken up by site and sampling month. By storing these individual files,
+#' neonstore enables more reproducible workflows that can be traced back to
+#' original, unaltered input data.  These atomized files can be quickly and easily
+#' combined into unified tables, see [neon_read].
+#' 
+#' File names include metadata such as the file productCode,
+#' table name, site, and sampling month, as well as timestamp of creation.
+#' `neon_index()` parses this metadata from the file name string and returns
+#' the information in a convenient table, along with a path to each file.
+#' 
+#' @param product Include only files matching this NEON productCode (optional)
+#' @param table Include only files matching this table name (or regex pattern). 
+#' (optional).
 #' @inheritParams neon_download
 #' 
 #' @export
-neon_index <- function(table = NULL, dir = neon_dir()){
+#' @examples
+#' 
+#' \dontshow{
+#' # Hide setting tempfile, since a user would specify a persistent location
+#'  Sys.setenv("NEONSTORE_HOME"=tempfile())
+#' }
+#' 
+#' neon_index()
+#' 
+#' ## Just bird survey product
+#' neon_index("DP1.10003.001")
+#' 
+neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
   
-  files <- list.files(neon_dir())
-  
+  files <- list.files(dir)
   ## Parse metadata from NEON file names
   into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
   site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
-  product <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."                  # \\2
+  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."                  # \\2
   name <- "(:?\\w+)?\\.?"                                    # \\3 
   month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
   type <- "(:?basic|expanded)?\\.?"                          # \\5
   timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
   ext <- "(\\w+$)"                                           # \\7
-  regex <- paste0(site, product, name, month, type, timestamp, ext)
+  regex <- paste0(site, productCode, name, month, type, timestamp, ext)
   meta <- strsplit(gsub(regex, "\\1  \\2  \\3  \\4  \\5  \\6  \\7", files), "  ")
   
   ## Confirm parsing was successful
@@ -36,30 +63,60 @@ neon_index <- function(table = NULL, dir = neon_dir()){
   meta_c <- as.data.frame(meta_b)
   meta_c$path <- file.path(dir, filenames)
   
+  
+  ## Apply any filters
   if(!is.null(table)){
     meta_c <- meta_c[grepl(table, meta_c$table), ]
   }
-  # Prefer 'expanded' format if available
-  if(any(grepl("expanded", meta_c$type))){
-    meta_c <- meta_c[grepl("expanded", meta_c$type), ]
+  
+  if(!is.null(product)){
+    meta_c <- meta_c[grepl(product, meta_c$product), ]
   }
   
+  
+  # Prefer 'expanded' format if available
+  if(any(grepl("basic", meta_c$type))){
+    meta_c <- meta_c[!grepl("basic", meta_c$type), ]
+  }
+  
+  class(meta_c) <- c("tbl_df", "tbl", "data.frame")
   meta_c
   
 }
 
+
+#' Show tables that have been downloaded to the neon store
+#' 
+#' @details
+#' The table names displayed can be read in using [neon_read]. 
+#' Optionally, specify a NEON productCode to view only tables associated
+#' with a specific product. 
+#' 
+#' Only downloaded tables will be displayed.  Users can view all available
+#' NEON data products using [neon_products] to choose which ones to download
+#' into the store.
+#' 
+#' `neon_store()` does not need to access the API and thus does not require
+#' an internet connection or incur rate limiting on requests.
+#' 
+#' @seealso [neon_products], [neon_download], [neon_index]
+#' @inheritParams neon_store
 #' @export
-neon_stored <- function(dir = neon_dir()){
-  meta <- neon_index()
+#' @examples
+#' 
+#' neon_store()
+#' 
+#' 
+neon_store <- function(product = NULL, dir = neon_dir()){
+  meta <- neon_index(product = product, dir = dir)
   unique(meta$table)
 }
 
 
-## Consider using conditionally
 
 #' read in neon tabular data
 #' 
-#' 
+#' @details
 #' NEON's tabular data files are separated out into separate .csv
 #' files for each site for each month of sampling.  In principle,
 #' each file has identical columns.  [vroom::vroom] can read in a
@@ -78,12 +135,13 @@ neon_stored <- function(dir = neon_dir()){
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
 #' @inheritParams neon_download
-#' 
+#' @import vroom vroom spec
 #' @export
+#' 
 #' @examples 
 #' 
 #' neon_read("brd_count")
-#' @import vroom vroom spec
+#' 
 neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
   
   if(is.null(files)){
@@ -144,7 +202,7 @@ vroom_ragged <- function(files){
   
 }
 
-# birds <- fs::dir_ls("birds") %>% vroom::vroom()
+
 
 #' x <- c(
 #' "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
