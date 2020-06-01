@@ -22,7 +22,7 @@ library(neonstore)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of neonstore is to provide access and persistent storage of NEON data tables.
+The goal of neonstore is to provide quick access and persistent storage of NEON data tables.
 
 ## Installation
 
@@ -33,35 +33,71 @@ Install the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("cboettig/neonstore")
 ```
-## Example
+## Quickstart
 
-Download all CSV files in the bird survey data products.  This will omit downloads of any existing data files. 
+
+Discover data products of interest:
+
+```{r}
+products <- neon_products()
+
+i <- grepl("Populations", products$themes)
+products[i, c("productCode", "productName")]
+ 
+i <- grepl("bird", products$keywords)
+products[i, c("productCode", "productName")]
+```
+
+Download all data files in the bird survey data products.  
 
 ```{r example, cache=TRUE}
 library(neonstore)
-neon_download("DP1.10003.001", file_regex = "[.]csv")
+neon_download("DP1.10003.001")
 
 ```
 
 
-Now, view your library of NEON products.  These will persist between sessions, 
+Now, view your store of NEON products.  These will persist between sessions,
 so you only need to download once, or to retrieve updates.
+(Note: the individual files making up a data product can all be listed by
+`neon_index()`).
 
 ```{r }
-neon_tables()
+neon_store()
 ```
-See files associated with a given table, 
-
-```{r}
-meta <- neon_index("brd_countdata") 
-meta
-```
-
 
 Read in all the component tables into a single data.frame
 
-```{r message = FALSE}
-brd_countdata <- neon_read(meta)
-brd_countdata
+```{r}
+neon_read("brd_countdata")
 ```
+
+## Details
+
+`neon_download()` will omit downloads of any existing data files. 
+You can request multiple products at once using vector notation. 
+You can optionally include date filters, e.g. to request only records more recent
+than a certain date. 
+Doing so will preserve API quota and improve speed (see API limits, below).
+
+Because `neonstore` only stores raw data products as returned from the NEON API,
+this makes it easy to track provenance and compare results across other analyses
+of the NEON data. 
+
+## Note on API limits
+
+[The NEON API now rate-limits requests.](https://data.neonscience.org/data-api/rate-limiting/#api-tokens).
+Using a personal token will increase the number of requests you can make.
+See that link for directions on registering for a token.
+Then pass this token in `.token` argument of `neon_download()`,
+or for frequent use, add this token as  an environmental variable, `NEON_DATA`
+to your local `.Renviron` file in your user's home directory.  
+
+`neon_download()` must first query each the API of eacn NEON site which collects
+that product, for each month the product is collected.  
+(It would be much more efficient on the NEON server if the API could take
+queries of the from `/data/<product>/<site>, and pool the results, rather than
+require each month of sampling separately!)
+
+
 
