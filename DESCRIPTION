@@ -19,5 +19,7 @@ Imports:
     httr,
     jsonlite,
     rappdirs,
-    progress
+    progress,
+    vroom,
+    utils
 RoxygenNote: 7.1.0

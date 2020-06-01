@@ -43,4 +43,9 @@ neon_index()
 ## Just bird survey product
 neon_index("DP1.10003.001")
 
+\dontshow{
+# tidy
+ Sys.unsetenv("NEONSTORE_HOME")
+}
+
 }

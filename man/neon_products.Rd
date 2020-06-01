@@ -25,7 +25,7 @@ most common columns, set to NULL to display all columns
 required but will allow access to a higher number of requests before
 rate limiting applies, see
 \url{https://data.neonscience.org/data-api/rate-limiting/#api-tokens}.
-Note that once files are downloaded once, \code{neonstore} provides persitent
+Note that once files are downloaded once, \code{neonstore} provides persistent
 access to them without further interaction required with the API.}
 }
 \description{

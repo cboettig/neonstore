@@ -34,9 +34,15 @@
 #' ## Just bird survey product
 #' neon_index("DP1.10003.001")
 #' 
+#' \dontshow{
+#' # tidy
+#'  Sys.unsetenv("NEONSTORE_HOME")
+#' }
+#' 
 neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
   
   files <- list.files(dir)
+  
   ## Parse metadata from NEON file names
   into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
   site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
@@ -59,6 +65,7 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
   
   ## Format as tidy data.frame
   meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
+  if(length(meta_b) == 0) return(NULL)
   colnames(meta_b) <- into
   meta_c <- as.data.frame(meta_b)
   meta_c$path <- file.path(dir, filenames)
@@ -100,7 +107,7 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
 #' an internet connection or incur rate limiting on requests.
 #' 
 #' @seealso [neon_products], [neon_download], [neon_index]
-#' @inheritParams neon_store
+#' @inheritParams neon_index
 #' @export
 #' @examples
 #' 

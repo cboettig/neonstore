@@ -81,11 +81,11 @@ neon_products <- function(
 }
 
 
-#' product <- "DP1.10003.001"
 
 #' @importFrom progress progress_bar
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
+#' @noRd
 neon_data <- function(product, 
                       start_date = NA,
                       end_date = NA,
@@ -161,18 +161,19 @@ neon_dir <- function(){
 #}
 
 
-#' product <- "DP1.10003.001"
-#' ".*basic.*[.]zip"
-
 
 #' Download NEON data products into a local store
-#' @param product A NEON productCode. See [neon_download].
+#'
+#'
+#' @param product A NEON `productCode`. See [neon_download].
 #' @param start_date Download only files as recent as (YYYY-MM-DD). Leave
 #' as `NA` to download up to the most recent avaialble data.
 #' @param end_date Download only files up to end_date (YYYY-MM-DD). Leave as 
 #' `NA` to download all prior data.
+#' @param type Should we prefer the basic or expanded version of this product? 
+#' See details. 
 #' @param file_regex Download only files matching this pattern.  See details.
-#' @param quiet Should progress be displayed?
+#' @param quiet Should download progress be displayed?
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
 #' (see [rappdirs::user_data_dir]).  This default also be configured by
@@ -183,17 +184,57 @@ neon_dir <- function(){
 #' required but will allow access to a higher number of requests before
 #' rate limiting applies, see 
 #' <https://data.neonscience.org/data-api/rate-limiting/#api-tokens>.
-#' Note that once files are downloaded once, `neonstore` provides persitent
+#' Note that once files are downloaded once, `neonstore` provides persistent
 #' access to them without further interaction required with the API.
 #' 
-#' @details `"*basic*.zip`
+#' @details Each NEON data product consists of a collection of 
+#' objects (e.g. tables), which are in turn broken into individual files by 
+#' site and sampling month.  Additionally, many NEON products have been 
+#' expanded, including some additional columns. Consequently, users must
+#' specify if they want the "basic" or "expanded" version of this data. 
+#' 
+#' In the products table (see [neon_products]), the `productHasExpanded` 
+#' column indicates if the data
+#' product has expanded, and the columns `productHasBasicDescription` and
+#' `productHasExpandedDescription` provide a detailed explanation of the
+#' differences between the `"expanded"` and `"basic"` versions of that
+#' particular product.
+#' 
+#' The API provides access to a `.zip` file containing all the component objects
+#' (e.g. tables) for that product at that site and sampling month. Additionally,
+#' the API allows users to request component files directly (e.g. as `.csv` 
+#' files).  Requesting component files directly avoids the additional overhead 
+#' of downloading other components that are not needed.  Both the `.zip` and 
+#' relevant `.csv` and `zip` files in products that have expanded will include
+#' both a `"basic"` and `"expanded"` name in the filename.  Setting `type`
+#' argument of `neon_download()` to the preferred one will make it filter out
+#' the other one.
+#' 
+#' By default, `neon_download()` will request the `.zip` packet for the product,
+#' matching the requested type.  `neon_download()` will extract the component 
+#' files into the store, removing the `.zip` file.  Specific files within a
+#' product can be identified by altering the `file_regex` argument
+#' (see examples).  
+#' 
+#' `neon_download()` will avoid downloading metadata files which are bitwise
+#' identical to other files in the same download request, as indicated by the
+#' crc32 hash reported by the API.  These typically include metadata that are
+#' shared across the product as a whole, but are for some reason included in 
+#' each sampling month for each site -- potentially thousands of duplicates.
+#' These duplicates are also packaged within the `.zip` downloads where it
+#' is not possible to exclude them from the download. 
 #' 
 #' @export
+#' @importFrom utils unzip download.file
 #' @examples 
 #' \donttest{
 #'  
-#'  neon_download("DP1.10003.001", 
-#'                start_date = "2019-01-01"
+#'  neon_download("DP1.10003.001")
+#'                
+#'  ## Advanced use: filter for a particular table in the product
+#'  neon_download("DP1.10003.001",
+#'                start_date = "2019-01-01",
+#'                file_regex = ".*brd_countdata.*\\.csv")
 #' 
 #' }
 neon_download <- function(product, 
@@ -241,12 +282,11 @@ neon_download <- function(product,
     total = length(unique_files$url), 
     clear = FALSE, width= 60)
   
-  handle <- curl::new_handle()
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
-    curl::curl_download(unique_files[i, "url"], 
-                        unique_files[i, "dir"], 
-                        handle = handle)
+    # consuder benchmarking if alternatives are faster? curl_download?
+    download.file(unique_files[i, "url"], 
+                  unique_files[i, "dir"])
   }
 
   # unzip and remove .zips

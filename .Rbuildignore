@@ -4,3 +4,4 @@
 ^notebook$
 .Renviron
 ^README\.Rmd$
+^README_cache$

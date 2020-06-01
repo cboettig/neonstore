@@ -6,6 +6,15 @@
 \usage{
 neon_store(product = NULL, dir = neon_dir())
 }
+\arguments{
+\item{product}{Include only files matching this NEON productCode (optional)}
+
+\item{dir}{Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
+setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
+\link{Renviron}.}
+}
 \description{
 Show tables that have been downloaded to the neon store
 }

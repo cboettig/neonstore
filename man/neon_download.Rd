@@ -2,9 +2,7 @@
 % Please edit documentation in R/api.R
 \name{neon_download}
 \alias{neon_download}
-\title{product <- "DP1.10003.001"
-".\emph{basic.}\link{.}zip"
-Download NEON data products into a local store}
+\title{Download NEON data products into a local store}
 \usage{
 neon_download(
   product,
@@ -19,7 +17,7 @@ neon_download(
 )
 }
 \arguments{
-\item{product}{A NEON productCode. See \link{neon_download}.}
+\item{product}{A NEON \code{productCode}. See \link{neon_download}.}
 
 \item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
 as \code{NA} to download up to the most recent avaialble data.}
@@ -27,9 +25,12 @@ as \code{NA} to download up to the most recent avaialble data.}
 \item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
 \code{NA} to download all prior data.}
 
+\item{type}{Should we prefer the basic or expanded version of this product?
+See details.}
+
 \item{file_regex}{Download only files matching this pattern.  See details.}
 
-\item{quiet}{Should progress be displayed?}
+\item{quiet}{Should download progress be displayed?}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -43,22 +44,59 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 required but will allow access to a higher number of requests before
 rate limiting applies, see
 \url{https://data.neonscience.org/data-api/rate-limiting/#api-tokens}.
-Note that once files are downloaded once, \code{neonstore} provides persitent
+Note that once files are downloaded once, \code{neonstore} provides persistent
 access to them without further interaction required with the API.}
 }
 \description{
-product <- "DP1.10003.001"
-".\emph{basic.}\link{.}zip"
 Download NEON data products into a local store
 }
 \details{
-\verb{"*basic*.zip}
+Each NEON data product consists of a collection of
+objects (e.g. tables), which are in turn broken into individual files by
+site and sampling month.  Additionally, many NEON products have been
+expanded, including some additional columns. Consequently, users must
+specify if they want the "basic" or "expanded" version of this data.
+
+In the products table (see \link{neon_products}), the \code{productHasExpanded}
+column indicates if the data
+product has expanded, and the columns \code{productHasBasicDescription} and
+\code{productHasExpandedDescription} provide a detailed explanation of the
+differences between the \code{"expanded"} and \code{"basic"} versions of that
+particular product.
+
+The API provides access to a \code{.zip} file containing all the component objects
+(e.g. tables) for that product at that site and sampling month. Additionally,
+the API allows users to request component files directly (e.g. as \code{.csv}
+files).  Requesting component files directly avoids the additional overhead
+of downloading other components that are not needed.  Both the \code{.zip} and
+relevant \code{.csv} and \code{zip} files in products that have expanded will include
+both a \code{"basic"} and \code{"expanded"} name in the filename.  Setting \code{type}
+argument of \code{neon_download()} to the preferred one will make it filter out
+the other one.
+
+By default, \code{neon_download()} will request the \code{.zip} packet for the product,
+matching the requested type.  \code{neon_download()} will extract the component
+files into the store, removing the \code{.zip} file.  Specific files within a
+product can be identified by altering the \code{file_regex} argument
+(see examples).
+
+\code{neon_download()} will avoid downloading metadata files which are bitwise
+identical to other files in the same download request, as indicated by the
+crc32 hash reported by the API.  These typically include metadata that are
+shared across the product as a whole, but are for some reason included in
+each sampling month for each site -- potentially thousands of duplicates.
+These duplicates are also packaged within the \code{.zip} downloads where it
+is not possible to exclude them from the download.
 }
 \examples{
 \donttest{
  
- neon_download("DP1.10003.001", 
-               start_date = "2019-01-01"
+ neon_download("DP1.10003.001")
+               
+ ## Advanced use: filter for a particular table in the product
+ neon_download("DP1.10003.001",
+               start_date = "2019-01-01",
+               file_regex = ".*brd_countdata.*\\\\.csv")
 
 }
 }
