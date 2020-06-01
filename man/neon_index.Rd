@@ -40,4 +40,7 @@ the information in a convenient table, along with a path to each file.
 
 neon_index()
 
+## Just bird survey product
+neon_index("DP1.10003.001")
+
 }

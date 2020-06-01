@@ -47,25 +47,17 @@ bench::bench_time(
 
 
 ```{r}
-library(dplyr)
-
-meta <- neon_index()
-meta %>% count(product)
+neon_store()
 ```
 
-
-```{r}
-meta %>% count(name)
-```
 
 
 ```{r}
 
-bench::bench_time({
-f <- meta %>% filter(name == "brd_countdata", type == "basic") %>% pull(path)
-df <- neon_read(f) # vroom with error handler
-})
+brd <- neon_read("brd_countdata")
 
+
+b <- neon_read("brd_countdata")
 
 
 ```

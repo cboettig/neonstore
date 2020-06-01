@@ -135,7 +135,7 @@ neon_store <- function(product = NULL, dir = neon_dir()){
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
 #' @inheritParams neon_download
-#' @import vroom vroom spec
+#' @importFrom vroom vroom spec
 #' @export
 #' 
 #' @examples 
