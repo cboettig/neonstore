@@ -21,6 +21,7 @@ library(neonstore)
 
 <!-- badges: start -->
 [![R build status](https://github.com/cboettig/neonstore/workflows/R-CMD-check/badge.svg)](https://github.com/cboettig/neonstore/actions)
+[![Codecov test coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg)](https://codecov.io/gh/cboettig/neonstore?branch=master)
 <!-- badges: end -->
 
 The goal of neonstore is to provide quick access and persistent storage of NEON data tables.

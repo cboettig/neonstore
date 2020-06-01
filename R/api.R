@@ -89,6 +89,7 @@ neon_products <- function(
 neon_data <- function(product, 
                       start_date = NA,
                       end_date = NA,
+                      site = NA,
                       quiet = FALSE,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
@@ -106,14 +107,23 @@ neon_data <- function(product,
   
   data_api <- unlist(available$availableDataUrls)
 
+  regex <- paste0(api, "/data/", product, "/(\\w+)/(\\d{4}-\\d{2})$")
   ## Filter by time -- year-month is included at end of data_api list
-  dates <- as.Date( gsub(".*(\\d{4}-\\d{2})$", "\\1-01", data_api) )
+  dates <- as.Date(gsub(regex, "\\2-01", data_api))
   if(!is.na(start_date)){
    data_api <- data_api[dates >= start_date]
   }
   if(!is.na(end_date)){
     data_api <- data_api[dates <= end_date]
   }  
+  
+  ## Filter by site
+  data_sites <- gsub(regex, "\\1", data_api)
+  if(!is.na(site)){
+    data_api <- data_api[data_sites %in% site]
+  }
+  
+  
   
   if(length(data_api) == 0){
     message("No additional files to download.")
@@ -170,6 +180,7 @@ neon_dir <- function(){
 #' as `NA` to download up to the most recent avaialble data.
 #' @param end_date Download only files up to end_date (YYYY-MM-DD). Leave as 
 #' `NA` to download all prior data.
+#' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
 #' @param type Should we prefer the basic or expanded version of this product? 
 #' See details. 
 #' @param file_regex Download only files matching this pattern.  See details.
@@ -234,12 +245,14 @@ neon_dir <- function(){
 #'  ## Advanced use: filter for a particular table in the product
 #'  neon_download("DP1.10003.001",
 #'                start_date = "2019-01-01",
+#'                site = "YELL",
 #'                file_regex = ".*brd_countdata.*\\.csv")
 #' 
 #' }
 neon_download <- function(product, 
                           start_date = NA,
                           end_date = NA,
+                          site = NA,
                           type = "expanded",
                           file_regex =  "[.]zip",
                           quiet = FALSE,
@@ -250,7 +263,8 @@ neon_download <- function(product,
   ## Query the API for a list of all files associated with this data product.
   files <- neon_data(product, 
                     start_date = start_date, 
-                    end_date = end_date, 
+                    end_date = end_date,
+                    site = site,
                     api = api,
                     .token = .token)
   
@@ -286,7 +300,8 @@ neon_download <- function(product,
     if(!quiet) pb$tick()
     # consuder benchmarking if alternatives are faster? curl_download?
     download.file(unique_files[i, "url"], 
-                  unique_files[i, "dir"])
+                  unique_files[i, "dir"],
+                  quiet = TRUE)
   }
 
   # unzip and remove .zips
@@ -321,7 +336,8 @@ take_first_match <- function(df, col){
     first <- which(match)[[1]]
     out[i,-1] <- df[first, ]
   }
-  out
+  rownames(out) <- NULL
+  out[,-1]
 }
 
 

@@ -7,6 +7,8 @@
 
 [![R build
 status](https://github.com/cboettig/neonstore/workflows/R-CMD-check/badge.svg)](https://github.com/cboettig/neonstore/actions)
+[![Codecov test
+coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg)](https://codecov.io/gh/cboettig/neonstore?branch=master)
 <!-- badges: end -->
 
 The goal of neonstore is to provide quick access and persistent storage
@@ -67,55 +69,42 @@ by `neon_index()`).
 
 ``` r
 neon_store()
-#>  [1] "validation"                      "categoricalCodes"               
-#>  [3] "brd_countdata"                   "brd_perpoint"                   
-#>  [5] "brd_references"                  "readme"                         
-#>  [7] "variables"                       "mos_archivepooling"             
-#>  [9] "mos_barcoding"                   "mos_expertTaxonomistIDProcessed"
-#> [11] "mos_expertTaxonomistIDRaw"       "mos_sorting"                    
-#> [13] "mos_trapping"                    "mam_perplotnight"               
-#> [15] "mam_pertrapnight"                "tck_fielddata"                  
-#> [17] "tck_taxonomyProcessed"           "tck_taxonomyRaw"                
-#> [19] "inv_fieldData"                   "inv_persample"                  
-#> [21] "inv_pervial"                     "inv_taxonomyProcessed"          
-#> [23] "inv_taxonomyRaw"                 "zoo_fieldData"                  
-#> [25] "zoo_perVial"                     "zoo_taxonomyProcessed"          
-#> [27] "zoo_taxonomyRaw"
+#> [1] "validation"     "brd_countdata"  "brd_references" "readme"        
+#> [5] "variables"
 ```
 
 Read in all the component tables into a single data.frame
 
 ``` r
 neon_read("brd_countdata")
-#> Rows: 164,782
+#> Rows: 1,568
 #> Columns: 24
 #> Delimiter: ","
-#> chr  [19]: uid, namedLocation, domainID, siteID, plotID, plotType, pointID, eventID, targe...
+#> chr  [20]: uid, namedLocation, domainID, siteID, plotID, plotType, pointID, eventID, targe...
 #> dbl  [ 3]: pointCountMinute, observerDistance, clusterSize
-#> lgl  [ 1]: clusterCode
 #> dttm [ 1]: startDate
 #> 
 #> Use `spec()` to retrieve the guessed column specification
 #> Pass a specification to the `col_types` argument to quiet this message
-#> # A tibble: 164,782 x 24
+#> # A tibble: 1,568 x 24
 #>    uid   namedLocation domainID siteID plotID plotType pointID
 #>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
-#>  1 ad84… BART_025.bir… D01      BART   BART_… distrib… C1     
-#>  2 2115… BART_025.bir… D01      BART   BART_… distrib… C1     
-#>  3 0592… BART_025.bir… D01      BART   BART_… distrib… C1     
-#>  4 8e5a… BART_025.bir… D01      BART   BART_… distrib… C1     
-#>  5 9b07… BART_025.bir… D01      BART   BART_… distrib… C1     
-#>  6 145f… BART_025.bir… D01      BART   BART_… distrib… B1     
-#>  7 f70e… BART_025.bir… D01      BART   BART_… distrib… B1     
-#>  8 648b… BART_025.bir… D01      BART   BART_… distrib… B1     
-#>  9 2295… BART_025.bir… D01      BART   BART_… distrib… B1     
-#> 10 cc6d… BART_025.bir… D01      BART   BART_… distrib… A1     
-#> # … with 164,772 more rows, and 17 more variables: startDate <dttm>,
+#>  1 4584… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  2 f4d7… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  3 0b71… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  4 e939… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  5 807d… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  6 4424… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  7 24f1… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  8 47b8… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#>  9 fd05… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#> 10 4d4d… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
+#> # … with 1,558 more rows, and 17 more variables: startDate <dttm>,
 #> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
 #> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
 #> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
 #> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
-#> #   clusterSize <dbl>, clusterCode <lgl>, identifiedBy <chr>
+#> #   clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>
 ```
 
 ## Details
