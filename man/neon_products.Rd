@@ -5,8 +5,8 @@
 \title{Table of all NEON Data Products}
 \usage{
 neon_products(
-  fields = c("productCode", "productName", "productStatus", "productDescription",
-    "productStatus", "themes", "keywords", "productCategory", "productAbstract",
+  fields = c("productCode", "productName", "productDescription", "productStatus",
+    "themes", "keywords", "productCategory", "productAbstract",
     "productDesignDescription", "productRemarks", "productSensor",
     "productPublicationFormatType", "productHasExpanded", "productBasicDescription",
     "productExpandedDescription"),

@@ -8,6 +8,7 @@ neon_download(
   product,
   start_date = NA,
   end_date = NA,
+  site = NA,
   type = "expanded",
   file_regex = "[.]zip",
   quiet = FALSE,
@@ -24,6 +25,8 @@ as \code{NA} to download up to the most recent avaialble data.}
 
 \item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
 \code{NA} to download all prior data.}
+
+\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
 See details.}
@@ -96,6 +99,7 @@ is not possible to exclude them from the download.
  ## Advanced use: filter for a particular table in the product
  neon_download("DP1.10003.001",
                start_date = "2019-01-01",
+               site = "YELL",
                file_regex = ".*brd_countdata.*\\\\.csv")
 
 }

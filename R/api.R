@@ -174,28 +174,6 @@ neon_dir <- function(){
 #' Download NEON data products into a local store
 #'
 #'
-#' @param product A NEON `productCode`. See [neon_download].
-#' @param start_date Download only files as recent as (YYYY-MM-DD). Leave
-#' as `NA` to download up to the most recent avaialble data.
-#' @param end_date Download only files up to end_date (YYYY-MM-DD). Leave as 
-#' `NA` to download all prior data.
-#' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
-#' @param type Should we prefer the basic or expanded version of this product? 
-#' See details. 
-#' @param file_regex Download only files matching this pattern.  See details.
-#' @param quiet Should download progress be displayed?
-#' @param dir Location where files should be downloaded. By default will
-#' use the appropriate applications directory for your system 
-#' (see [rappdirs::user_data_dir]).  This default also be configured by
-#' setting the environmental variable `NEONSTORE_HOME`, see [Sys.setenv] or
-#' [Renviron].
-#' @param api the URL to the NEON API, leave as default.
-#' @param .token an authentication token from NEON. A token is not
-#' required but will allow access to a higher number of requests before
-#' rate limiting applies, see 
-#' <https://data.neonscience.org/data-api/rate-limiting/#api-tokens>.
-#' Note that once files are downloaded once, `neonstore` provides persistent
-#' access to them without further interaction required with the API.
 #' 
 #' @details Each NEON data product consists of a collection of 
 #' objects (e.g. tables), which are in turn broken into individual files by 
@@ -234,6 +212,29 @@ neon_dir <- function(){
 #' These duplicates are also packaged within the `.zip` downloads where it
 #' is not possible to exclude them from the download. 
 #' 
+#' @param product A NEON `productCode`. See [neon_download].
+#' @param start_date Download only files as recent as (YYYY-MM-DD). Leave
+#' as `NA` to download up to the most recent avaialble data.
+#' @param end_date Download only files up to end_date (YYYY-MM-DD). Leave as 
+#' `NA` to download all prior data.
+#' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
+#' @param type Should we prefer the basic or expanded version of this product? 
+#' See details. 
+#' @param file_regex Download only files matching this pattern.  See details.
+#' @param quiet Should download progress be displayed?
+#' @param dir Location where files should be downloaded. By default will
+#' use the appropriate applications directory for your system 
+#' (see [rappdirs::user_data_dir]).  This default also be configured by
+#' setting the environmental variable `NEONSTORE_HOME`, see [Sys.setenv] or
+#' [Renviron].
+#' @param api the URL to the NEON API, leave as default.
+#' @param .token an authentication token from NEON. A token is not
+#' required but will allow access to a higher number of requests before
+#' rate limiting applies, see 
+#' <https://data.neonscience.org/data-api/rate-limiting/#api-tokens>.
+#' Note that once files are downloaded once, `neonstore` provides persistent
+#' access to them without further interaction required with the API.
+#'
 #' @export
 #' @importFrom utils unzip download.file
 #' @examples 
