@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![R build
+status](https://github.com/cboettig/neonstore/workflows/R-CMD-check/badge.svg)](https://github.com/cboettig/neonstore/actions)
 <!-- badges: end -->
 
 The goal of neonstore is to provide quick access and persistent storage
