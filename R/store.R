@@ -6,7 +6,7 @@
 #' @inheritParams neon_download
 #' 
 #' @export
-neon_store <- function(table = NULL, dir = neon_dir()){
+neon_index <- function(table = NULL, dir = neon_dir()){
   
   files <- list.files(neon_dir())
   
@@ -39,17 +39,17 @@ neon_store <- function(table = NULL, dir = neon_dir()){
   if(!is.null(table)){
     meta_c <- meta_c[grepl(table, meta_c$table), ]
   }
-  # Prefer 'extended' format if available
-  if(any(grepl("extended", meta_c$type))){
-    meta_c <- meta_c[grepl("extended", meta_c$type), ]
+  # Prefer 'expanded' format if available
+  if(any(grepl("expanded", meta_c$type))){
+    meta_c <- meta_c[grepl("expanded", meta_c$type), ]
   }
   
   meta_c
-
+  
 }
 
 #' @export
-neon_stored_tables <- function(dir = neon_dir()){
+neon_stored <- function(dir = neon_dir()){
   meta <- neon_index()
   unique(meta$table)
 }
@@ -57,26 +57,90 @@ neon_stored_tables <- function(dir = neon_dir()){
 
 ## Consider using conditionally
 
+#' read in neon tabular data
+#' 
+#' 
+#' NEON's tabular data files are separated out into separate .csv
+#' files for each site for each month of sampling.  In principle,
+#' each file has identical columns.  [vroom::vroom] can read in a
+#' data table that has been sharded into many files like this much
+#' much faster than other parsers can read in each table iteratively, 
+#' (and thus can greatly out-perform the 'stacking" methods in neonUtilities).
+#'
+#' Unfortunately, not all datasets are entirely consistent in their use
+#' of columns.  `neon_read` works around this by parsing such tables in
+#' groups of matching schema, which is still reasonably fast.
+#' 
+#' For convenience, neon_read takes the name of a table in the local store.
+#' 
+#' @param table the name of a downloaded NEON table
+#' @param ... additional arguments to [vroom::vroom], can usually be omitted.
+#' @param files optionally, specify a vector of file paths directly (e.g. as
+#' provided from [neon_index]) and specify `table` argument as NULL.
+#' @inheritParams neon_download
+#' 
 #' @export
-neon_read <- function(table, dir = neon_dir()){
+#' @examples 
+#' 
+#' neon_read("brd_count")
+#' @import vroom vroom spec
+neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
   
+  if(is.null(files)){
+    meta <- neon_index(table = table, dir = dir)
+    files <- meta$path
+  }
   
-  meta <- neon_index(table = table, dir = dir)
-  files <- meta$path
-  ## What about .zip files?
-  
+  if(length(files) == 0){
+    warning(paste("no files found for", table, "in", dir, "\n",
+                  "perhaps you need to download them first?"))
+    return(NULL)
+  }
   
   ## vroom can read in a list of files, but only if columns are consistent
-  ## dplyr::bind_rows can bind and fill missing columns
-  tryCatch(vroom::vroom(files),
-           error = function(e){
-             warning("inconsistent columns across csv files, parsing individually...")
-             suppressMessages(
-               dplyr::bind_rows(lapply(files, vroom::vroom)) 
-             )
-           },
+  tryCatch(vroom::vroom(files, ...),
+           error = function(e) vroom_ragged(files, ...),
            finally = NULL)
+}
+
+
+
+#' @importFrom vroom vroom spec
+vroom_ragged <- function(files){
+
+  ## We read the 1st line of every file to determine schema  
+  suppressMessages(
+    schema <- lapply(files, vroom::vroom, n_max = 1, altrep = FALSE)
+  )
   
+  
+  ## Now, we read in tables in groups of matching schema,
+  ## filling in additional columns as in bind_rows.
+  
+  col_schemas <- lapply(schema, colnames)
+  u_schemas <- unique(col_schemas)
+  tbl_list <- vector("list", length=length(u_schemas))
+  
+  all_cols <- unique(unlist(u_schemas))
+  
+  i <- 1
+  for(s in u_schemas){
+
+    ## select tables that have matching schemas
+    index <- vapply(col_schemas, identical, logical(1L), s)
+    col_types <- vroom::spec(schema[index][[1]])
+    
+    ## Read in all those tables
+    tbl <- vroom::vroom(files[index], col_types = col_types)
+    
+    ## append any columns missing from all_cols set
+    missing <- all_cols[ !(all_cols %in% colnames(tbl)) ]
+    tbl[ missing ] <- NA
+    tbl_list[[i]] <- tbl
+    i <- i+1
+    
+  }
+  do.call(rbind, tbl_list)
   
 }
 

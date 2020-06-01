@@ -16,6 +16,8 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
  
 }
 
+
+
 #' Table of all NEON Data Products
 #'
 #' Return a table of all NEON Data Products, including product descriptions
@@ -81,7 +83,7 @@ neon_products <- function(
 
 #' product <- "DP1.10003.001"
 
-#' 
+#' @importFrom progress progress_bar
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
 neon_data <- function(product, 
@@ -113,15 +115,19 @@ neon_data <- function(product,
     data_api <- data_api[dates <= end_date]
   }  
   
-    
+  if(length(data_api) == 0){
+    message("No additional files to download.")
+    return(invisible(NULL))
+  }
+
   ## Extract the file list from the data endpoint.  O(sites * months) calls
   pb <- progress::progress_bar$new(
-    format = "  querying API for available data [:bar] :percent eta: :eta",
+    format = "  querying API [:bar] :percent eta: :eta",
     total = length(data_api), 
     clear = FALSE, width= 60)
   
   resp <- lapply(data_api, function(x){
-    if(!quiet) pb$tick()$print()
+    if(!quiet){ pb$tick() }
     httr::GET(x, httr::add_headers("X-API-Token" = .token))
   })
   
@@ -187,8 +193,7 @@ neon_dir <- function(){
 #' \donttest{
 #'  
 #'  neon_download("DP1.10003.001", 
-#'                start_date = "2019-01-01", 
-#'                file_regex = ".*basic.*[.]zip")
+#'                start_date = "2019-01-01"
 #' 
 #' }
 neon_download <- function(product, 
@@ -225,25 +230,25 @@ neon_download <- function(product,
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   
   ## now time to download!
-  
+  f
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent eta: :eta",
-    total = length(data_api), 
+    total = length(unique_files$url), 
     clear = FALSE, width= 60)
   
   handle <- curl::new_handle()
   for(i in seq_along(unique_files$url)){
-    if(!quiet) pb$tick()$print()
+    if(!quiet) pb$tick()
     curl::curl_download(unique_files[i, "url"], 
                         unique_files[i, "dir"], 
                         handle = handle)
   }
 
-  
-  # unzip zip files
-  lapply(list.files(dir, "[.]zip", full.names = TRUE),
-         unzip, exdir = dir)
-  
+  # unzip and remove .zips
+  zips <- unique_files[grepl("[.]zip", unique_files$dir), "dir"]
+  lapply(zips, unzip, exdir = dir)
+  unlink(zips)
+  # remove .zip file?
   
   invisible(unique_files)
 }
