@@ -41,7 +41,6 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
 neon_products <- function(
   fields = c("productCode", 
              "productName", 
-             "productStatus", 
              "productDescription", 
              "productStatus",
              "themes",
