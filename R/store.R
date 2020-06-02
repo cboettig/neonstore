@@ -44,18 +44,11 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
   files <- list.files(dir)
   
   ## Parse metadata from NEON file names
-  into <- c("site", "product", "table", "month", "type", "timestamp", "ext")    
-  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
-  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."                  # \\2
-  name <- "(:?\\w+)?\\.?"                                    # \\3 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
-  type <- "(:?basic|expanded)?\\.?"                          # \\5
-  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
-  ext <- "(\\w+$)"                                           # \\7
-  regex <- paste0(site, productCode, name, month, type, timestamp, ext)
-  meta <- strsplit(gsub(regex, "\\1  \\2  \\3  \\4  \\5  \\6  \\7", files), "  ")
+  parsed <- gsub(neon_regex(), "\\1  \\2  \\3-\\5  \\4  \\5  \\6  \\7", files)
+  meta <- strsplit(parsed, "  ")
   
   ## Confirm parsing was successful
+  into <- c("site", "product", "table", "month", "type", "timestamp", "ext")
   parts <- vapply(meta, length, integer(1L))
   meta <- meta[parts == length(into)]
   
@@ -69,7 +62,7 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
   colnames(meta_b) <- into
   meta_c <- as.data.frame(meta_b)
   meta_c$path <- file.path(dir, filenames)
-  
+
   
   ## Apply any filters
   if(!is.null(table)){
@@ -80,18 +73,22 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
     meta_c <- meta_c[grepl(product, meta_c$product), ]
   }
   
-  
-  # Prefer 'expanded' format if available
-  if(any(grepl("basic", meta_c$type))){
-    meta_c <- meta_c[!grepl("basic", meta_c$type), ]
-  }
-  
   class(meta_c) <- c("tbl_df", "tbl", "data.frame")
   meta_c
   
 }
 
-
+neon_regex <- function(){
+  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
+  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\2
+  name <- "(:?\\w+)?\\.?"                                    # \\3 
+  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
+  type <- "(:?basic|expanded)?\\.?"                          # \\5
+  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
+  ext <- "(\\w+$)"                                           # \\7
+  regex <- paste0(site, productCode, name, month, type, timestamp, ext)
+  regex
+}
 #' Show tables that have been downloaded to the neon store
 #' 
 #' @details
@@ -121,6 +118,8 @@ neon_store <- function(product = NULL, dir = neon_dir()){
 
 
 
+
+
 #' read in neon tabular data
 #' 
 #' @details
@@ -129,15 +128,16 @@ neon_store <- function(product = NULL, dir = neon_dir()){
 #' each file has identical columns.  [vroom::vroom] can read in a
 #' data table that has been sharded into many files like this much
 #' much faster than other parsers can read in each table iteratively, 
-#' (and thus can greatly out-perform the 'stacking" methods in neonUtilities).
+#' (and thus can greatly out-perform the 'stacking" methods in `neonUtilities`).
 #'
 #' Unfortunately, not all datasets are entirely consistent in their use
 #' of columns.  `neon_read` works around this by parsing such tables in
 #' groups of matching schema, which is still reasonably fast.
 #' 
-#' For convenience, neon_read takes the name of a table in the local store.
+#' For convenience, `neon_read` takes the name of a table in the local store.
 #' 
-#' @param table the name of a downloaded NEON table
+#' @param table the name of a downloaded NEON table in the store,
+#'  see [neon_store]
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
@@ -147,7 +147,7 @@ neon_store <- function(product = NULL, dir = neon_dir()){
 #' 
 #' @examples 
 #' 
-#' neon_read("brd_count")
+#' neon_read("brd_countdata-expanded")
 #' 
 neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
   
@@ -209,14 +209,4 @@ vroom_ragged <- function(files){
   
 }
 
-
-
-#' x <- c(
-#' "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
-#' "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
-#' "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
-#' "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
-#' "NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip"
-#' )
-#' strsplit(gsub(regex, "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
 

@@ -71,7 +71,7 @@ neon_store()
 Read in all the component tables into a single data.frame
 
 ```{r}
-neon_read("brd_countdata")
+neon_read("brd_countdata-expanded")
 ```
 
 ## Details

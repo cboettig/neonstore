@@ -94,7 +94,7 @@ is not possible to exclude them from the download.
 \examples{
 \donttest{
  
- neon_download("DP1.10003.001")
+ neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
                
  ## Advanced use: filter for a particular table in the product
  neon_download("DP1.10003.001",

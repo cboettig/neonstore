@@ -7,7 +7,8 @@
 neon_read(table, ..., files = NULL, dir = neon_dir())
 }
 \arguments{
-\item{table}{the name of a downloaded NEON table}
+\item{table}{the name of a downloaded NEON table in the store,
+see \link{neon_store}}
 
 \item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
 
@@ -29,16 +30,16 @@ files for each site for each month of sampling.  In principle,
 each file has identical columns.  \link[vroom:vroom]{vroom::vroom} can read in a
 data table that has been sharded into many files like this much
 much faster than other parsers can read in each table iteratively,
-(and thus can greatly out-perform the 'stacking" methods in neonUtilities).
+(and thus can greatly out-perform the 'stacking" methods in \code{neonUtilities}).
 
 Unfortunately, not all datasets are entirely consistent in their use
 of columns.  \code{neon_read} works around this by parsing such tables in
 groups of matching schema, which is still reasonably fast.
 
-For convenience, neon_read takes the name of a table in the local store.
+For convenience, \code{neon_read} takes the name of a table in the local store.
 }
 \examples{
 
-neon_read("brd_count")
+neon_read("brd_countdata-expanded")
 
 }

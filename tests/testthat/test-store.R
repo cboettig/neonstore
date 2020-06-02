@@ -28,7 +28,7 @@ test_that("neon_store()", {
 
 test_that("neon_read()", {
   
-  x <- neon_read("brd_count")
+  x <- neon_read("brd_countdata-expanded")
   expect_is(x, "data.frame")
   expect_true(any(grepl("observerDistance", colnames(x))))
   
@@ -48,6 +48,22 @@ test_that("vroom_ragged()", {
   
   expect_is(out, "data.frame")
   expect_equal(colnames(out), colnames(B))
+  
+  
+})
+
+test_that("neon_regex()", {
+  
+   x <- c(
+  "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
+  "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
+  "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
+  "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
+  "NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip",
+  "NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv"
+   )
+  strsplit(gsub(neon_regex(), "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
+  
   
   
 })

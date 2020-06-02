@@ -69,42 +69,16 @@ by `neon_index()`).
 
 ``` r
 neon_store()
-#> [1] "validation"     "brd_countdata"  "brd_references" "readme"        
-#> [5] "variables"
+#> NULL
 ```
 
 Read in all the component tables into a single data.frame
 
 ``` r
-neon_read("brd_countdata")
-#> Rows: 1,568
-#> Columns: 24
-#> Delimiter: ","
-#> chr  [20]: uid, namedLocation, domainID, siteID, plotID, plotType, pointID, eventID, targe...
-#> dbl  [ 3]: pointCountMinute, observerDistance, clusterSize
-#> dttm [ 1]: startDate
-#> 
-#> Use `spec()` to retrieve the guessed column specification
-#> Pass a specification to the `col_types` argument to quiet this message
-#> # A tibble: 1,568 x 24
-#>    uid   namedLocation domainID siteID plotID plotType pointID
-#>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
-#>  1 4584… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  2 f4d7… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  3 0b71… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  4 e939… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  5 807d… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  6 4424… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  7 24f1… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  8 47b8… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#>  9 fd05… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#> 10 4d4d… YELL_009.bir… D12      YELL   YELL_… distrib… C3     
-#> # … with 1,558 more rows, and 17 more variables: startDate <dttm>,
-#> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
-#> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
-#> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
-#> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
-#> #   clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>
+neon_read("brd_countdata-expanded")
+#> Warning in neon_read("brd_countdata-expanded"): no files found for brd_countdata-expanded in /tmp/RtmpUWBhrh/file518617ba96c3 
+#>  perhaps you need to download them first?
+#> NULL
 ```
 
 ## Details
