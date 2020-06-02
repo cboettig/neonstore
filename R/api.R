@@ -301,7 +301,8 @@ neon_download <- function(product,
     # consuder benchmarking if alternatives are faster? curl_download?
     download.file(unique_files[i, "url"], 
                   unique_files[i, "dir"],
-                  quiet = TRUE)
+                  quiet = TRUE,
+                  mode = "wb")
   }
 
   # unzip and remove .zips
