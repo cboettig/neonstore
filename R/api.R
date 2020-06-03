@@ -236,7 +236,8 @@ neon_dir <- function(){
 #' access to them without further interaction required with the API.
 #'
 #' @export
-#' @importFrom utils unzip download.file
+#' @importFrom utils unzip
+#' @importFrom curl curl_download
 #' @examples 
 #' \donttest{
 #'  
@@ -299,10 +300,8 @@ neon_download <- function(product,
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
     # consuder benchmarking if alternatives are faster? curl_download?
-    download.file(unique_files[i, "url"], 
-                  unique_files[i, "dir"],
-                  quiet = TRUE,
-                  mode = "wb")
+    curl::curl_download(unique_files[i, "url"], 
+                        unique_files[i, "dir"])
   }
 
   # unzip and remove .zips

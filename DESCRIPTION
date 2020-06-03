@@ -21,7 +21,8 @@ Imports:
     rappdirs,
     progress,
     vroom,
-    utils
+    utils,
+    curl
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
