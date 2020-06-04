@@ -6,14 +6,17 @@
 #' @inheritParams neon_download
 #' @importFrom httr GET content
 #' @importFrom jsonlite fromJSON
+#' @export
 neon_sites <- function(api = "https://data.neonscience.org/api/v0", 
                        .token = Sys.getenv("NEON_TOKEN")){
   
   resp <- httr::GET(paste0(api, "/sites"), 
                     httr::add_headers("X-API-Token" = .token))
-  sites <- httr::content(resp, as="text")
-  jsonlite::fromJSON(sites)[[1]]
- 
+  txt <- httr::content(resp, as="text")
+  sites <- jsonlite::fromJSON(txt)[[1]]
+  
+  class(sites) <- c("tbl_df", "tbl", "data.frame")
+  sites
 }
 
 
@@ -257,6 +260,7 @@ neon_download <- function(product,
                           type = "expanded",
                           file_regex =  "[.]zip",
                           quiet = FALSE,
+                          verify = TRUE,
                           dir = neon_dir(), 
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
@@ -275,7 +279,7 @@ neon_download <- function(product,
   
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
-  files$dir <- file.path(dir, files$name)
+  files$path <- file.path(dir, files$name)
   
   
   ## Filter to have only expanded or basic (not both)
@@ -299,11 +303,26 @@ neon_download <- function(product,
   
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
-    # consuder benchmarking if alternatives are faster? curl_download?
+    # consider benchmarking if alternatives are faster? curl_download?
     curl::curl_download(unique_files[i, "url"], 
-                        unique_files[i, "dir"])
+                        unique_files[i, "path"])
   }
 
+  if(verify) {
+    md5 <- vapply(unique_files$path, 
+           function(y) as.character(openssl::md5(file(y))),
+           character(1L), USE.NAMES = FALSE)
+    i <- which(md5 != unique_files$crc32)
+    if(length(i) > 0) {
+      
+      warning(paste("Removing downloaded files which", 
+                    "did not match the expected hash:",
+                    unique_files$path[i]), call. = FALSE)
+      unlink(unique_files$path[i])
+    }
+  }
+  
+  
   # unzip and remove .zips
   zips <- unique_files[grepl("[.]zip", unique_files$dir), "dir"]
   lapply(zips, unzip, exdir = dir)

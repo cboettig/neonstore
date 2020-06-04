@@ -4,10 +4,13 @@
 \alias{neon_store}
 \title{Show tables that have been downloaded to the neon store}
 \usage{
-neon_store(product = NULL, dir = neon_dir())
+neon_store(product = NULL, table = NULL, dir = neon_dir())
 }
 \arguments{
 \item{product}{Include only files matching this NEON productCode (optional)}
+
+\item{table}{Include only files matching this table name (or regex pattern).
+(optional).}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

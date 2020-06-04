@@ -4,13 +4,16 @@
 \alias{neon_index}
 \title{Show information about all files downloaded to the local store}
 \usage{
-neon_index(product = NULL, table = NULL, dir = neon_dir())
+neon_index(product = NULL, table = NULL, hash = "md5", dir = neon_dir())
 }
 \arguments{
 \item{product}{Include only files matching this NEON productCode (optional)}
 
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
+
+\item{hash}{name of a hashing algorithm to check file integrity. Can be
+md5, sha1, or sha256 currently; or set to \link{NULL} to skip hash computation.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

@@ -1,85 +1,40 @@
 
 # Import
 
-```{r birds}
-bench_time(
-  neon_download("DP1.10003.001", file_regex = ".*basic.*[.]csv")
-)
-```
 
+# Checksum comparison
 
-```{r beetles}
-bench::bench_time(
-  neon_download("DP1.10022.001")
-)
-```
-
-
-```{r ticks}
-bench::bench_time(
-  neon_download("DP1.10093.001", quiet = TRUE)
-)
-```
-
-```{r mammals}
-bench::bench_time(
-  neon_download("DP1.10072.001",  quiet = TRUE)
-)
-```
-
-```{r zooplankton}
-neon_download("DP1.20219.001")
-```
-
-```{r macroinvert}
-neon_download("DP1.20120.001")
-```
-
-
-```{r mozzies}
-bench::bench_time(
-  neon_download("DP1.10043.001")
-)
-```
-
-
-# Explore
+The NEON API returns 32 character crc32 checksum
 
 
 ```{r}
-neon_store()
+raw_files <- neon_index(table = "brd_countdata-expanded")
+x <- raw_files$path[[1]]
+digest::digest(x, algo = "crc32", file = TRUE)
+
+url <- paste("https://data.neonscience.org/api/v0/data", 
+                raw_files$product[[1]], 
+                "BART", 
+                raw_files$month[[1]], 
+                sep = "/")
+resp <- httr::GET(url)
+out <- jsonlite::fromJSON(httr::content(resp, "text"))$data$files
+out[out$name == basename(x),]
+
+dir.create("tmp")
+paste0("tmp/", out$name)
+purrr::walk2(out$url, paste0("tmp/", out$name), curl::curl_download)
+unzip("tmp/NEON.D01.BART.DP1.10003.001.2015-06.expanded.20191107T154457Z.zip",
+      exdir = "tmp/expanded")
 ```
-
-
 
 ```{r}
+vapply(fs::dir_ls("tmp", glob="*.csv"), digest::digest,  character(1L), algo = "crc32", file = TRUE, USE.NAMES = FALSE)
+vapply(fs::dir_ls("tmp/expanded", glob="*.csv"), digest::digest, character(1L), algo = "crc32", file = TRUE, USE.NAMES = FALSE)
 
-brd <- neon_read("brd_countdata")
-
-
-b <- neon_read("brd_countdata")
-
+out$crc32[grepl("[.]csv",out$name)]
 
 ```
-
-
-```{r}
-
-bench::bench_time({
-f <- meta %>% filter(name == "mam_perplotnight", type == "basic") %>% pull(path)
-df <- neon_read(f) # vroom with error handler
-})
-
-
-
-```
-
-
-```{r}
-as_tibble(df)
-```
-
-
 
 
 # Distribute

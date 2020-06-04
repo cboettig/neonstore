@@ -12,6 +12,7 @@ neon_download(
   type = "expanded",
   file_regex = "[.]zip",
   quiet = FALSE,
+  verify = TRUE,
   dir = neon_dir(),
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")

@@ -42,4 +42,8 @@ For convenience, \code{neon_read} takes the name of a table in the local store.
 
 neon_read("brd_countdata-expanded")
 
+## Read in specific files from the neon_index():
+files <- neon_index(table = "brd_countdata-expanded")$path
+neon_read(files = files)
+
 }
