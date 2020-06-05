@@ -4,7 +4,7 @@
 \alias{neon_read}
 \title{read in neon tabular data}
 \usage{
-neon_read(table, ..., files = NULL, dir = neon_dir())
+neon_read(table = NULL, ..., files = NULL, dir = neon_dir())
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,

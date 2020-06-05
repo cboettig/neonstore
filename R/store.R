@@ -192,17 +192,15 @@ neon_store <- function(product = NULL, table = NULL, dir = neon_dir()){
 #' files <- neon_index(table = "brd_countdata-expanded")$path
 #' neon_read(files = files)
 #' 
-neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
+neon_read <- function(table = NULL, ..., files = NULL, dir = neon_dir()){
   
   if(is.null(files)){
     meta <- neon_index(table = table, hash = NULL, dir = dir)
     files <- meta$path
-  } else if(length(files) == 0){ 
-    warning("no files or table name provided")
-    return(NULL)
   }
   
   if(length(files) == 0){
+    if(is.null(table)) table <- "unspecified tables"
     warning(paste("no files found for", table, "in", dir, "\n",
                   "perhaps you need to download them first?"))
     return(NULL)
