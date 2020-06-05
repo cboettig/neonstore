@@ -36,6 +36,9 @@ See details.}
 
 \item{quiet}{Should download progress be displayed?}
 
+\item{verify}{Should downloaded files be compared against the MD5 hash
+reported by the NEON API to verify integrity? (default TRUE)}
+
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
@@ -98,8 +101,9 @@ is not possible to exclude them from the download.
  neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
                
  ## Advanced use: filter for a particular table in the product
- neon_download("DP1.10003.001",
+ neon_download(product = "DP1.10003.001",
                start_date = "2019-01-01",
+               end_date = "2020-01-01",
                site = "YELL",
                file_regex = ".*brd_countdata.*\\\\.csv")
 

@@ -36,7 +36,7 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
 #' products <- neon_products()
 #' 
 #' # Or search for a keyword
-#' i <- grepl("bird", products$keyword)
+#' i <- grepl("bird", products$keywords)
 #' products[i, c("productCode", "productName")]
 #' 
 #' }
@@ -222,6 +222,8 @@ neon_dir <- function(){
 #' See details. 
 #' @param file_regex Download only files matching this pattern.  See details.
 #' @param quiet Should download progress be displayed?
+#' @param verify Should downloaded files be compared against the MD5 hash
+#' reported by the NEON API to verify integrity? (default TRUE)
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
 #' (see [rappdirs::user_data_dir]).  This default also be configured by
@@ -244,8 +246,9 @@ neon_dir <- function(){
 #'  neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
 #'                
 #'  ## Advanced use: filter for a particular table in the product
-#'  neon_download("DP1.10003.001",
+#'  neon_download(product = "DP1.10003.001",
 #'                start_date = "2019-01-01",
+#'                end_date = "2020-01-01",
 #'                site = "YELL",
 #'                file_regex = ".*brd_countdata.*\\.csv")
 #' 
@@ -301,8 +304,8 @@ neon_download <- function(product,
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
     # consider benchmarking if alternatives are faster? curl_download?
-    curl::curl_download(unique_files[i, "url"][[1]], 
-                        unique_files[i, "path"][[1]])
+    curl::curl_download(unique_files$url[i], 
+                        unique_files$path[i])
   }
 
   if(verify) {
@@ -321,9 +324,10 @@ neon_download <- function(product,
   
   
   # unzip and remove .zips
-  zips <- unique_files[grepl("[.]zip", unique_files$path), "path"]
+  zips <- unique_files$path[grepl("[.]zip", unique_files$path)]
   lapply(zips, unzip, exdir = dir)
   unlink(zips)
+  
   # remove .zip file?
   
   unique_files <- tibble::as_tibble(unique_files)

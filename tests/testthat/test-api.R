@@ -76,7 +76,7 @@ test_that("neon_download()", {
                      start_date = "2019-06-01",
                      end_date = "2019-08-01")
   expect_is(x, "data.frame")
-  expect_gt(nrow(x), 1)
+  expect_gt(nrow(x), 0)
   
   
 })
