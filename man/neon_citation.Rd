@@ -36,6 +36,12 @@ updating of downloads without re-downloading older data.
 
 neon_citation("DP1.10003.001")
 
+## or the citation for all products in store:
+neon_citation()
+
+## as bibtex
+format(neon_citation("DP1.10003.001"), "bibtex")
+
 }
 \references{
 \url{https://www.neonscience.org/data/about-data/data-policies}

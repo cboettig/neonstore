@@ -271,11 +271,17 @@ vroom_ragged <- function(files){
 #' Indeed, `neon_download()` is designed in precisely this way, to allow easy
 #' updating of downloads without re-downloading older data.
 #' 
-#' @importFrom utils bibentry uitls
+#' @importFrom utils bibentry person
 #' @export
 #' @examples 
 #' 
 #' neon_citation("DP1.10003.001")
+#' 
+#' ## or the citation for all products in store:
+#' neon_citation()
+#' 
+#' ## as bibtex
+#' format(neon_citation("DP1.10003.001"), "bibtex")
 #' 
 neon_citation <- function(product = NULL, 
                           download_date = Sys.Date(),
