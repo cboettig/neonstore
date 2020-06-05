@@ -19,6 +19,8 @@
 #' @param product Include only files matching this NEON productCode (optional)
 #' @param table Include only files matching this table name (or regex pattern). 
 #' (optional).
+#' @param hash name of a hashing algorithm to check file integrity. Can be
+#'  md5, sha1, or sha256 currently; or set to [NULL] to skip hash computation.
 #' @inheritParams neon_download
 #' 
 #' @export
@@ -39,7 +41,10 @@
 #'  Sys.unsetenv("NEONSTORE_HOME")
 #' }
 #' 
-neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
+neon_index <- function(product = NULL, 
+                       table = NULL, 
+                       hash = "md5",
+                       dir = neon_dir()){
   
   files <- list.files(dir)
   
@@ -73,10 +78,41 @@ neon_index <- function(product = NULL, table = NULL, dir = neon_dir()){
     meta_c <- meta_c[grepl(product, meta_c$product), ]
   }
   
-  class(meta_c) <- c("tbl_df", "tbl", "data.frame")
-  meta_c
+  ## Compute hashes, if requested
+  meta_c$hash <- file_hash(meta_c$path, hash = hash)
+  
+  tibble::as_tibble(meta_c)
+}
+
+#' @importFrom openssl md5 sha1 sha256
+file_hash <- function(x, hash = "md5"){
+  
+  
+  if(is.null(hash)) return(NULL)
+  if(length(x) == 0)  return(NULL)
+  
+  hash_fn <- switch(hash, 
+         "md5" = openssl::md5,
+         "sha1" = openssl::sha1,
+         "sha256" = openssl::sha256,
+         NULL)
+  
+  if(is.null(hash_fn)) {
+   warning(paste("No function for", hash, 
+                 "found", call. = FALSE))
+   return(NULL)
+  }
+  
+  ## httr imports openssl already
+  hashes <- paste0("hash://", hash, "/",
+    vapply(x, 
+           function(y) as.character(hash_fn(file(y))),
+           character(1L)))
+  
+  hashes
   
 }
+
 
 neon_regex <- function(){
   site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
@@ -111,8 +147,11 @@ neon_regex <- function(){
 #' neon_store()
 #' 
 #' 
-neon_store <- function(product = NULL, dir = neon_dir()){
-  meta <- neon_index(product = product, dir = dir)
+neon_store <- function(product = NULL, table = NULL, dir = neon_dir()){
+  meta <- neon_index(product = product, 
+                     table = table, 
+                     hash = NULL,
+                     dir = dir)
   unique(meta$table)
 }
 
@@ -149,14 +188,19 @@ neon_store <- function(product = NULL, dir = neon_dir()){
 #' 
 #' neon_read("brd_countdata-expanded")
 #' 
-neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
+#' ## Read in specific files from the neon_index():
+#' files <- neon_index(table = "brd_countdata-expanded")$path
+#' neon_read(files = files)
+#' 
+neon_read <- function(table = NULL, ..., files = NULL, dir = neon_dir()){
   
   if(is.null(files)){
-    meta <- neon_index(table = table, dir = dir)
+    meta <- neon_index(table = table, hash = NULL, dir = dir)
     files <- meta$path
   }
   
   if(length(files) == 0){
+    if(is.null(table)) table <- "unspecified tables"
     warning(paste("no files found for", table, "in", dir, "\n",
                   "perhaps you need to download them first?"))
     return(NULL)
@@ -208,5 +252,78 @@ vroom_ragged <- function(files){
   do.call(rbind, tbl_list)
   
 }
+
+
+
+
+#' Generate the appropriate citation for your data
+#' 
+#' @inheritParams neon_download
+#' @param  download_date Date of download to be included in citation.
+#'  default is today's date, see details. 
+#' 
+#' @references <https://www.neonscience.org/data/about-data/data-policies>
+#' @return returns a [utils::bibentry] object, which can be used as text
+#' or formatted for bibtex.
+#' @details
+#' Note that the `neon_download()` does not record download date for each file.
+#' Citing a single product download date is after all rather meaningless, as 
+#' parts of a products may not have all been downloaded on different dates.
+#' Indeed, `neon_download()` is designed in precisely this way, to allow easy
+#' updating of downloads without re-downloading older data.
+#' 
+#' @importFrom utils bibentry person
+#' @export
+#' @examples 
+#' 
+#' neon_citation("DP1.10003.001")
+#' 
+#' ## or the citation for all products in store:
+#' neon_citation()
+#' 
+#' ## as bibtex
+#' format(neon_citation("DP1.10003.001"), "bibtex")
+#' 
+neon_citation <- function(product = NULL, 
+                          download_date = Sys.Date(),
+                          dir = neon_dir()){
+  
+  download_date <- as.Date(download_date)
+  year <-  format(Sys.Date(), "%Y")
+  
+  if(is.null(product)){
+    meta <- neon_index(hash = NULL, dir = dir)
+    product <- unique(meta$product)
+  }
+  
+  product_list <- ""
+  if(length(product) < 6)
+    product_list <- paste("Data Products:", 
+                           paste0("NEON.", product, collapse = " "),
+                          ". ")
+  
+  
+  author <- "National Ecological Observatory Network"
+  year <- year
+  title <- paste0(product_list, 
+    "Provisional data downloaded from http://data.neonscience.org on ",
+    format(download_date, "%d %b %Y"))  
+  publisher = "Battelle"
+  location = "Boulder, CO, USA"
+  
+  txt <- paste(author, year, title, 
+               paste(publisher, location, sep = ", "), sep = ". ")
+  
+  utils::bibentry("Misc", 
+                  author = utils::person(family = author), 
+                  year = year, 
+                  title = title, 
+                  publisher = publisher, 
+                  location = location,
+                  textVersion = txt)
+  
+  
+}
+
 
 

@@ -22,7 +22,9 @@ Imports:
     progress,
     vroom,
     utils,
-    curl
+    curl,
+    openssl,
+    tibble
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,

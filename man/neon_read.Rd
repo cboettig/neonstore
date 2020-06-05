@@ -4,7 +4,7 @@
 \alias{neon_read}
 \title{read in neon tabular data}
 \usage{
-neon_read(table, ..., files = NULL, dir = neon_dir())
+neon_read(table = NULL, ..., files = NULL, dir = neon_dir())
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
@@ -41,5 +41,9 @@ For convenience, \code{neon_read} takes the name of a table in the local store.
 \examples{
 
 neon_read("brd_countdata-expanded")
+
+## Read in specific files from the neon_index():
+files <- neon_index(table = "brd_countdata-expanded")$path
+neon_read(files = files)
 
 }

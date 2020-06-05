@@ -38,7 +38,7 @@ and the productCode needed for \link{neon_download}.
 products <- neon_products()
 
 # Or search for a keyword
-i <- grepl("bird", products$keyword)
+i <- grepl("bird", products$keywords)
 products[i, c("productCode", "productName")]
 
 }

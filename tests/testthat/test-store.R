@@ -54,18 +54,39 @@ test_that("vroom_ragged()", {
 
 test_that("neon_regex()", {
   
-   x <- c(
-  "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
-  "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
-  "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
-  "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
-  "NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip",
-  "NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv"
+ x <- c(
+"NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
+"NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
+"NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
+"NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
+"NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip",
+"NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv"
    )
-  strsplit(gsub(neon_regex(), "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
+  out <- 
+    strsplit(gsub(neon_regex(), "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
   
   
-  
+  expect_true(all(vapply(out, length, integer(1L)) == 6))
 })
+
+
+test_that("neon_citation()", {
+  
+  
+  x <- neon_citation("DP1.10003.001")
+  expect_is(x, "bibentry")
+  expect_true(grepl("DP1.10003", x))
+  
+  ## shorter format
+  y <- neon_citation(c("DP1.10001.001","DP1.10002.001","DP1.10003.001",
+                       "DP1.10004.001","DP1.10005.001","DP1.10006.001"))
+  expect_is(y, "bibentry")
+  expect_false(grepl("DP1.10003", y))
+  
+    
+})
+
+
+
 
 

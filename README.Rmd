@@ -11,10 +11,11 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  cache = TRUE
 )
 library(neonstore)
-
+Sys.setenv("NEONSTORE_HOME" = tempfile())
 ```
 
 # neonstore
@@ -24,7 +25,7 @@ library(neonstore)
 [![Codecov test coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg)](https://codecov.io/gh/cboettig/neonstore?branch=master)
 <!-- badges: end -->
 
-The goal of neonstore is to provide quick access and persistent storage of NEON data tables.
+`neonstore` provides quick access and persistent storage of NEON data tables.
 
 ## Installation
 
@@ -52,23 +53,25 @@ products[i, c("productCode", "productName")]
 
 Download all data files in the bird survey data products.  
 
-```{r example, cache=TRUE}
+```{r}
 library(neonstore)
 neon_download("DP1.10003.001")
 
 ```
 
 
-Now, view your store of NEON products.  These will persist between sessions,
-so you only need to download once, or to retrieve updates.
-(Note: the individual files making up a data product can all be listed by
-`neon_index()`).
+Now, view your store of NEON products:
 
 ```{r }
 neon_store()
 ```
 
-Read in all the component tables into a single data.frame
+These will persist between sessions, so you only need to download once
+or to retrieve updates. `neon_store()` can take arguments to filter by product
+or pattern in table name, e.g. `neon_store(table = "brd")`.
+
+Once you determine the table of interest, you can
+read in all the component tables into a single `data.frame`
 
 ```{r}
 neon_read("brd_countdata-expanded")
@@ -78,13 +81,73 @@ neon_read("brd_countdata-expanded")
 
 `neon_download()` will omit downloads of any existing data files. 
 You can request multiple products at once using vector notation. 
-You can optionally include date filters, e.g. to request only records more recent
-than a certain date. 
-Doing so will preserve API quota and improve speed (see API limits, below).
+You can optionally include date filters, e.g. to request only records more 
+recent than a certain date.  Doing so will preserve API quota and improve speed
+(see API limits, below).
+
+
+## Provenance
 
 Because `neonstore` only stores raw data products as returned from the NEON API,
-this makes it easy to track provenance and compare results across other analyses
+it can easily determine which files have already been downloaded, and only
+download new files without requiring the user to specify specific dates. 
+(It must still query the API for all the metadata in the requested date range).
+This same modular approach also makes it easy to track _data provenance_, an 
+essential element of reproduciblity in comparing results across other analyses
 of the NEON data. 
+
+We can list precisely which component files are being read in by `neon_read()`
+by consulting `neon_index()`:
+
+
+```{r}
+raw_files <- neon_index(table = "brd_countdata-expanded")
+raw_files
+```
+
+`neon_read()` is a relatively trivial function that simply passes this file 
+list to `vroom::vroom()`, a fast, vectorized parser that can easily read in 
+a single table that is broken into many separate files.  
+
+
+Imagine instead that we use the common pattern of downloading
+these raw files, stacks and possibly cleans the data, saving only this derived
+product while discarding the individual files.  Now imagine a second researcher,
+at some later date, queries the API over the same reported range of dates and 
+sites, uses the same software package to stack the tables, only to discover the
+resulting table is somehow different from ours (e.g. by comparing file hashes).
+Pinpointing the source of the discrepancy would be challenging and 
+labor-intensive.
+
+In contrast, the same detective-work would be easy with the `neonstore` file
+list.  We can confirm if the API had returned the same number of 
+raw files with the same names; and better, can verify integrity of the contents
+by comparing hashes of files now being returned to those recorded
+by `neon_index()`.  In this way, we could determine if any additional files
+had been included or pinpoint any files that may have changed.
+
+
+As such, users might want to store the `neon_index()` `data.frame` for the
+table(s) they have used as part of their analysis, including the individual
+file hashes.  One can also generate a zip of all the data files for 
+archival purposes. (Note that NEON is an Open Data provider, see
+[LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
+
+```{r message=FALSE}
+write.csv(raw_files, "index.csv")
+zip("brd_countdata.zip", raw_files$path)
+```
+
+## Data citation
+
+Generate the appropriate citation for your data:
+
+```{r}
+neon_citation()
+```
+
+
+
 
 ## Note on API limits
 
@@ -101,5 +164,9 @@ that product, for each month the product is collected.
 queries of the from `/data/<product>/<site>, and pool the results, rather than
 require each month of sampling separately!)
 
-
+```{r include=FALSE}
+unlink("brd_countdata.zip")
+unlink("index.csv")
+Sys.unsetenv("NEONSTORE_HOME")
+```
 

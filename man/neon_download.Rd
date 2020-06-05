@@ -12,6 +12,7 @@ neon_download(
   type = "expanded",
   file_regex = "[.]zip",
   quiet = FALSE,
+  verify = TRUE,
   dir = neon_dir(),
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
@@ -34,6 +35,9 @@ See details.}
 \item{file_regex}{Download only files matching this pattern.  See details.}
 
 \item{quiet}{Should download progress be displayed?}
+
+\item{verify}{Should downloaded files be compared against the MD5 hash
+reported by the NEON API to verify integrity? (default TRUE)}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -97,8 +101,9 @@ is not possible to exclude them from the download.
  neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
                
  ## Advanced use: filter for a particular table in the product
- neon_download("DP1.10003.001",
+ neon_download(product = "DP1.10003.001",
                start_date = "2019-01-01",
+               end_date = "2020-01-01",
                site = "YELL",
                file_regex = ".*brd_countdata.*\\\\.csv")
 

@@ -11,8 +11,8 @@ status](https://github.com/cboettig/neonstore/workflows/R-CMD-check/badge.svg)](
 coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg)](https://codecov.io/gh/cboettig/neonstore?branch=master)
 <!-- badges: end -->
 
-The goal of neonstore is to provide quick access and persistent storage
-of NEON data tables.
+`neonstore` provides quick access and persistent storage of NEON data
+tables.
 
 ## Installation
 
@@ -62,23 +62,53 @@ library(neonstore)
 neon_download("DP1.10003.001")
 ```
 
-Now, view your store of NEON products. These will persist between
-sessions, so you only need to download once, or to retrieve updates.
-(Note: the individual files making up a data product can all be listed
-by `neon_index()`).
+Now, view your store of NEON products:
 
 ``` r
 neon_store()
-#> NULL
+#> [1] "validation-"             "brd_countdata-expanded" 
+#> [3] "brd_perpoint-basic"      "brd_references-expanded"
+#> [5] "readme-"                 "variables-"
 ```
 
-Read in all the component tables into a single data.frame
+These will persist between sessions, so you only need to download once
+or to retrieve updates. `neon_store()` can take arguments to filter by
+product or pattern in table name, e.g. `neon_store(table = "brd")`.
+
+Once you determine the table of interest, you can read in all the
+component tables into a single `data.frame`
 
 ``` r
 neon_read("brd_countdata-expanded")
-#> Warning in neon_read("brd_countdata-expanded"): no files found for brd_countdata-expanded in /tmp/RtmpUWBhrh/file518617ba96c3 
-#>  perhaps you need to download them first?
-#> NULL
+#> Rows: 164,782
+#> Columns: 24
+#> Delimiter: ","
+#> chr  [19]: uid, namedLocation, domainID, siteID, plotID, plotType, pointID, eventID, targe...
+#> dbl  [ 3]: pointCountMinute, observerDistance, clusterSize
+#> lgl  [ 1]: clusterCode
+#> dttm [ 1]: startDate
+#> 
+#> Use `spec()` to retrieve the guessed column specification
+#> Pass a specification to the `col_types` argument to quiet this message
+#> # A tibble: 164,782 x 24
+#>    uid   namedLocation domainID siteID plotID plotType pointID
+#>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
+#>  1 ad84… BART_025.bir… D01      BART   BART_… distrib… C1     
+#>  2 2115… BART_025.bir… D01      BART   BART_… distrib… C1     
+#>  3 0592… BART_025.bir… D01      BART   BART_… distrib… C1     
+#>  4 8e5a… BART_025.bir… D01      BART   BART_… distrib… C1     
+#>  5 9b07… BART_025.bir… D01      BART   BART_… distrib… C1     
+#>  6 145f… BART_025.bir… D01      BART   BART_… distrib… B1     
+#>  7 f70e… BART_025.bir… D01      BART   BART_… distrib… B1     
+#>  8 648b… BART_025.bir… D01      BART   BART_… distrib… B1     
+#>  9 2295… BART_025.bir… D01      BART   BART_… distrib… B1     
+#> 10 cc6d… BART_025.bir… D01      BART   BART_… distrib… A1     
+#> # … with 164,772 more rows, and 17 more variables: startDate <dttm>,
+#> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
+#> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
+#> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
+#> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
+#> #   clusterSize <dbl>, clusterCode <lgl>, identifiedBy <chr>
 ```
 
 ## Details
@@ -89,9 +119,82 @@ optionally include date filters, e.g. to request only records more
 recent than a certain date. Doing so will preserve API quota and improve
 speed (see API limits, below).
 
+## Provenance
+
 Because `neonstore` only stores raw data products as returned from the
-NEON API, this makes it easy to track provenance and compare results
-across other analyses of the NEON data.
+NEON API, it can easily determine which files have already been
+downloaded, and only download new files without requiring the user to
+specify specific dates. (It must still query the API for all the
+metadata in the requested date range). This same modular approach also
+makes it easy to track *data provenance*, an essential element of
+reproduciblity in comparing results across other analyses of the NEON
+data.
+
+We can list precisely which component files are being read in by
+`neon_read()` by consulting `neon_index()`:
+
+``` r
+raw_files <- neon_index(table = "brd_countdata-expanded")
+raw_files
+#> # A tibble: 204 x 9
+#>    site   product  table   month  type   timestamp ext   path          hash     
+#>    <chr>  <chr>    <chr>   <chr>  <chr>  <chr>     <chr> <chr>         <chr>    
+#>  1 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  2 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  3 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  4 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  5 NEON.… DP1.100… brd_co… 2019-… expan… 20191205… csv   /tmp/Rtmpwrk… hash://m…
+#>  6 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  7 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  8 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#>  9 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#> 10 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
+#> # … with 194 more rows
+```
+
+`neon_read()` is a relatively trivial function that simply passes this
+file list to `vroom::vroom()`, a fast, vectorized parser that can easily
+read in a single table that is broken into many separate files.
+
+Imagine instead that we use the common pattern of downloading these raw
+files, stacks and possibly cleans the data, saving only this derived
+product while discarding the individual files. Now imagine a second
+researcher, at some later date, queries the API over the same reported
+range of dates and sites, uses the same software package to stack the
+tables, only to discover the resulting table is somehow different from
+ours (e.g. by comparing file hashes). Pinpointing the source of the
+discrepancy would be challenging and labor-intensive.
+
+In contrast, the same detective-work would be easy with the `neonstore`
+file list. We can confirm if the API had returned the same number of raw
+files with the same names; and better, can verify integrity of the
+contents by comparing hashes of files now being returned to those
+recorded by `neon_index()`. In this way, we could determine if any
+additional files had been included or pinpoint any files that may have
+changed.
+
+As such, users might want to store the `neon_index()` `data.frame` for
+the table(s) they have used as part of their analysis, including the
+individual file hashes. One can also generate a zip of all the data
+files for archival purposes. (Note that NEON is an Open Data provider,
+see
+[LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
+
+``` r
+write.csv(raw_files, "index.csv")
+zip("brd_countdata.zip", raw_files$path)
+```
+
+## Data citation
+
+Generate the appropriate citation for your data:
+
+``` r
+neon_citation()
+#> National Ecological Observatory Network (2020). "Data Products:
+#> NEON.DP0.10003.001 NEON.DP1.10003.001 . Provisional data downloaded
+#> from http://data.neonscience.org on 05 Jun 2020."
+```
 
 ## Note on API limits
 
