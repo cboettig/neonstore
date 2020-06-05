@@ -6,6 +6,7 @@
 #' @inheritParams neon_download
 #' @importFrom httr GET content
 #' @importFrom jsonlite fromJSON
+#' @importFrom tibble as_tibble
 #' @export
 neon_sites <- function(api = "https://data.neonscience.org/api/v0", 
                        .token = Sys.getenv("NEON_TOKEN")){
@@ -14,9 +15,7 @@ neon_sites <- function(api = "https://data.neonscience.org/api/v0",
                     httr::add_headers("X-API-Token" = .token))
   txt <- httr::content(resp, as="text")
   sites <- jsonlite::fromJSON(txt)[[1]]
-  
-  class(sites) <- c("tbl_df", "tbl", "data.frame")
-  sites
+  tibble::as_tibble(sites)
 }
 
 
@@ -76,9 +75,7 @@ neon_products <- function(
   if(!is.null(fields))
     products <- products[fields]
   
-  # allow tibble-style printing for tidyverse users
-  class(products) <- c("tbl_df", "tbl", "data.frame")
-  products
+  tibble::as_tibble(products)
   
 }
 
@@ -157,7 +154,7 @@ neon_data <- function(product,
     dat$files
   }))
 
-  data
+  tibble::as_tibble(data)
 }
 
 
@@ -304,8 +301,8 @@ neon_download <- function(product,
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
     # consider benchmarking if alternatives are faster? curl_download?
-    curl::curl_download(unique_files[i, "url"], 
-                        unique_files[i, "path"])
+    curl::curl_download(unique_files[i, "url"][[1]], 
+                        unique_files[i, "path"][[1]])
   }
 
   if(verify) {
@@ -324,11 +321,12 @@ neon_download <- function(product,
   
   
   # unzip and remove .zips
-  zips <- unique_files[grepl("[.]zip", unique_files$dir), "dir"]
+  zips <- unique_files[grepl("[.]zip", unique_files$path), "path"]
   lapply(zips, unzip, exdir = dir)
   unlink(zips)
   # remove .zip file?
   
+  unique_files <- tibble::as_tibble(unique_files)
   invisible(unique_files)
 }
 

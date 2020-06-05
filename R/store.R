@@ -81,12 +81,7 @@ neon_index <- function(product = NULL,
   ## Compute hashes, if requested
   meta_c$hash <- file_hash(meta_c$path, hash = hash)
   
-  class(meta_c) <- c("tbl_df", "tbl", "data.frame")
-  meta_c
-  
-  
-  
-  
+  tibble::as_tibble(meta_c)
 }
 
 #' @importFrom openssl md5 sha1 sha256
@@ -94,14 +89,17 @@ file_hash <- function(x, hash = "md5"){
   
   
   if(is.null(hash)) return(NULL)
+  if(length(x) == 0)  return(NULL)
   
   hash_fn <- switch(hash, 
          "md5" = openssl::md5,
          "sha1" = openssl::sha1,
          "sha256" = openssl::sha256,
          NULL)
+  
   if(is.null(hash_fn)) {
-   warning(paste("No function for", hash, "found", call. = FALSE))
+   warning(paste("No function for", hash, 
+                 "found", call. = FALSE))
    return(NULL)
   }
   

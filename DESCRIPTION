@@ -23,7 +23,8 @@ Imports:
     vroom,
     utils,
     curl,
-    openssl
+    openssl,
+    tibble
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,

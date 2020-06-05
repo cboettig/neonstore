@@ -16,9 +16,9 @@ test_that("neon_sites()", {
   skip_if_offline()
   
   x <- neon_sites()
-
   expect_is(x, "data.frame")
-    
+  expect_match(colnames(x), "siteCode", all=FALSE)
+  expect_gt(nrow(x), 10)
 })
 
 
@@ -30,6 +30,8 @@ test_that("neon_products()", {
     
   x <- neon_products()
   expect_is(x, "data.frame")
+  expect_match(colnames(x), "productCode", all=FALSE)  
+  expect_gt(nrow(x), 10)
   
   
 })
@@ -48,6 +50,7 @@ test_that("neon_data()", {
                  end_date = "2019-08-01")
   
   expect_is(x, "data.frame")
+  expect_gt(nrow(x), 1)
   
 })
 
@@ -73,6 +76,7 @@ test_that("neon_download()", {
                      start_date = "2019-06-01",
                      end_date = "2019-08-01")
   expect_is(x, "data.frame")
+  expect_gt(nrow(x), 1)
   
   
 })
