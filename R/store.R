@@ -197,6 +197,9 @@ neon_read <- function(table, ..., files = NULL, dir = neon_dir()){
   if(is.null(files)){
     meta <- neon_index(table = table, hash = NULL, dir = dir)
     files <- meta$path
+  } else if(length(files) == 0){ 
+    warning("no files or table name provided")
+    return(NULL)
   }
   
   if(length(files) == 0){
