@@ -12,7 +12,8 @@ coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg
 <!-- badges: end -->
 
 `neonstore` provides quick access and persistent storage of NEON data
-tables.
+tables. `neonstore` emphasizes simplicity and a clean data provenance
+trail, see (Provenance)\[/\#Provenance\].
 
 ## Installation
 
@@ -111,13 +112,118 @@ neon_read("brd_countdata-expanded")
 #> #   clusterSize <dbl>, clusterCode <lgl>, identifiedBy <chr>
 ```
 
-## Details
+Two other functions access additional API endpoints that may also be of
+interest. `neon_sites()` returns a `data.frame` of site information,
+including site descriptions and the ecological domain that each site
+falls into:
 
-`neon_download()` will omit downloads of any existing data files. You
-can request multiple products at once using vector notation. You can
-optionally include date filters, e.g. to request only records more
-recent than a certain date. Doing so will preserve API quota and improve
-speed (see API limits, below).
+``` r
+neon_sites()
+#> # A tibble: 81 x 11
+#>    siteCode siteName siteDescription siteType siteLatitude siteLongitude
+#>    <chr>    <chr>    <chr>           <chr>           <dbl>         <dbl>
+#>  1 ABBY     Abby Ro… Abby Road       RELOCAT…         45.8        -122. 
+#>  2 ARIK     Arikare… Arikaree River  CORE             39.8        -102. 
+#>  3 BARC     Barco L… Barco Lake      CORE             29.7         -82.0
+#>  4 BARR     Utqiaġv… Utqiaġvik       RELOCAT…         71.3        -157. 
+#>  5 BART     Bartlet… Bartlett Exper… RELOCAT…         44.1         -71.3
+#>  6 BIGC     Upper B… Upper Big Creek RELOCAT…         37.1        -119. 
+#>  7 BLAN     Blandy … Blandy Experim… RELOCAT…         39.0         -78.0
+#>  8 BLDE     Blackta… Blacktail Deer… CORE             45.0        -111. 
+#>  9 BLUE     Blue Ri… Blue River      RELOCAT…         34.4         -96.6
+#> 10 BLWA     Black W… Black Warrior … RELOCAT…         32.5         -87.8
+#> # … with 71 more rows, and 5 more variables: stateCode <chr>, stateName <chr>,
+#> #   domainCode <chr>, domainName <chr>, dataProducts <list>
+```
+
+Lastly, `neon_products()` returns a table with a list of all neon
+products, which may be useful for data discovery or additional metadata
+about any given product:
+
+``` r
+neon_products()
+#> # A tibble: 181 x 15
+#>    productCode productName productDescript… productStatus themes keywords
+#>    <chr>       <chr>       <chr>            <chr>         <chr>  <chr>   
+#>  1 DP1.00001.… 2D wind sp… Two-dimensional… ACTIVE        Atmos… sonic a…
+#>  2 DP1.00002.… Single asp… Air temperature… ACTIVE        Atmos… air tem…
+#>  3 DP1.00003.… Triple asp… Air temperature… ACTIVE        Atmos… air tem…
+#>  4 DP1.00004.… Barometric… Barometric pres… ACTIVE        Atmos… aquatic…
+#>  5 DP1.00005.… IR biologi… Infrared temper… ACTIVE        Atmos… leaf | …
+#>  6 DP1.00006.… Precipitat… Precipitation i… ACTIVE        Atmos… precipi…
+#>  7 DP1.00007.… 3D wind sp… Three-dimension… FUTURE        Atmos… sonic a…
+#>  8 DP1.00010.… 3D wind at… Measurement of … FUTURE        Atmos… azimuth…
+#>  9 DP1.00013.… Wet deposi… Total dissolved… ACTIVE        Atmos… precipi…
+#> 10 DP1.00014.… Shortwave … Total, direct b… ACTIVE        Atmos… solar r…
+#> # … with 171 more rows, and 9 more variables: productCategory <chr>,
+#> #   productAbstract <chr>, productDesignDescription <chr>,
+#> #   productRemarks <chr>, productSensor <chr>,
+#> #   productPublicationFormatType <chr>, productHasExpanded <lgl>,
+#> #   productBasicDescription <chr>, productExpandedDescription <chr>
+```
+
+## Design Details / comparison to `neonUtilities`
+
+`neonstore` is not meant as a replacement to the `neonUtilities` package
+developed by NEON staff. `neonUtilities` performs a range of
+product-specific data querying, parsing, and data manipulation beyond
+what is provided by NEON’s API or web interface. `neonUtilities` also
+provides other utilities for working with NEON data beyond the scope of
+the NEON API or the data download/ingest process. While this processing
+is undoubtedly useful, it may make it difficult to compare results or
+analyses based on data downloaded and accessed using `neonUtilities` R
+package with analyses based on data accessed directly from the web
+interface, the API, or another tool (or even a different release of the
+`neonUtilities`).
+
+By contrast, `neonstore` aims to do far less. `neonstore` merely
+automates the download of individual NEON data files. In contrast to
+`neonUtilities` which by default “stacks” these raw files into single
+tables and discards the raw data, `neonstore` preserves only the raw
+files in the store, stacking the individual tables “on demand” using
+`neon_read()`. `neon_read()` is a thin wrapper around the `vroom`
+package, [Hester & Wickham, 2020](https://vroom.r-lib.org), which uses
+the `altrep` mechanism in R to provide very fast reads of rectangular
+text data into R, and trivially handles the case of a single table being
+broken across many files. Some NEON tables are not entirely consistent
+in their use of columns across the individual site-month files, so
+`neon_read()` transparently checks for this, reading in groups of files
+sharing all matching columns with `vroom` before binding the groups
+together. This makes it easier to always trace an analysis back to the
+original input data, makes it easier to update input data files without
+facing the challenge of either downloading & stacking the whole data
+product from scratch again or having to keep track of some previously
+downloaded data file.
+
+A few other differences are also worth noting.
+
+  - `neonstore` aims to provide persistent storage, writing raw data
+    files to the appropriate app directory for your operating system
+    (see `rappdirs`, [Ratnakumar et
+    al 2016](https://CRAN.R-project.org/package=rappdirs)). More details
+    about this can be found in [Provenance](/#Provenance), below.
+  - `neon_download()` provides clean and concise progress bars for the
+    two key processes involved: querying the API to obtain download URLs
+    (which involves no large data transfer but counts against API rate
+    limiting, see below), and the actual file downloads.
+  - `neon_download()` will verify the integrity of file downloads
+    against the MD5 hashes provided.
+  - `neon_download()` will omit downloads of any existing data files in
+    the local store.  
+  - You can request multiple products at once using vector notation,
+    though API rate limiting may interfere with large requests.
+  - `neon_download()` uses `curl::curl_download()` instead of
+    `downloadr` package used in `neonUtilities`, which can be finicky on
+    Windows and older versions of R.
+  - `neonstore` has slightly lighter dependencies: only `vroom` and
+    `httr`, and packages already used by one of those two (`curl`,
+    `openssl`).
+
+Like `neonUtilities`, You can optionally include site and date filters,
+e.g. to request only records more recent than a certain date. Doing so
+will preserve API quota and improve speed (see API limits, below).
+`neonUtilities` is also far more widely tested and has extensive error
+handling tailored to individual data products.
 
 ## Provenance
 
@@ -136,20 +242,7 @@ We can list precisely which component files are being read in by
 ``` r
 raw_files <- neon_index(table = "brd_countdata-expanded")
 raw_files
-#> # A tibble: 204 x 9
-#>    site   product  table   month  type   timestamp ext   path          hash     
-#>    <chr>  <chr>    <chr>   <chr>  <chr>  <chr>     <chr> <chr>         <chr>    
-#>  1 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  2 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  3 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  4 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  5 NEON.… DP1.100… brd_co… 2019-… expan… 20191205… csv   /tmp/Rtmpwrk… hash://m…
-#>  6 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  7 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  8 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#>  9 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#> 10 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmpwrk… hash://m…
-#> # … with 194 more rows
+#> NULL
 ```
 
 `neon_read()` is a relatively trivial function that simply passes this
@@ -187,13 +280,15 @@ zip("brd_countdata.zip", raw_files$path)
 
 ## Data citation
 
-Generate the appropriate citation for your data:
+Always remember to cite your data sources\! `neonstore` knows how to
+generate the appropriate citation for the data in your local store (or
+any specific product).
 
 ``` r
 neon_citation()
-#> National Ecological Observatory Network (2020). "Data Products:
-#> NEON.DP0.10003.001 NEON.DP1.10003.001 . Provisional data downloaded
-#> from http://data.neonscience.org on 05 Jun 2020."
+#> National Ecological Observatory Network (2020). "Data Products: NEON. .
+#> Provisional data downloaded from http://data.neonscience.org on 08 Jun
+#> 2020."
 ```
 
 ## Note on API limits
@@ -207,7 +302,7 @@ use, add this token as an environmental variable, `NEON_DATA` to your
 local `.Renviron` file in your user’s home directory.
 
 `neon_download()` must first query each the API of eacn NEON site which
-collects that product, for each month the product is collected.  
-(It would be much more efficient on the NEON server if the API could
-take queries of the from \`/data/<product>/<site>, and pool the results,
+collects that product, for each month the product is collected. (It
+would be much more efficient on the NEON server if the API could take
+queries of the from `/data/<product>/<site>`, and pool the results,
 rather than require each month of sampling separately\!)
