@@ -242,7 +242,20 @@ We can list precisely which component files are being read in by
 ``` r
 raw_files <- neon_index(table = "brd_countdata-expanded")
 raw_files
-#> NULL
+#> # A tibble: 204 x 9
+#>    site   product  table   month  type   timestamp ext   path          hash     
+#>    <chr>  <chr>    <chr>   <chr>  <chr>  <chr>     <chr> <chr>         <chr>    
+#>  1 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  2 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  3 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  4 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  5 NEON.… DP1.100… brd_co… 2019-… expan… 20191205… csv   /tmp/Rtmp3aU… hash://m…
+#>  6 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  7 NEON.… DP1.100… brd_co… 2015-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  8 NEON.… DP1.100… brd_co… 2016-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#>  9 NEON.… DP1.100… brd_co… 2017-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#> 10 NEON.… DP1.100… brd_co… 2018-… expan… 20191107… csv   /tmp/Rtmp3aU… hash://m…
+#> # … with 194 more rows
 ```
 
 `neon_read()` is a relatively trivial function that simply passes this
@@ -286,9 +299,9 @@ any specific product).
 
 ``` r
 neon_citation()
-#> National Ecological Observatory Network (2020). "Data Products: NEON. .
-#> Provisional data downloaded from http://data.neonscience.org on 08 Jun
-#> 2020."
+#> National Ecological Observatory Network (2020). "Data Products:
+#> NEON.DP0.10003.001 NEON.DP1.10003.001 . Provisional data downloaded
+#> from http://data.neonscience.org on 08 Jun 2020."
 ```
 
 ## Note on API limits

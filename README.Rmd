@@ -208,7 +208,7 @@ file hashes.  One can also generate a zip of all the data files for
 archival purposes. (Note that NEON is an Open Data provider, see
 [LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
 
-```{r message=FALSE, eval=FALSE}
+```{r message=FALSE}
 write.csv(raw_files, "index.csv")
 zip("brd_countdata.zip", raw_files$path)
 ```
