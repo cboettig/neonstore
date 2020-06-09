@@ -48,26 +48,11 @@ neon_index <- function(product = NULL,
   
   files <- list.files(dir)
   filename <- basename(files)
-  ## Parse metadata from NEON file names
-  parsed <- gsub(neon_regex(), "\\1  \\2  \\4-\\6  \\5  \\6  \\7  \\8  \\3", filename)
-  meta <- strsplit(parsed, "  ")
-  
-  ## Confirm parsing was successful
-  into <- c("site", "product", "table", "month", "type", "timestamp", "ext", "misc")
-  parts <- vapply(meta, length, integer(1L))
-  meta <- meta[parts == length(into)]
-  
-  ## Drop unparse-able file names
-  filenames <- files[parts == length(into)]
-  dropped <- files[parts != length(into)]
-  
-  ## Format as tidy data.frame
-  meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
-  if(length(meta_b) == 0) return(NULL)
-  colnames(meta_b) <- into
-  meta_c <- as.data.frame(meta_b)
-  meta_c$path <- file.path(dir, filenames)
+  meta_c <- filename_parser(filename)
+  if(is.null(meta_c)) return(NULL)
 
+  
+  meta_c$path <- file.path(dir, meta_c$path)
   
   ## Apply any filters
   if(!is.null(table)){
@@ -84,7 +69,31 @@ neon_index <- function(product = NULL,
   tibble::as_tibble(meta_c)
 }
 
-
+filename_parser <- function(files){
+  ## Parse metadata from NEON file names
+  parsed <- gsub(neon_regex(),
+                 "\\1%\\2%\\4-\\6%\\5%\\6%\\7%\\8%\\3%",
+                 files)
+  meta <- strsplit(parsed, "%", fixed = TRUE)
+  into <- c("site", "product", "table", "month",
+            "type", "timestamp", "ext", "misc")
+  
+  ## Confirm parsing was successful
+  parts <- vapply(meta, length, integer(1L))
+  meta <- meta[parts == length(into)]
+  
+  ## Drop unparse-able file names
+  filenames <- files[parts == length(into)]
+  dropped <- files[parts != length(into)]
+  
+  ## Format as tidy data.frame
+  meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
+  if(length(meta_b) == 0) return(NULL)
+  colnames(meta_b) <- into
+  meta_c <- as.data.frame(meta_b)
+  meta_c$path <- filenames
+  meta_c
+}
 
 
 neon_regex <- function(){
@@ -99,7 +108,16 @@ neon_regex <- function(){
   regex <- paste0(site, productCode, misc, name, month, type, timestamp, ext)
   regex
 }
-
+meta_split <- function(x){
+  parsed <- gsub(neon_regex(),
+                 "\\1%\\2%\\4-\\6%\\5%\\6%\\7%\\8%\\3%",
+                 x)
+  meta <- strsplit(parsed, "%", fixed = TRUE)
+  into <- c("site", "product", "table", "month", "type", "timestamp",
+            "ext", "misc")
+  parts <- vapply(meta, length, integer(1L))
+  meta <- meta[parts == length(into)]
+}
 
 
 

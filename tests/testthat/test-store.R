@@ -14,14 +14,16 @@ test_that("neon_index()", {
   expect_is(x, "data.frame")
   expect_true(any(grepl("DP1.10003.001", x$product)))
   
+  x <- neon_index(dir = tempfile())
+  
 })
 
 test_that("neon_store()", {
   
   x <- neon_store()
   expect_true(any(grepl("brd_countdata", x)))
-  
-  x <- neon_store(dir = tempfile())
+  d <- tempfile()
+  x <- neon_store(dir = d)
   expect_null(x)
   
 })
@@ -53,7 +55,7 @@ test_that("vroom_ragged()", {
 })
 
 test_that("neon_regex()", {
-  
+
  x <- c(
 "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
 "NEON.D01.BART.DP0.10003.001.validation.20191107T152154Z.csv",
@@ -63,10 +65,14 @@ test_that("neon_regex()", {
 "NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv",
 "NEON.D03.SUGG.DP1.20288.001.103.100.100.waq_instantaneous.2018-01.expanded.20190618T023102Z.csv"
 )
-  out <- 
-    strsplit(gsub(neon_regex(), "\\1  \\2  \\4  \\6  \\7  \\8  \\9", x), "  ")
-out  
-  expect_true(all(vapply(out, length, integer(1L)) == 6))
+
+  meta <- filename_parser(x)
+  expect_is(meta, "data.frame")
+  expect_equal(dim(meta), c(7,9))
+  
+  expect_true(any(grepl("DP1.10003.001", meta$product)))
+  expect_true(any(grepl("brd_countdata", meta$table)))
+  
 })
 
 
