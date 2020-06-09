@@ -106,7 +106,8 @@ neon_data <- function(product,
   
   data_api <- unlist(available$availableDataUrls)
 
-  regex <- paste0(api, "/data/", product, "/(\\w+)/(\\d{4}-\\d{2})$")
+  product_regex <- "DP\\d\\.\\d{5}\\.\\d{3}"
+  regex <- paste0(api, "/data/", product_regex, "/(\\w+)/(\\d{4}-\\d{2})$")
   ## Filter by time -- year-month is included at end of data_api list
   dates <- as.Date(gsub(regex, "\\2-01", data_api))
   if(!is.na(start_date)){
