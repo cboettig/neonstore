@@ -47,13 +47,13 @@ neon_index <- function(product = NULL,
                        dir = neon_dir()){
   
   files <- list.files(dir)
-  
+  filename <- basename(files)
   ## Parse metadata from NEON file names
-  parsed <- gsub(neon_regex(), "\\1  \\2  \\4-\\6  \\5  \\6  \\7  \\8  \\3", files)
+  parsed <- gsub(neon_regex(), "\\1  \\2  \\4-\\6  \\5  \\6  \\7  \\8  \\3", filename)
   meta <- strsplit(parsed, "  ")
   
   ## Confirm parsing was successful
-  into <- c("site", "product", "table", "month", "type", "timestamp", "ext")
+  into <- c("site", "product", "table", "month", "type", "timestamp", "ext", "misc")
   parts <- vapply(meta, length, integer(1L))
   meta <- meta[parts == length(into)]
   
@@ -90,12 +90,12 @@ neon_index <- function(product = NULL,
 neon_regex <- function(){
   site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
   productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\2
-  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 # 
-  name <- "(:?\\w+)?\\.?"                                    # \\3 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
-  type <- "(:?basic|expanded)?\\.?"                          # \\5
-  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
-  ext <- "(\\w+$)"                                           # \\7
+  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 #   \\3
+  name <- "(:?\\w+)?\\.?"                                    # \\4 
+  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\5
+  type <- "(:?basic|expanded)?\\.?"                          # \\6
+  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\7
+  ext <- "(\\w+$)"                                           # \\8
   regex <- paste0(site, productCode, misc, name, month, type, timestamp, ext)
   regex
 }
