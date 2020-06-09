@@ -49,7 +49,7 @@ neon_index <- function(product = NULL,
   files <- list.files(dir)
   
   ## Parse metadata from NEON file names
-  parsed <- gsub(neon_regex(), "\\1  \\2  \\3-\\5  \\4  \\5  \\6  \\7", files)
+  parsed <- gsub(neon_regex(), "\\1  \\2  \\4-\\6  \\5  \\6  \\7  \\8  \\3", files)
   meta <- strsplit(parsed, "  ")
   
   ## Confirm parsing was successful
@@ -84,6 +84,25 @@ neon_index <- function(product = NULL,
   tibble::as_tibble(meta_c)
 }
 
+
+
+
+neon_regex <- function(){
+  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
+  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\2
+  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 # 
+  name <- "(:?\\w+)?\\.?"                                    # \\3 
+  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
+  type <- "(:?basic|expanded)?\\.?"                          # \\5
+  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
+  ext <- "(\\w+$)"                                           # \\7
+  regex <- paste0(site, productCode, misc, name, month, type, timestamp, ext)
+  regex
+}
+
+
+
+
 #' @importFrom openssl md5 sha1 sha256
 file_hash <- function(x, hash = "md5"){
   
@@ -114,17 +133,6 @@ file_hash <- function(x, hash = "md5"){
 }
 
 
-neon_regex <- function(){
-  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
-  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\2
-  name <- "(:?\\w+)?\\.?"                                    # \\3 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\4
-  type <- "(:?basic|expanded)?\\.?"                          # \\5
-  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\6
-  ext <- "(\\w+$)"                                           # \\7
-  regex <- paste0(site, productCode, name, month, type, timestamp, ext)
-  regex
-}
 #' Show tables that have been downloaded to the neon store
 #' 
 #' @details

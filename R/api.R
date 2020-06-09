@@ -283,6 +283,13 @@ neon_download <- function(product,
   
   
   ## Filter to have only expanded or basic (not both)
+  ## Confirm we have expanded product first:
+  products <- neon_products(api = api, .token = .token)
+  expanded <- products$productHasExpanded[products$productCode %in% product]
+  if(!any(expanded)){
+    type <- "basic"
+    if(!quiet) message("no expanded product, using basic product")
+  }
   if(type == "expanded")
     files <- files[!grepl("basic", files$name), ]
   if(type == "basic")

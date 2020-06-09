@@ -60,12 +60,12 @@ test_that("neon_regex()", {
 "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.basic.20191107T154457Z.csv",
 "NEON.D01.BART.DP1.10003.001.brd_references.expanded.20191107T152154Z.csv",
 "NEON.D01.BART.DP1.10003.001.2019-06.basic.20191205T150213Z.zip",
-"NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv"
-   )
+"NEON.D01.HARV.DP1.10022.001.bet_sorting.2014-06.basic.20200504T173728Z.csv",
+"NEON.D03.SUGG.DP1.20288.001.103.100.100.waq_instantaneous.2018-01.expanded.20190618T023102Z.csv"
+)
   out <- 
-    strsplit(gsub(neon_regex(), "\\1  \\2  \\3  \\5  \\6  \\7  \\8", x), "  ")
-  
-  
+    strsplit(gsub(neon_regex(), "\\1  \\2  \\4  \\6  \\7  \\8  \\9", x), "  ")
+out  
   expect_true(all(vapply(out, length, integer(1L)) == 6))
 })
 
