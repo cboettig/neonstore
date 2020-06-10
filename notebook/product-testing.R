@@ -9,11 +9,18 @@ length(codes) # 152 active products! (29 more future)
 #neon_download(codes, start_date = "2020-01-01", site = c("HARV", "BART"))
 neon_download(codes, start_date = "2020-01-01")
 
-all_files <- neonstore:::neon_dir() %>% list.files()
-product_code <- gsub(".*(DP\\d\\.\\d{5}\\.\\d{3}).*", "\\1", all_files)
-code <- unique(product_code)
 
+all_files <- neonstore:::neon_dir() %>% list.files()
 index <- neon_index(hash=NULL)
+
+dropped <- all_files[!(all_files %in% basename(index$path))]
+dropped[!grepl("EML", dropped)]
+## Compare product codes:
+product_code <- regmatches(all_files, 
+                           regexpr("DP\\d\\.\\d{5}\\.\\d{3}", all_files))
+
+
+code <- unique(product_code)
 parse_codes <- index %>% select(product) %>% distinct()
 
 neon_store()
