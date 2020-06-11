@@ -23,7 +23,9 @@ test_that("neon_store()", {
   x <- neon_store()
   expect_true(any(grepl("brd_countdata", x)))
   d <- tempfile()
-  x <- neon_store(dir = d)
+  expect_message(
+    x <- neon_store(dir = d)
+  )
   expect_null(x)
   
 })

@@ -1,177 +1,3 @@
-
-#' Table of all NEON sites
-#' 
-#' Returns a table of all NEON sites by making a single API call
-#' to the `/sites` endpoint.
-#' @inheritParams neon_download
-#' @importFrom httr GET content
-#' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble
-#' @export
-neon_sites <- function(api = "https://data.neonscience.org/api/v0", 
-                       .token = Sys.getenv("NEON_TOKEN")){
-  
-  resp <- httr::GET(paste0(api, "/sites"), 
-                    httr::add_headers("X-API-Token" = .token))
-  txt <- httr::content(resp, as="text")
-  sites <- jsonlite::fromJSON(txt)[[1]]
-  tibble::as_tibble(sites)
-}
-
-
-
-#' Table of all NEON Data Products
-#'
-#' Return a table of all NEON Data Products, including product descriptions
-#' and the productCode needed for [neon_download].  
-#' @param fields a list of fields (columns) to include.  Default includes
-#' most common columns, set to NULL to display all columns
-#' (including list-columns).
-#' @inheritParams neon_download
-#' @seealso [neon_download]
-#' @export
-#' @examples 
-#' \donttest{
-#' 
-#' products <- neon_products()
-#' 
-#' # Or search for a keyword
-#' i <- grepl("bird", products$keywords)
-#' products[i, c("productCode", "productName")]
-#' 
-#' }
-neon_products <- function(
-  fields = c("productCode", 
-             "productName", 
-             "productDescription", 
-             "productStatus",
-             "themes",
-             "keywords",
-             "productCategory",
-             "productAbstract",
-             "productDesignDescription",
-             "productRemarks",
-             "productSensor",
-             "productPublicationFormatType",
-             "productHasExpanded",
-             "productBasicDescription", 
-             "productExpandedDescription"),
-  api = "https://data.neonscience.org/api/v0",
-  .token = Sys.getenv("NEON_TOKEN")){
-  
-  # consider a local cache option?
-  
-  resp <- httr::GET(paste0(api, "/products"),
-                    httr::add_headers("X-API-Token" = .token))
-  txt <- httr::content(resp, as="text")
-  products <-jsonlite::fromJSON(txt)[[1]]
-  
-  # un-list character columns
-  products$themes <- 
-    vapply(products$themes, paste0, character(1L), collapse = " | ")
-  products$keywords <- 
-    vapply(products$keywords, paste0, character(1L), collapse = " | ")
-  
-  if(!is.null(fields))
-    products <- products[fields]
-  
-  tibble::as_tibble(products)
-  
-}
-
-
-
-#' @importFrom progress progress_bar
-#' @importFrom httr GET content stop_for_status
-#' @importFrom jsonlite fromJSON
-#' @noRd
-neon_data <- function(product, 
-                      start_date = NA,
-                      end_date = NA,
-                      site = NA,
-                      quiet = FALSE,
-                      api = "https://data.neonscience.org/api/v0", 
-                      .token = Sys.getenv("NEON_TOKEN")){
-
-  start_date <- as.Date(start_date)
-  end_date <- as.Date(end_date)
-  
-  ## A single API call to sites, includes product & month at each site    
-  sites_df <- neon_sites(api)
-  dataProducts <- do.call(rbind, sites_df$dataProducts)
-  
-  ## Consider all/only the sites including the requested product.
-  ## The DataUrl column gives the API endpoint data/{ProductCode}/{SiteCode}{Month}
-  available <- dataProducts[dataProducts$dataProductCode %in% product,]
-  
-  data_api <- unlist(available$availableDataUrls)
-
-  product_regex <- "DP\\d\\.\\d{5}\\.\\d{3}"
-  regex <- paste0(api, "/data/", product_regex, "/(\\w+)/(\\d{4}-\\d{2})$")
-  ## Filter by time -- year-month is included at end of data_api list
-  dates <- as.Date(gsub(regex, "\\2-01", data_api))
-  if(!is.na(start_date)){
-   data_api <- data_api[dates >= start_date]
-  }
-  if(!is.na(end_date)){
-    data_api <- data_api[dates <= end_date]
-  }  
-  
-  ## Filter by site
-  data_sites <- gsub(regex, "\\1", data_api)
-  if(!is.na(site)){
-    data_api <- data_api[data_sites %in% site]
-  }
-  
-  
-  
-  if(length(data_api) == 0){
-    message("No additional files to download.")
-    return(invisible(NULL))
-  }
-
-  ## Extract the file list from the data endpoint.  O(sites * months) calls
-  pb <- progress::progress_bar$new(
-    format = "  querying API [:bar] :percent eta: :eta",
-    total = length(data_api), 
-    clear = FALSE, width= 60)
-  
-  resp <- lapply(data_api, function(x){
-    if(!quiet){ pb$tick() }
-    httr::GET(x, httr::add_headers("X-API-Token" = .token))
-  })
-  
-  
-  
-  ## Format the result as a data.frame
-  data <- do.call(rbind,
-                  lapply(resp, function(x) {
-    
-    httr::stop_for_status(x)
-    cont <- httr::content(x, as = "text")
-    dat <- jsonlite::fromJSON(cont)[[1]]
-    if(length(dat) == 0) return(NULL)
-    if(length(dat$files) == 0) return(NULL)
-    dat$files
-  }))
-
-  tibble::as_tibble(data)
-}
-
-
-neon_dir <- function(){
-  Sys.getenv("NEONSTORE_HOME", 
-             rappdirs::user_data_dir("neonstore"))
-}
- 
-#neon_contentstore <- function(files, dir = contentid::content_dir()){
-#  
-#  files$ids <- vapply(files$url, contentid::store, character(1L), dir = dir)
-#  files
-#}
-
-
-
 #' Download NEON data products into a local store
 #'
 #'
@@ -259,7 +85,7 @@ neon_download <- function(product,
                           end_date = NA,
                           site = NA,
                           type = "expanded",
-                          file_regex =  "[.]zip",
+                          file_regex =  "[.]csv",
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
@@ -268,13 +94,15 @@ neon_download <- function(product,
   
   ## Query the API for a list of all files associated with this data product.
   files <- neon_data(product, 
-                    start_date = start_date, 
-                    end_date = end_date,
-                    site = site,
-                    api = api,
-                    .token = .token)
+                     start_date = start_date, 
+                     end_date = end_date,
+                     site = site,
+                     api = api,
+                     .token = .token)
+  
   
   ## Omit those files we already have
+  ## Consider using file hashes instead of file names here!
   already_have <- list.files(dir)
   files <- files[!(files$name %in% already_have), ]
   
@@ -297,6 +125,8 @@ neon_download <- function(product,
     files <- files[!grepl("expanded", files$name), ]
   
   
+  
+  
   ## Filter out duplicate files, e.g. have identical crc32 values
   unique_files <- take_first_match(files, "crc32")
   
@@ -315,11 +145,11 @@ neon_download <- function(product,
     curl::curl_download(unique_files$url[i], 
                         unique_files$path[i])
   }
-
+  
   if(verify) {
     md5 <- vapply(unique_files$path, 
-           function(y) as.character(openssl::md5(file(y))),
-           character(1L), USE.NAMES = FALSE)
+                  function(y) as.character(openssl::md5(file(y))),
+                  character(1L), USE.NAMES = FALSE)
     i <- which(md5 != unique_files$crc32)
     if(length(i) > 0) {
       
@@ -336,12 +166,87 @@ neon_download <- function(product,
   lapply(zips, unzip, exdir = dir)
   unlink(zips)
   
-  # remove .zip file?
-  
   unique_files <- tibble::as_tibble(unique_files)
   invisible(unique_files)
 }
 
+
+
+
+
+#' @importFrom progress progress_bar
+#' @importFrom httr GET content stop_for_status
+#' @importFrom jsonlite fromJSON
+#' @noRd
+neon_data <- function(product, 
+                      start_date = NA,
+                      end_date = NA,
+                      site = NA,
+                      quiet = FALSE,
+                      api = "https://data.neonscience.org/api/v0", 
+                      .token = Sys.getenv("NEON_TOKEN")){
+  
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
+  
+  ## A single API call to sites, includes product & month at each site    
+  sites_df <- neon_sites(api)
+  dataProducts <- do.call(rbind, sites_df$dataProducts)
+  
+  ## Consider all/only the sites including the requested product.
+  ## The DataUrl column gives the API endpoint data/{ProductCode}/{SiteCode}{Month}
+  available <- dataProducts[dataProducts$dataProductCode %in% product,]
+  
+  data_api <- unlist(available$availableDataUrls)
+  
+  product_regex <- "DP\\d\\.\\d{5}\\.\\d{3}"
+  regex <- paste0(api, "/data/", product_regex, "/(\\w+)/(\\d{4}-\\d{2})$")
+  ## Filter by time -- year-month is included at end of data_api list
+  dates <- as.Date(gsub(regex, "\\2-01", data_api))
+  if(!is.na(start_date)){
+    data_api <- data_api[dates >= start_date]
+  }
+  if(!is.na(end_date)){
+    data_api <- data_api[dates <= end_date]
+  }  
+  
+  ## Filter by site
+  data_sites <- gsub(regex, "\\1", data_api)
+  if(!is.na(site)){
+    data_api <- data_api[data_sites %in% site]
+  }
+  
+  if(length(data_api) == 0){
+    message("No additional files to download.")
+    return(invisible(NULL))
+  }
+  
+  ## Extract the file list from the data endpoint.  O(sites * months) calls
+  pb <- progress::progress_bar$new(
+    format = "  querying API [:bar] :percent eta: :eta",
+    total = length(data_api), 
+    clear = FALSE, width= 60)
+  
+  resp <- lapply(data_api, function(x){
+    if(!quiet){ pb$tick() }
+    httr::GET(x, httr::add_headers("X-API-Token" = .token))
+  })
+  
+  
+  ## Format the result as a data.frame
+  data <- do.call(rbind,
+                  lapply(resp, function(x) {
+                    
+                    httr::stop_for_status(x)
+                    cont <- httr::content(x, as = "text")
+                    dat <- jsonlite::fromJSON(cont)[[1]]
+                    if(length(dat) == 0) return(NULL)
+                    if(length(dat$files) == 0) return(NULL)
+                    dat$files
+                  }))
+  
+  tibble::as_tibble(data)
+}
 
 
 

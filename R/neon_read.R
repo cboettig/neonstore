@@ -1,0 +1,93 @@
+#' read in neon tabular data
+#' 
+#' @details
+#' NEON's tabular data files are separated out into separate .csv
+#' files for each site for each month of sampling.  In principle,
+#' each file has identical columns.  [vroom::vroom] can read in a
+#' data table that has been sharded into many files like this much
+#' much faster than other parsers can read in each table iteratively, 
+#' (and thus can greatly out-perform the 'stacking" methods in `neonUtilities`).
+#'
+#' Unfortunately, not all datasets are entirely consistent in their use
+#' of columns.  `neon_read` works around this by parsing such tables in
+#' groups of matching schema, which is still reasonably fast.
+#' 
+#' For convenience, `neon_read` takes the name of a table in the local store.
+#' 
+#' @param table the name of a downloaded NEON table in the store,
+#'  see [neon_store]
+#' @param ... additional arguments to [vroom::vroom], can usually be omitted.
+#' @param files optionally, specify a vector of file paths directly (e.g. as
+#' provided from [neon_index]) and specify `table` argument as NULL.
+#' @inheritParams neon_download
+#' @importFrom vroom vroom spec
+#' @export
+#' 
+#' @examples 
+#' 
+#' neon_read("brd_countdata-expanded")
+#' 
+#' ## Read in specific files from the neon_index():
+#' files <- neon_index(table = "brd_countdata-expanded")$path
+#' neon_read(files = files)
+#' 
+neon_read <- function(table = NULL, ..., files = NULL, dir = neon_dir()){
+  
+  if(is.null(files)){
+    meta <- neon_index(table = table, hash = NULL, dir = dir)
+    files <- meta$path
+  }
+  
+  if(length(files) == 0){
+    if(is.null(table)) table <- "unspecified tables"
+    warning(paste("no files found for", table, "in", dir, "\n",
+                  "perhaps you need to download them first?"))
+    return(NULL)
+  }
+  
+  ## vroom can read in a list of files, but only if columns are consistent
+  tryCatch(vroom::vroom(files, ...),
+           error = function(e) vroom_ragged(files, ...),
+           finally = NULL)
+}
+
+
+
+#' @importFrom vroom vroom spec
+vroom_ragged <- function(files){
+  
+  ## We read the 1st line of every file to determine schema  
+  suppressMessages(
+    schema <- lapply(files, vroom::vroom, n_max = 1, altrep = FALSE)
+  )
+  
+  
+  ## Now, we read in tables in groups of matching schema,
+  ## filling in additional columns as in bind_rows.
+  
+  col_schemas <- lapply(schema, colnames)
+  u_schemas <- unique(col_schemas)
+  tbl_list <- vector("list", length=length(u_schemas))
+  
+  all_cols <- unique(unlist(u_schemas))
+  
+  i <- 1
+  for(s in u_schemas){
+    
+    ## select tables that have matching schemas
+    index <- vapply(col_schemas, identical, logical(1L), s)
+    col_types <- vroom::spec(schema[index][[1]])
+    
+    ## Read in all those tables
+    tbl <- vroom::vroom(files[index], col_types = col_types)
+    
+    ## append any columns missing from all_cols set
+    missing <- all_cols[ !(all_cols %in% colnames(tbl)) ]
+    tbl[ missing ] <- NA
+    tbl_list[[i]] <- tbl
+    i <- i+1
+    
+  }
+  do.call(rbind, tbl_list)
+  
+}
