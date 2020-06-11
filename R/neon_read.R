@@ -63,21 +63,20 @@ neon_read <- function(table = NA,
   }
   
   if(!is.na(.id)){
-    id <- unique(meta[.id])
-    names(id) <- id
+    id <- unique(meta[[.id]])
     groups <- 
       lapply(id,
              function(x){
-              paths <- meta$path[meta[.id] == x]
+              paths <- meta$path[meta[[.id]] == x]
               out <- read_csvs(paths, ...)
               out[.id] <- x
               out
     })
-    do.call(rbind, groups)
-   
+    #do.call(rbind, groups)
+    groups
+  } else {
+    read_csvs(files, ...)
   }
-  
-  read_csvs(files, ...)
 }
 
 read_csvs <- function(files, ...){

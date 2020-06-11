@@ -123,7 +123,7 @@ meta_filter <- function(meta,
 filename_parser <- function(files){
   ## Parse metadata from NEON file names
   parsed <- gsub(neon_regex(),
-                 "\\1%\\2%\\4-\\6%\\5%\\6%\\7%\\8%\\3%",
+                 "\\2%\\3%\\5-\\7%\\6%\\7%\\8%\\9%\\4%",
                  files)
   meta <- strsplit(parsed, "%", fixed = TRUE)
   into <- c("site", "product", "table", "month",
@@ -153,14 +153,14 @@ filename_parser <- function(files){
 
 
 neon_regex <- function(){
-  site <- "(NEON\\.D\\d\\d\\.\\w{4})\\."                     # \\1
-  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\2
-  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 #   \\3
-  name <- "(:?\\w+)?\\.?"                                    # \\4 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\5
-  type <- "(:?basic|expanded)?\\.?"                          # \\6
-  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\7
-  ext <- "(\\w+$)"                                           # \\8
+  site <- "(NEON\\.D\\d\\d\\.(\\w{4}))\\."                   # \\1 + \\2
+  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\3
+  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 #   \\4
+  name <- "(:?\\w+)?\\.?"                                    # \\5 
+  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\6
+  type <- "(:?basic|expanded)?\\.?"                          # \\7
+  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\8
+  ext <- "(\\w+$)"                                           # \\9
   regex <- paste0(site, productCode, misc, name, month, type, timestamp, ext)
   regex
 }
