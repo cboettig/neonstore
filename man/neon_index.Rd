@@ -16,7 +16,7 @@ neon_index(
 )
 }
 \arguments{
-\item{product}{Include only files matching this NEON productCode (optional)}
+\item{product}{Include only files matching this NEON productCode(s)}
 
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
@@ -29,7 +29,7 @@ as \code{NA} to download up to the most recent avaialble data.}
 \item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
 \code{NA} to download all prior data.}
 
-\item{ext}{only match files with this file extension (can be a regex)}
+\item{ext}{only match files with this file extension(s)}
 
 \item{hash}{name of a hashing algorithm to check file integrity. Can be
 \code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)

@@ -13,6 +13,7 @@ neon_read(
   ext = NA,
   dir = neon_dir(),
   files = NULL,
+  .id = NA,
   ...
 )
 }
@@ -20,7 +21,7 @@ neon_read(
 \item{table}{the name of a downloaded NEON table in the store,
 see \link{neon_store}}
 
-\item{product}{Include only files matching this NEON productCode (optional)}
+\item{product}{Include only files matching this NEON productCode(s)}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
@@ -30,7 +31,7 @@ as \code{NA} to download up to the most recent avaialble data.}
 \item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
 \code{NA} to download all prior data.}
 
-\item{ext}{only match files with this file extension (can be a regex)}
+\item{ext}{only match files with this file extension(s)}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -40,6 +41,8 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 
 \item{files}{optionally, specify a vector of file paths directly (e.g. as
 provided from \link{neon_index}) and specify \code{table} argument as NULL.}
+
+\item{.id}{add an additional id column with metadata from filename.}
 
 \item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
 }
