@@ -19,7 +19,7 @@
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
-#' @inheritParams neon_download
+#' @inheritParams neon_index
 #' @importFrom vroom vroom spec
 #' @export
 #' 
@@ -31,10 +31,25 @@
 #' files <- neon_index(table = "brd_countdata-expanded")$path
 #' neon_read(files = files)
 #' 
-neon_read <- function(table = NULL, ..., files = NULL, dir = neon_dir()){
+neon_read <- function(table = NA,
+                      product = NA, 
+                      site = NA,
+                      start_date = NA,
+                      end_date = NA,
+                      ext = NA,
+                      dir = neon_dir(),
+                      files = NULL,
+                      ...){
   
   if(is.null(files)){
-    meta <- neon_index(table = table, hash = NULL, dir = dir)
+    meta <- neon_index(product = product,
+                       table = table, 
+                       site = site,
+                       start_date = start_date,
+                       end_date = end_date,
+                       ext = ext,
+                       hash = NULL, 
+                       dir = dir)
     files <- meta$path
   }
   

@@ -176,7 +176,7 @@ by consulting `neon_index()`:
 
 
 ```{r}
-raw_files <- neon_index(table = "brd_countdata-expanded")
+raw_files <- neon_index(table = "brd_countdata-expanded", hash="md5")
 raw_files
 ```
 

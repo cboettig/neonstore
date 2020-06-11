@@ -4,22 +4,44 @@
 \alias{neon_read}
 \title{read in neon tabular data}
 \usage{
-neon_read(table = NULL, ..., files = NULL, dir = neon_dir())
+neon_read(
+  table = NA,
+  product = NA,
+  site = NA,
+  start_date = NA,
+  end_date = NA,
+  ext = NA,
+  dir = neon_dir(),
+  files = NULL,
+  ...
+)
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
 see \link{neon_store}}
 
-\item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
+\item{product}{Include only files matching this NEON productCode (optional)}
 
-\item{files}{optionally, specify a vector of file paths directly (e.g. as
-provided from \link{neon_index}) and specify \code{table} argument as NULL.}
+\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
+
+\item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
+as \code{NA} to download up to the most recent avaialble data.}
+
+\item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
+\code{NA} to download all prior data.}
+
+\item{ext}{only match files with this file extension (can be a regex)}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
+
+\item{files}{optionally, specify a vector of file paths directly (e.g. as
+provided from \link{neon_index}) and specify \code{table} argument as NULL.}
+
+\item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
 }
 \description{
 read in neon tabular data

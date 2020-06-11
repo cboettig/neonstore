@@ -141,7 +141,7 @@ filename_parser <- function(files){
   meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
   if(length(meta_b) == 0) return(NULL)
   colnames(meta_b) <- into
-  meta_c <- as.data.frame(meta_b)
+  meta_c <- as.data.frame(meta_b, stringsAsFactors = FALSE)
   
   ##drop trailing - on table name created by gsub w blank type
   meta_c$table[meta_c$type == ""] <- 
