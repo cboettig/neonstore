@@ -21,7 +21,7 @@ test_that("neon_index()", {
 test_that("neon_store()", {
   
   x <- neon_store()
-  expect_true(any(grepl("brd_countdata", x)))
+  expect_true(any(grepl("brd_countdata", x$table)))
   d <- tempfile()
   expect_message(
     x <- neon_store(dir = d)
