@@ -16,6 +16,7 @@
 #' 
 #' @param table the name of a downloaded NEON table in the store,
 #'  see [neon_store]
+#' @param .id add an additional id column with metadata from filename.
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
@@ -39,6 +40,7 @@ neon_read <- function(table = NA,
                       ext = NA,
                       dir = neon_dir(),
                       files = NULL,
+                      .id = NA,
                       ...){
   
   if(is.null(files)){
@@ -60,12 +62,30 @@ neon_read <- function(table = NA,
     return(NULL)
   }
   
+  if(!is.na(.id)){
+    id <- unique(meta[.id])
+    names(id) <- id
+    groups <- 
+      lapply(id,
+             function(x){
+              paths <- meta$path[meta[.id] == x]
+              out <- read_csvs(paths, ...)
+              out[.id] <- x
+              out
+    })
+    do.call(rbind, groups)
+   
+  }
+  
+  read_csvs(files, ...)
+}
+
+read_csvs <- function(files, ...){
   ## vroom can read in a list of files, but only if columns are consistent
   tryCatch(vroom::vroom(files, ...),
            error = function(e) vroom_ragged(files, ...),
-           finally = NULL)
+           finally = NULL)  
 }
-
 
 
 #' @importFrom vroom vroom spec

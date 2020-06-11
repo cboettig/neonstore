@@ -12,10 +12,10 @@
 #' `neon_index()` parses this metadata from the file name string and returns
 #' the information in a convenient table, along with a path to each file.
 #' 
-#' @param product Include only files matching this NEON productCode (optional)
+#' @param product Include only files matching this NEON productCode(s)
 #' @param table Include only files matching this table name (or regex pattern). 
 #' (optional).
-#' @param ext only match files with this file extension (can be a regex)
+#' @param ext only match files with this file extension(s)
 #' @param hash name of a hashing algorithm to check file integrity. Can be
 #'  `"md5"`, `"sha1"`, or `"sha256"` currently; or set to [NULL] (default)
 #'   to skip hash computation.
@@ -77,15 +77,15 @@ meta_filter <- function(meta,
   ## Arguably, filtering could be done on file names
   ## rather than table of parsed file names?
   if(!is.na(table)){
-    meta <- meta[grepl(table, meta$table), ]
+      meta <- meta[grepl(table, meta$table), ]
   }
   
-  if(!is.na(product)){
-    meta <- meta[grepl(product, meta$product), ]
+  if(!all(is.na(product))){
+      meta <- meta[meta$product %in% product, ]
   }
   
-  if(!is.na(site)){
-    meta <- meta[grepl(site, meta$site), ]
+  if(!all(is.na(site))){
+    meta <- meta[meta$site %in% site, ]
   }
   
   
@@ -111,8 +111,8 @@ meta_filter <- function(meta,
     meta <- meta[month < end_date, ]
   }
   
-  if(!is.na(ext)){
-    ext <- meta[grepl(ext, meta$ext), ]
+  if(!all(is.na(ext))){
+    meta <- meta[meta$ext %in% ext, ]
   }
   
   meta
