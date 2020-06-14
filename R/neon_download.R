@@ -212,7 +212,7 @@ neon_data <- function(product,
   
   ## Filter by site
   data_sites <- gsub(regex, "\\1", data_api)
-  if(!is.na(site)){
+  if(!all(is.na(site))){
     data_api <- data_api[data_sites %in% site]
   }
   

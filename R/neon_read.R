@@ -62,6 +62,7 @@ neon_read <- function(table = NA,
     return(NULL)
   }
   
+  ## Handle the case of needing to add an id column 
   if(!is.na(.id)){
     id <- unique(meta[[.id]])
     groups <- 
@@ -72,8 +73,8 @@ neon_read <- function(table = NA,
               out[.id] <- x
               out
     })
-    #do.call(rbind, groups)
-    groups
+    ragged_bind(groups)
+  ## Otherwise we can just read in:  
   } else {
     read_csvs(files, ...)
   }
@@ -125,3 +126,22 @@ vroom_ragged <- function(files){
   do.call(rbind, tbl_list)
   
 }
+
+## simpler case
+ragged_bind <- function(x){
+  
+  col_schemas <- lapply(x, colnames)
+  u_schemas <- unique(col_schemas)
+  all_cols <- unique(unlist(u_schemas))
+  i <- 1
+  for(s in u_schemas){
+    ## append any columns missing from all_cols set
+    missing <- all_cols[ !(all_cols %in% colnames(x[[i]])) ]
+    x[[i]][ missing ] <- NA
+    i <- i+1
+  }
+  do.call(rbind, x)
+  
+}
+
+

@@ -38,6 +38,18 @@ test_that("neon_read()", {
   
 })
 
+test_that("ragged_bind()", {
+  
+  A <- data.frame(A = 1:5, B = 1:5)
+  B <- data.frame(A = 1:5, B = 1:5, C = 1:5)
+  x <- list(A, B)
+  df <- ragged_bind(x)
+  
+  expect_is(df, "data.frame")
+  expect_equal(colnames(df), colnames(B))
+  
+})
+
 test_that("vroom_ragged()", {
   
   A <- data.frame(A = 1:5, B = 1:5)

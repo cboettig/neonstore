@@ -1,9 +1,12 @@
 Package: neonstore
 Title: NEON Data Store
 Version: 0.0.0.9000
-Authors@R: 
-     person("Carl", "Boettiger", , "cboettig@gmail.com", c("aut", "cre"),
-                   comment = c(ORCID = "0000-0002-1642-628X"))
+Authors@R: c(person(
+              "Carl", "Boettiger", 
+              email = "cboettig@gmail.com", 
+              role = c("aut", "cre"),
+              comment = c(ORCID = "0000-0002-1642-628X")),
+            person("Quinn", "Thomas", role = "ctb"))
 Description: The National Ecological Observatory Network (NEON) provides access
   to its numerous data products through its REST API. This package provides a
   high-level user interface for downloading and storing NEON data products.
