@@ -98,12 +98,15 @@ is not possible to exclude them from the download.
 \examples{
 \donttest{
  
- neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
+ neon_download("DP1.10003.001", 
+               start_date = "2018-01-01", 
+               end_date = "2019-01-01",
+               site = "YELL")
                
  ## Advanced use: filter for a particular table in the product
  neon_download(product = "DP1.10003.001",
-               start_date = "2019-01-01",
-               end_date = "2020-01-01",
+               start_date = "2018-01-01",
+               end_date = "2019-01-01",
                site = "YELL",
                file_regex = ".*brd_countdata.*\\\\.csv")
 

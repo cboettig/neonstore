@@ -70,12 +70,15 @@
 #' @examples 
 #' \donttest{
 #'  
-#'  neon_download("DP1.10003.001", start_date = "2019-01-01", site = "YELL")
+#'  neon_download("DP1.10003.001", 
+#'                start_date = "2018-01-01", 
+#'                end_date = "2019-01-01",
+#'                site = "YELL")
 #'                
 #'  ## Advanced use: filter for a particular table in the product
 #'  neon_download(product = "DP1.10003.001",
-#'                start_date = "2019-01-01",
-#'                end_date = "2020-01-01",
+#'                start_date = "2018-01-01",
+#'                end_date = "2019-01-01",
 #'                site = "YELL",
 #'                file_regex = ".*brd_countdata.*\\.csv")
 #' 
@@ -100,6 +103,8 @@ neon_download <- function(product,
                      api = api,
                      .token = .token)
   
+  ## no additional files to download
+  if(is.null(files)) return(invisible(NULL))
   
   ## Omit those files we already have
   ## Consider using file hashes instead of file names here!
@@ -141,7 +146,6 @@ neon_download <- function(product,
   
   for(i in seq_along(unique_files$url)){
     if(!quiet) pb$tick()
-    # consider benchmarking if alternatives are faster? curl_download?
     curl::curl_download(unique_files$url[i], 
                         unique_files$path[i])
   }

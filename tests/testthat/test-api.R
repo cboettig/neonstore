@@ -73,8 +73,8 @@ test_that("neon_download()", {
   
   x <- neon_download("DP1.10003.001",
                      site = "YELL",
-                     start_date = "2019-06-01",
-                     end_date = "2019-08-01")
+                     start_date = "2018-01-01",
+                     end_date = "2019-01-01")
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
   

@@ -44,6 +44,7 @@ neon_index <- function(product = NA,
                        site = NA,
                        start_date = NA,
                        end_date = NA,
+                       type = NA,
                        ext = NA,
                        hash = NULL,
                        dir = neon_dir()){
@@ -58,7 +59,14 @@ neon_index <- function(product = NA,
   meta$path <- file.path(dir, meta$path)
   
   ## Apply filters
-  meta <- meta_filter(meta, product, table, site, start_date, end_date, ext)
+  meta <- meta_filter(meta, 
+                      product = product,
+                      table = table, 
+                      site = site, 
+                      start_date = start_date,
+                      end_date = end_date,
+                      type = type,
+                      ext = ext)
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
@@ -72,6 +80,7 @@ meta_filter <- function(meta,
                         site = NA, 
                         start_date = NA, 
                         end_date = NA, 
+                        type = NA,
                         ext = NA){
   
   ## Arguably, filtering could be done on file names
@@ -88,34 +97,36 @@ meta_filter <- function(meta,
     meta <- meta[meta$site %in% site, ]
   }
   
-  
-  if(!is.na(start_date) | is.na(end_date)){
-    start_date <- as.Date(start_date)
-    end_date <- as.Date(end_date)
-    month <- as.Date(meta$month, "%Y-%M")   
-  }
-  
   if(!is.na(start_date)){
+    start_date <- as.Date(start_date)
+    month <- as.Date(meta$month, "%Y-%M")  
+    keep <- month >= start_date
     ## don't filter out tables without a month:
-    keep <- month > start_date
     keep[is.na(keep)] <- TRUE
     meta <- meta[keep, ]
   }
   
   if(!is.na(end_date)){
-    month <- as.Date(meta$month, "%Y-%M")
+    end_date <- as.Date(end_date)
+    month <- as.Date(meta$month, "%Y-%M")  
+    keep <- month <= end_date
     ## don't filter out tables without a month:
-    keep <- month < end_date
     keep[is.na(keep)] <- TRUE
     meta <- meta[keep, ]
-    meta <- meta[month < end_date, ]
+  }
+  
+  if(!is.na(type)){
+    meta <- switch(type,
+      "basic" = meta[meta$type != "expanded",],
+      "expanded" = meta[meta$type != "basic", ],
+      meta)
   }
   
   if(!all(is.na(ext))){
     meta <- meta[meta$ext %in% ext, ]
   }
   
-  meta
+  tibble::as_tibble(meta)
   
 }
 
@@ -148,7 +159,7 @@ filename_parser <- function(files){
     gsub("-$", "", meta_c$table[meta_c$type == ""])
   
   meta_c$path <- filenames
-  meta_c
+  tibble::as_tibble(meta_c)
 }
 
 

@@ -2,10 +2,10 @@ context("store")
 
 
 ## setup so we have something in the store
-x <- neon_download("DP1.10003.001",
-                   site = "YELL",
-                   start_date = "2019-06-01",
-                   end_date = "2019-08-01")
+x <- neon_download_s3(product = "DP1.10003.001",
+                      site = "YELL",
+                      start_date = "2018-05-01",
+                      end_date = "2018-08-01")
 
 
 test_that("neon_index()", {
@@ -106,6 +106,28 @@ test_that("neon_citation()", {
     
 })
 
+test_that("neon_export()/neon_import()", {
+  
+  archive <- tempfile(fileext = ".zip")
+  suppressMessages({
+    meta <- neon_export(archive)
+  })
+  
+  expect_true(file.exists(archive))
+  expect_is(meta, "data.frame")
+  
+  ## now purge store and restore from archive
+  status <- file.remove(meta$path)
+  expect_true(all(status))
+  expect_null( neon_index() )
+  
+  ## restore
+  neon_import(archive)
+  meta2 <- neon_index()
+  expect_false(is.null(meta2))
+  expect_equal(meta, meta2)
+  
+})
 
 
 
