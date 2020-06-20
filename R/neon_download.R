@@ -65,7 +65,6 @@
 #' access to them without further interaction required with the API.
 #'
 #' @export
-#' @importFrom utils unzip
 #' @importFrom curl curl_download
 #' @examples 
 #' \donttest{
@@ -167,7 +166,7 @@ neon_download <- function(product,
   
   # unzip and remove .zips
   zips <- unique_files$path[grepl("[.]zip", unique_files$path)]
-  lapply(zips, unzip, exdir = dir)
+  lapply(zips, zip::unzip, exdir = dir)
   unlink(zips)
   
   unique_files <- tibble::as_tibble(unique_files)

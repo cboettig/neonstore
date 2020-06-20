@@ -28,10 +28,10 @@ Imports:
     curl,
     openssl,
     tibble,
-    stats
-RoxygenNote: 7.1.0
+    stats,
+    zip
+RoxygenNote: 7.1.0.9000
 Suggests: 
     testthat,
     covr,
     xml2
-    
