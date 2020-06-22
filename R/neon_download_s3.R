@@ -8,7 +8,7 @@
 #' what to download. This should be much faster than the NEON API and
 #' avoids rate-limiting.
 #' @inheritParams neon_download
-#' @param bucket URL to an S3 bucket containing raw NEON data files (in
+#' @param api URL to an S3 bucket containing raw NEON data files (in
 #' flat file structure like that used by neonstore).
 #' @return (invisibly) table of requested files and metadata
 #' @export
@@ -40,24 +40,24 @@ neon_download_s3 <- function(product,
                              quiet = FALSE,
                              verify = TRUE,
                              dir = neon_dir(), 
-  bucket = "https://minio-jetstream.carlboettiger.info/neonstore/"){
+                             keep_zips = FALSE,
+  api = "https://minio-jetstream.carlboettiger.info/neonstore/"){
   
   if(!quiet) message("querying S3 API...")
-  files <- s3_index_public(bucket)
+  files <- s3_index_public(api)
   
+  ## These two checks overlap with neon_download() steps
   ## only files matching regex
   files <- files[grepl(file_regex, files)]
-  
   ## only files we don't already have in the store
   already_have <- list.files(dir)
   files <- files[!(files %in% already_have)]
-  
   if(length(files) == 0){
     message("No new files found")
     return(invisible(NULL))
   } 
   
-  ## Apply filters
+  ## Apply filters to filenames
   meta <- filename_parser(files)
   meta <- meta_filter(meta, 
                       product = product, 
@@ -70,6 +70,7 @@ neon_download_s3 <- function(product,
     message("No new files found")
     return(invisible(NULL))
   } 
+  
   
   ## make sure destination exists
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
@@ -90,6 +91,12 @@ neon_download_s3 <- function(product,
     curl::curl_download(addr[i], 
                         dest[i])
   }
+  
+  # unzip and remove .zips
+  zips <- dest[grepl("[.]zip", dest)]
+  lapply(zips, zip::unzip, exdir = dir)
+  if(!keep_zip) unlink(zips)
+  
   
   invisible(meta)
 }
@@ -117,8 +124,7 @@ s3_index_public <- function(
   isTruncated <- TRUE
   startAfter <- NULL
   files <- ""
-  
-  
+
   while(isTruncated){
     resp <- httr::GET(bucket,
                       query = list("marker" = startAfter))
@@ -129,7 +135,6 @@ s3_index_public <- function(
     startAfter <- xml_text(xml_find_first(xml, "//d1:NextMarker", ns))
     set <- xml_text(xml_find_all(xml, "//d1:Key", ns))
     files <- c(files,set)
-    
   }
   files
 }

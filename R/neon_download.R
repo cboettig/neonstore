@@ -40,9 +40,9 @@
 #' is not possible to exclude them from the download. 
 #' 
 #' @param product A NEON `productCode`. See [neon_download].
-#' @param start_date Download only files as recent as (YYYY-MM-DD). Leave
-#' as `NA` to download up to the most recent avaialble data.
-#' @param end_date Download only files up to end_date (YYYY-MM-DD). Leave as 
+#' @param start_date Download only files as recent as (`YYYY-MM-DD`). Leave
+#' as `NA` to download up to the most recent available data.
+#' @param end_date Download only files up to end_date (`YYYY-MM-DD`). Leave as 
 #' `NA` to download all prior data.
 #' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
 #' @param type Should we prefer the basic or expanded version of this product? 
@@ -50,7 +50,9 @@
 #' @param file_regex Download only files matching this pattern.  See details.
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
-#' reported by the NEON API to verify integrity? (default TRUE)
+#' reported by the NEON API to verify integrity? (default `TRUE`)
+#' @param keep_zip should we keep zip files after extracting contents?
+#'  (default `FALSE`)
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
 #' (see [rappdirs::user_data_dir]).  This default also be configured by
@@ -92,6 +94,7 @@ neon_download <- function(product,
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
+                          keep_zip = FALSE,
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
   
@@ -129,9 +132,6 @@ neon_download <- function(product,
   if(type == "basic")
     files <- files[!grepl("expanded", files$name), ]
   
-  
-  
-  
   ## Filter out duplicate files, e.g. have identical crc32 values
   unique_files <- take_first_match(files, "crc32")
   
@@ -156,19 +156,17 @@ neon_download <- function(product,
                   character(1L), USE.NAMES = FALSE)
     i <- which(md5 != unique_files$crc32)
     if(length(i) > 0) {
-      
-      warning(paste("Removing downloaded files which", 
+      warning(paste("Some downloaded files which", 
                     "did not match the expected hash:",
                     unique_files$path[i]), call. = FALSE)
-      unlink(unique_files$path[i])
     }
   }
   
   
   # unzip and remove .zips
   zips <- unique_files$path[grepl("[.]zip", unique_files$path)]
-  lapply(zips, unzip, exdir = dir)
-  unlink(zips)
+  lapply(zips, zip::unzip, exdir = dir)
+  if(!keep_zip) unlink(zips)
   
   unique_files <- tibble::as_tibble(unique_files)
   invisible(unique_files)
