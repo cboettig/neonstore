@@ -14,6 +14,7 @@ neon_download(
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
+  keep_zips = FALSE,
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
 )
@@ -21,10 +22,10 @@ neon_download(
 \arguments{
 \item{product}{A NEON \code{productCode}. See \link{neon_download}.}
 
-\item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
-as \code{NA} to download up to the most recent avaialble data.}
+\item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
+as \code{NA} to download up to the most recent available data.}
 
-\item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
+\item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
@@ -37,13 +38,16 @@ See details.}
 \item{quiet}{Should download progress be displayed?}
 
 \item{verify}{Should downloaded files be compared against the MD5 hash
-reported by the NEON API to verify integrity? (default TRUE)}
+reported by the NEON API to verify integrity? (default \code{TRUE})}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
+
+\item{keep_zips}{should we keep zip files after extracting contents?
+(default \code{FALSE})}
 
 \item{api}{the URL to the NEON API, leave as default.}
 

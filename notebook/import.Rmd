@@ -2,41 +2,6 @@
 # Import
 
 
-# Checksum comparison
-
-The NEON API returns 32 character crc32 checksum
-
-
-```{r}
-raw_files <- neon_index(table = "brd_countdata-expanded")
-x <- raw_files$path[[1]]
-digest::digest(x, algo = "crc32", file = TRUE)
-
-url <- paste("https://data.neonscience.org/api/v0/data", 
-                raw_files$product[[1]], 
-                "BART", 
-                raw_files$month[[1]], 
-                sep = "/")
-resp <- httr::GET(url)
-out <- jsonlite::fromJSON(httr::content(resp, "text"))$data$files
-out[out$name == basename(x),]
-
-dir.create("tmp")
-paste0("tmp/", out$name)
-purrr::walk2(out$url, paste0("tmp/", out$name), curl::curl_download)
-unzip("tmp/NEON.D01.BART.DP1.10003.001.2015-06.expanded.20191107T154457Z.zip",
-      exdir = "tmp/expanded")
-```
-
-```{r}
-vapply(fs::dir_ls("tmp", glob="*.csv"), digest::digest,  character(1L), algo = "crc32", file = TRUE, USE.NAMES = FALSE)
-vapply(fs::dir_ls("tmp/expanded", glob="*.csv"), digest::digest, character(1L), algo = "crc32", file = TRUE, USE.NAMES = FALSE)
-
-out$crc32[grepl("[.]csv",out$name)]
-
-```
-
-
 # Distribute
 
 

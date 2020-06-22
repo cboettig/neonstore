@@ -28,10 +28,10 @@ Imports:
     curl,
     openssl,
     tibble,
-    stats
+    stats,
+    zip
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
     covr,
     xml2
-    

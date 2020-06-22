@@ -24,10 +24,10 @@ neon_index(
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
-\item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
-as \code{NA} to download up to the most recent avaialble data.}
+\item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
+as \code{NA} to download up to the most recent available data.}
 
-\item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
+\item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?

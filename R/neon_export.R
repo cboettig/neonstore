@@ -10,7 +10,7 @@
 #' @return table of selected files and metadata, from [neon_index()], invisibly.
 #' @param archive path to the zip archive to be created.
 #' @inheritParams neon_index
-#' @importFrom utils zip
+#' @importFrom zip zip unzip
 #' @seealso [neon_import()], [neon_citation()]
 neon_export <-  function(archive = "neon.zip",
                          product = NA, 
@@ -18,20 +18,22 @@ neon_export <-  function(archive = "neon.zip",
                          site = NA,
                          start_date = NA,
                          end_date = NA,
+                         type = NA,
                          ext = NA,
                          hash = NULL,
                          dir = neon_dir()){
   
-  meta <- neon_index(product, table, site, start_date, 
-                     end_date, ext, hash, dir)
+  meta <- neon_index(product = product,
+                     table = table, 
+                     site = site, 
+                     start_date = start_date,
+                     end_date = end_date,
+                     type = type,
+                     ext = ext,
+                     hash = hash, 
+                     dir = dir)
   
-  # to ensure zip paths are relative to dir we must go there
-  cur <- getwd()
-  setwd(dir)
-  
-  zip(archive, basename(meta$path))
-  
-  setwd(cur)
+  zip::zipr(archive, meta$path, include_directories=FALSE)
   invisible(meta)
 }
 
@@ -46,5 +48,5 @@ neon_export <-  function(archive = "neon.zip",
 #' @seealso [neon_export()]
 #' 
 neon_import <- function(archive, overwrite = TRUE, dir = neon_dir()){
-  unzip(archive, overwrite = overwrite, exdir = dir)
+  zip::unzip(archive, overwrite = overwrite, exdir = dir)
 }

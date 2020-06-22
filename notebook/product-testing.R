@@ -1,13 +1,17 @@
 library(neonstore)
 library(dplyr)
+
 site <- neon_sites()
 products <- neon_products()
+
 products <- products %>% filter(productStatus == "ACTIVE")
 codes <- products$productCode
 length(codes) # 152 active products! (29 more future)
 
+
+## AND HERE WE GO!
 #neon_download(codes, start_date = "2020-01-01", site = c("HARV", "BART"))
-neon_download(codes, start_date = "2020-01-01")
+neon_download(codes, keep_zip = TRUE)
 
 
 all_files <- neonstore:::neon_dir() %>% list.files()

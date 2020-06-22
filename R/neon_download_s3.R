@@ -76,7 +76,7 @@ neon_download_s3 <- function(product,
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   
   ## URL and destination
-  addr <- paste0(bucket, meta$path)
+  addr <- paste0(api, meta$path)
   dest <- file.path(dir, meta$path)
   
   
@@ -95,7 +95,7 @@ neon_download_s3 <- function(product,
   # unzip and remove .zips
   zips <- dest[grepl("[.]zip", dest)]
   lapply(zips, zip::unzip, exdir = dir)
-  if(!keep_zip) unlink(zips)
+  if(!keep_zips) unlink(zips)
   
   
   invisible(meta)

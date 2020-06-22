@@ -51,7 +51,7 @@
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
 #' reported by the NEON API to verify integrity? (default `TRUE`)
-#' @param keep_zip should we keep zip files after extracting contents?
+#' @param keep_zips should we keep zip files after extracting contents?
 #'  (default `FALSE`)
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
@@ -67,7 +67,6 @@
 #' access to them without further interaction required with the API.
 #'
 #' @export
-#' @importFrom utils unzip
 #' @importFrom curl curl_download
 #' @examples 
 #' \donttest{
@@ -94,7 +93,7 @@ neon_download <- function(product,
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
-                          keep_zip = FALSE,
+                          keep_zips = FALSE,
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
   
@@ -162,12 +161,11 @@ neon_download <- function(product,
     }
   }
   
-  
   # unzip and remove .zips
   zips <- unique_files$path[grepl("[.]zip", unique_files$path)]
   lapply(zips, zip::unzip, exdir = dir)
-  if(!keep_zip) unlink(zips)
-  
+  if(!keep_zips) unlink(zips)
+
   unique_files <- tibble::as_tibble(unique_files)
   invisible(unique_files)
 }

@@ -14,16 +14,17 @@ neon_download_s3(
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  bucket = "https://minio-jetstream.carlboettiger.info/neonstore/"
+  keep_zips = FALSE,
+  api = "https://minio-jetstream.carlboettiger.info/neonstore/"
 )
 }
 \arguments{
 \item{product}{A NEON \code{productCode}. See \link{neon_download}.}
 
-\item{start_date}{Download only files as recent as (YYYY-MM-DD). Leave
-as \code{NA} to download up to the most recent avaialble data.}
+\item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
+as \code{NA} to download up to the most recent available data.}
 
-\item{end_date}{Download only files up to end_date (YYYY-MM-DD). Leave as
+\item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
@@ -36,7 +37,7 @@ See details.}
 \item{quiet}{Should download progress be displayed?}
 
 \item{verify}{Should downloaded files be compared against the MD5 hash
-reported by the NEON API to verify integrity? (default TRUE)}
+reported by the NEON API to verify integrity? (default \code{TRUE})}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -44,7 +45,10 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{bucket}{URL to an S3 bucket containing raw NEON data files (in
+\item{keep_zips}{should we keep zip files after extracting contents?
+(default \code{FALSE})}
+
+\item{api}{URL to an S3 bucket containing raw NEON data files (in
 flat file structure like that used by neonstore).}
 }
 \value{
