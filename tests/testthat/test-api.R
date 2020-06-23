@@ -71,6 +71,10 @@ test_that("take_first_match()", {
 
 test_that("neon_download()", {
   
+  
+  skip_on_cran()
+  skip_if_offline()
+  
   x <- neon_download("DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-01-01",

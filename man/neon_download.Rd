@@ -10,7 +10,7 @@ neon_download(
   end_date = NA,
   site = NA,
   type = "expanded",
-  file_regex = "[.]csv",
+  file_regex = "[.]zip",
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),

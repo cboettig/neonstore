@@ -89,7 +89,7 @@ neon_download <- function(product,
                           end_date = NA,
                           site = NA,
                           type = "expanded",
-                          file_regex =  "[.]csv",
+                          file_regex =  "[.]zip",
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
@@ -97,29 +97,54 @@ neon_download <- function(product,
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
   
+  ## make sure destination exists
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  
   ## Query the API for a list of all files associated with this data product.
-  files <- neon_data(product, 
+  files <- neon_data(product = product, 
                      start_date = start_date, 
-                     end_date = end_date,
-                     site = site,
-                     api = api,
+                     end_date = end_date, 
+                     site = site,  
+                     api = api, 
                      .token = .token)
+
+  ## additional filters on already_have, type and file_regex:
+  files <- download_filters(files, file_regex, type, product,
+                            quiet, dir, api, .token)
   
-  ## no additional files to download
-  if(is.null(files)) return(invisible(NULL))
+  if(is.null(files)) return(invisible(NULL)) # nothing to download
   
+  ## Time to download, verify, and unzip
+  download_all(files$url, files$path, quiet)
+  verify_hash(files$path, files$crc32, verify)
+  unzip_all(files$path, keep_zips, dir)
+  
+  ## file metadata (url, path, md5sum)  
+  invisible(files)
+}
+
+
+download_filters <- function(files, file_regex, 
+                             type, product, quiet, 
+                             dir, api, .token){
+  
+  if(is.null(files)) return(invisible(NULL)) # nothing to download
+
   ## Omit those files we already have
-  ## Consider using file hashes instead of file names here!
-  already_have <- list.files(dir)
-  files <- files[!(files$name %in% already_have), ]
+  files <- files[!(files$name %in% list.files(dir)), ]
   
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
+  
+  ## create path column for dest
   files$path <- file.path(dir, files$name)
+  
   
   
   ## Filter to have only expanded or basic (not both)
   ## Confirm we have expanded product first:
+  
+  ## could grepl for 'expanded' being present instead!
   products <- neon_products(api = api, .token = .token)
   expanded <- products$productHasExpanded[products$productCode %in% product]
   if(!any(expanded)){
@@ -132,43 +157,53 @@ neon_download <- function(product,
     files <- files[!grepl("expanded", files$name), ]
   
   ## Filter out duplicate files, e.g. have identical crc32 values
-  unique_files <- take_first_match(files, "crc32")
+  files <- take_first_match(files, "crc32")
+  files
+}
+
+
+
+download_all <- function(addr, dest, quiet){
   
-  ## make sure destination exists
-  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
-  
-  ## now time to download!
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent eta: :eta",
-    total = length(unique_files$url), 
+    total = length(addr), 
     clear = FALSE, width= 60)
   
-  for(i in seq_along(unique_files$url)){
+  for(i in seq_along(addr)){
     if(!quiet) pb$tick()
-    curl::curl_download(unique_files$url[i], 
-                        unique_files$path[i])
-  }
-  
-  if(verify) {
-    md5 <- vapply(unique_files$path, 
+    tryCatch( ## treat errors as warnings
+      curl::curl_download(addr[i], dest[i]),
+      error = function(e) 
+        stop(paste(e$message, "on", addr[i]),
+             call. = FALSE),
+      finally = NULL
+    )
+  }  
+}
+
+unzip_all <- function(path, keep_zips, dir){
+  zips <- path[grepl("[.]zip", path)]
+  lapply(zips, zip::unzip, exdir = dir)
+  if(!keep_zips) unlink(zips)
+}
+
+verify_hash <- function(path, hash, verify){
+  if(verify){
+    md5 <- vapply(path, 
                   function(y) as.character(openssl::md5(file(y))),
                   character(1L), USE.NAMES = FALSE)
-    i <- which(md5 != unique_files$crc32)
+    i <- which(md5 != hash)
     if(length(i) > 0) {
       warning(paste("Some downloaded files which", 
                     "did not match the expected hash:",
-                    unique_files$path[i]), call. = FALSE)
+                    path[i]), call. = FALSE)
     }
   }
   
-  # unzip and remove .zips
-  zips <- unique_files$path[grepl("[.]zip", unique_files$path)]
-  lapply(zips, zip::unzip, exdir = dir)
-  if(!keep_zips) unlink(zips)
-
-  unique_files <- tibble::as_tibble(unique_files)
-  invisible(unique_files)
 }
+
+
 
 
 

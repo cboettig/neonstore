@@ -1,6 +1,8 @@
 library(neonstore)
 library(dplyr)
 
+Sys.setenv(NEONSTORE_HOME = "/home/neonstore")
+
 site <- neon_sites()
 products <- neon_products()
 
@@ -9,31 +11,33 @@ codes <- products$productCode
 length(codes) # 152 active products! (29 more future)
 
 
-## AND HERE WE GO!
-#neon_download(codes, start_date = "2020-01-01", site = c("HARV", "BART"))
-neon_download(codes, keep_zip = TRUE)
+## AND HERE WE GO.  
+## (will almost surely run foul of rate limiting -- work by site or something)
+## or work by product code at least?
+for(p in codes){
+  for(s in site$siteCode){
+    neon_download(p, file_regex = "[.]zip", site = s, keep_zip = TRUE)
+    Sys.sleep(10)
+  }
+}
 
 
-all_files <- neonstore:::neon_dir() %>% list.files()
-index <- neon_index(hash=NULL)
-
-dropped <- all_files[!(all_files %in% basename(index$path))]
-dropped[!grepl("EML", dropped)]
-## Compare product codes:
-product_code <- regmatches(all_files, 
-                           regexpr("DP\\d\\.\\d{5}\\.\\d{3}", all_files))
+#for(c in codes){
+#  neon_download(c, file_regex = "*", keep_zip = TRUE)
+#  Sys.sleep(600)
+#}
 
 
-code <- unique(product_code)
-parse_codes <- index %>% select(product) %>% distinct()
 
-neon_store()
+#### Inspect resulting store
 
-#suggs <- neon_read("waq_instantaneous")
+#all_files <- neonstore:::neon_dir() %>% list.files()
+#index <- neon_index()
 
-#neon_download("DP1.20288.001", site = "SUGG")
-#neon_download("DP1.10045.001", site = "MLBS")
-#neon_store(product = "DP1.20288.001")
-#neon_store(product = "DP1.10045.001")
+#dropped <- all_files[!(all_files %in% basename(index$path))]
+#dropped[!grepl("EML", dropped)]
 
-
+#product_code <- regmatches(all_files, regexpr("DP\\d\\.\\d{5}\\.\\d{3}", all_files))
+#code <- unique(product_code)
+#parse_codes <- index %>% select(product) %>% distinct()
+#testthat::expect_true( all(parse_code %in% codes) )

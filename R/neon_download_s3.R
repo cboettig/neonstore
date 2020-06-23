@@ -71,7 +71,6 @@ neon_download_s3 <- function(product,
     return(invisible(NULL))
   } 
   
-  
   ## make sure destination exists
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
   
@@ -79,25 +78,10 @@ neon_download_s3 <- function(product,
   addr <- paste0(api, meta$path)
   dest <- file.path(dir, meta$path)
   
-  
-  ## now time to download!
-  pb <- progress::progress_bar$new(
-    format = "  downloading [:bar] :percent eta: :eta",
-    total = length(addr), 
-    clear = FALSE, width= 60)
-  
-  for(i in seq_along(addr)){
-    if(!quiet) pb$tick()
-    curl::curl_download(addr[i], 
-                        dest[i])
-  }
-  
-  # unzip and remove .zips
-  zips <- dest[grepl("[.]zip", dest)]
-  lapply(zips, zip::unzip, exdir = dir)
-  if(!keep_zips) unlink(zips)
-  
-  
+  download_all(addr, dest, quiet)
+  # verify_hash(dest, files$crc32, verify)
+  unzip_all(dest, keep_zips, dir)
+
   invisible(meta)
 }
 
