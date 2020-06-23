@@ -15,7 +15,7 @@ neon_download_s3(
   verify = TRUE,
   dir = neon_dir(),
   keep_zips = FALSE,
-  api = "https://minio-jetstream.carlboettiger.info/neonstore/"
+  api = "https://minio.jetstream.carlboettiger.info/neonstore/"
 )
 }
 \arguments{

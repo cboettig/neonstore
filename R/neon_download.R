@@ -175,7 +175,7 @@ download_all <- function(addr, dest, quiet){
     tryCatch( ## treat errors as warnings
       curl::curl_download(addr[i], dest[i]),
       error = function(e) 
-        stop(paste(e$message, "on", addr[i]),
+        warning(paste(e$message, "on", addr[i]),
              call. = FALSE),
       finally = NULL
     )
