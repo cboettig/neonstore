@@ -109,9 +109,7 @@ neon_download <- function(product,
                      .token = .token)
 
   ## additional filters on already_have, type and file_regex:
-  files <- download_filters(files, file_regex, type, product,
-                            quiet, dir, api, .token)
-  
+  files <- download_filters(files, file_regex, type, quiet, dir)
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   
   ## Time to download, verify, and unzip
@@ -125,8 +123,7 @@ neon_download <- function(product,
 
 
 download_filters <- function(files, file_regex, 
-                             type, product, quiet, 
-                             dir, api, .token){
+                             type, quiet, dir){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
 
@@ -139,15 +136,9 @@ download_filters <- function(files, file_regex,
   ## create path column for dest
   files$path <- file.path(dir, files$name)
   
-  
-  
   ## Filter to have only expanded or basic (not both)
-  ## Confirm we have expanded product first:
-  
-  ## could grepl for 'expanded' being present instead!
-  products <- neon_products(api = api, .token = .token)
-  expanded <- products$productHasExpanded[products$productCode %in% product]
-  if(!any(expanded)){
+  ## Note: this may not make sense if product is a vector!
+  if(!any(grepl("expanded", files))){
     type <- "basic"
     if(!quiet) message("no expanded product, using basic product")
   }
