@@ -15,6 +15,7 @@ sites <- site$siteCode
 ## (will almost surely run foul of rate limiting -- work by site or something)
 ## or work by product code at least?
 for(p in codes){
+  message(paste("product", p))
   for(s in sites){
     neon_download(p, file_regex = "[.]zip", site = s, keep_zip = TRUE)
     Sys.sleep(10)

@@ -94,7 +94,7 @@ neon_download_s3 <- function(product,
 # In particular, this uses `marker` instead of `continuation-token`
 
 s3_index_public <- function(
-  bucket = "https://minio-jetstream.carlboettiger.info/neonstore/"){
+  bucket = "https://minio.jetstream.carlboettiger.info/neonstore/"){
   
   ## use xml2 conditionally
   if(!requireNamespace("xml2", quietly = TRUE)){
