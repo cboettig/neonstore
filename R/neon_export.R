@@ -48,5 +48,6 @@ neon_export <-  function(archive = "neon.zip",
 #' @seealso [neon_export()]
 #' 
 neon_import <- function(archive, overwrite = TRUE, dir = neon_dir()){
+  if(!dir.exists(dir)) dir.create(dir, FALSE, TRUE)
   zip::unzip(archive, overwrite = overwrite, exdir = dir)
 }
