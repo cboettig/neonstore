@@ -2,7 +2,7 @@ context("store")
 
 
 ## setup so we have something in the store
-x <- neon_download_s3(product = "DP1.10003.001",
+x <- neon_download(product = "DP1.10003.001",
                    site = "YELL",
                    start_date = "2018-05-01",
                    end_date = "2018-08-01")
@@ -130,5 +130,14 @@ test_that("neon_export()/neon_import()", {
 })
 
 
-
+test_that("neon_download_s3", {
+  
+  
+  ## setup so we have something in the store
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01")
+  
+})
 
