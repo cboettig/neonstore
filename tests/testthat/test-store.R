@@ -116,13 +116,14 @@ test_that("neon_export()/neon_import()", {
   expect_true(file.exists(archive))
   expect_is(meta, "data.frame")
   
-  ## now purge store and restore from archive
-  unlink(neon_dir(), TRUE)
-  expect_null( neon_index() )
+  ## now restore from archive to new store
+  neondir <-  tempfile()
+  
+  expect_null( neon_index(dir = neondir) )
   
   ## restore
-  neon_import(archive)
-  meta2 <- neon_index()
+  neon_import(archive, dir = neondir)
+  meta2 <- neon_index(dir = neondir)
   expect_false(is.null(meta2))
   expect_equal(meta, meta2)
   
