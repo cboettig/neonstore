@@ -125,7 +125,7 @@ test_that("neon_export()/neon_import()", {
   neon_import(archive, dir = neondir)
   meta2 <- neon_index(dir = neondir)
   expect_false(is.null(meta2))
-  expect_equal(meta, meta2)
+  expect_equal(basename(meta$path), basename(meta2$path))
   
 })
 
