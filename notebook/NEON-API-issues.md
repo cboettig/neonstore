@@ -4,7 +4,7 @@ NEON API BUGS:
   
 - API has .zip and .csv files.  But some entries have .zip but not the matching .csv:  
   
-````
+```
 x <- neon_download(product = "DP1.10003.001",
                       site = "YELL",
                       start_date = "2019-01-01",
