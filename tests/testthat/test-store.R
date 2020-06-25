@@ -117,7 +117,7 @@ test_that("neon_export()/neon_import()", {
   expect_is(meta, "data.frame")
   
   ## now purge store and restore from archive
-  unlink(neon_dir())
+  unlink(neon_dir(), TRUE)
   expect_null( neon_index() )
   
   ## restore
