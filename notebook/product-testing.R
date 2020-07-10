@@ -1,7 +1,7 @@
 library(neonstore)
 library(dplyr)
 
-Sys.setenv(NEONSTORE_HOME = "/home/neonstore")
+Sys.setenv(NEONSTORE_HOME = "/minio/neonstore")
 
 site <- neon_sites()
 products <- neon_products()
