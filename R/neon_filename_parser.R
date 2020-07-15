@@ -1,5 +1,7 @@
 
 
+
+
 # https://data.neonscience.org/file-naming-conventions
 
 
@@ -87,5 +89,9 @@ L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_", NNNNNNN
 ##  AOP is airborne data
 ## EC is a type of TIS data
 
+neon_is_OS <- function(x) { grepl(OS_DATA, x) }
+neon_is_IS <- function(x) { grepl(IS_DATA, x) }
+neon_is_EC <- function(x)  { grepl(EC_ZIP, x) | grepl(EC_DAILY, x) | grepl(EC_MONTHLY, x) }
+neon_is_AOP <- function(x) { grepl(IS_DATA, x) }
 
 

@@ -5,22 +5,49 @@ Sys.setenv(NEONSTORE_HOME = "/minio/neonstore")
 
 site <- neon_sites()
 products <- neon_products()
+products <- products %>% filter(productStatus == "ACTIVE") # 152 active products! (29 more future)
 
-products <- products %>% filter(productStatus == "ACTIVE")
+## 76 observational products
+observational_data <- products %>% filter(productScienceTeamAbbr %in% c("TOS", "AOS"))
+## 76 instrument products
+instrument_data  <- products %>% filter(productScienceTeamAbbr %in% c("TIS", "AIS"))
+## 29 Airborne products
+airborne_data  <- products %>% filter(productScienceTeamAbbr == "AOP")
+
+
+
+### Observational Data first: 
+#codes <- observational_data$productCode
+
 codes <- products$productCode
-length(codes) # 152 active products! (29 more future)
+length(codes) 
 sites <- site$siteCode
 
 ## AND HERE WE GO.  
 ## (will almost surely run foul of rate limiting -- work by site or something)
 ## or work by product code at least?
+i <- j <- 1
+datas <- vector("list", length(codes))
+some_datas <- vector("list", length(sites))
+
+
 for(p in codes){
   message(paste("product", p))
   for(s in sites){
-    neon_download(p, file_regex = "[.]zip", site = s, keep_zip = TRUE)
-    Sys.sleep(10)
+   some_datas[[j]] <- neonstore:::neon_data(p,  site = s)
+   j <- j+1
+   Sys.sleep(10)
   }
+  datas[[i]] <- bind_rows(some_datas)
+  i <- i+1
+  Sys.sleep(10)
 }
+
+
+
+
+catalog <- dplyr::bind_rows(datas) %>% dplyr::mutate(size = fs::as_fs_bytes(size)) 
+catalog %>% dplyr::summarize(total = sum(size))
 
 
 #for(c in codes){

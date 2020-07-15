@@ -40,7 +40,7 @@ neon_download_s3 <- function(product,
                              quiet = FALSE,
                              verify = TRUE,
                              dir = neon_dir(), 
-                             keep_zips = FALSE,
+                             unzip = TRUE,
   api = "https://minio.jetstream.carlboettiger.info/neonstore/"){
   
   if(!quiet) message("querying S3 API...")
@@ -80,7 +80,7 @@ neon_download_s3 <- function(product,
   
   download_all(addr, dest, quiet)
   # verify_hash(dest, files$crc32, verify)
-  unzip_all(dest, keep_zips, dir)
+  if(unzip) unzip_all(dest, dir)
 
   invisible(meta)
 }
