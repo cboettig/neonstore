@@ -28,13 +28,13 @@ PRNUM <- "\\d{5}"
 REV <- "\\d{3}"
 
 ## I think these are actually 3-digit, not 3-alphanumeric character
-HOR <- "^[a-zA-Z0-9]{3}"
-VER <- "^[a-zA-Z0-9]{3}"
-TMI <- "^[a-zA-Z0-9]{3}"
+HOR <- "[0-9]{3}"
+VER <- "[0-9]{3}"
+TMI <- "\\b[a-zA-Z0-9]{3}\\b"
 DESC <- "\\w+"
 YYYY_MM <- "\\d{4}-\\d{2}"
 YYYY_MM_DD <- "\\d{4}-\\d{2}-\\d{2}"
-PKGTYPE <- "[basic|expanded]"
+PKGTYPE <- "(basic|expanded|)"
 GENTIME <- "\\d{4}\\d{2}\\d{2}T\\d{2}\\d{2}\\d{2}Z"
 
 
@@ -42,11 +42,16 @@ GENTIME <- "\\d{4}\\d{2}\\d{2}T\\d{2}\\d{2}\\d{2}Z"
 OS_DATA <- paste(NEON,DOM,SITE,DPL,PRNUM,REV,DESC,YYYY_MM,PKGTYPE,GENTIME, "csv", sep = "\\.")
 IS_DATA <- paste(NEON,DOM,SITE,DPL,PRNUM,REV,HOR,VER,TMI,DESC,YYYY_MM,PKGTYPE,GENTIME, "csv", sep = "\\.")
 
+##GENTIME_optional <- paste0("(", "\\.", GENTIME, ")?")
+
 ## Eddy Covariance is a single product, with it's own formats:
 EC_ZIP <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",YYYY_MM,PKGTYPE,GENTIME,"zip", sep = "\\.")
-EC_MONTHLY <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM,PKGTYPE,"h5", sep = "\\.")
-EC_DAILY <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM_DD,PKGTYPE,"h5", sep = "\\.")
 
+EC_MONTHLY <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM,PKGTYPE, "h5", sep = "\\.")
+EC_DAILY <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM_DD,PKGTYPE, "h5", sep = "\\.")
+
+EC_MONTHLY2 <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM,PKGTYPE, GENTIME, "h5", sep = "\\.")
+EC_DAILY2 <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM_DD,PKGTYPE, GENTIME, "h5", sep = "\\.")
 
 ### AOP Products Only  (Airborne Observation Platform)
 
@@ -61,9 +66,9 @@ EC_DAILY <- paste(NEON,DOM,SITE,"DP4\\.00200\\.001",DESC,YYYY_MM_DD,PKGTYPE,"h5"
 # FFFFFF 	Numeric code for an individual flightline
 # EEEEEE 	UTM easting of lower left corner
 # NNNNNNN 	UTM northing of lower left corner
-FLHTDATE <- "\\d{4}{\\d2}\\d{2}"
-FLIGHTSTRT <- "\\d{4}{\\d2}\\d{2}\\d{2}"
-FLHTSTRT <- "\\d{2}{\\d2}\\d{2}\\d{2}"
+FLHTDATE <- "\\d{4}\\d{2}\\d{2}"
+FLIGHTSTRT <- "\\d{4}\\d{2}\\d{2}\\d{2}"
+FLHTSTRT <- "\\d{2}\\d{2}\\d{2}\\d{2}"
 IMAGEDATETIME <- "\\d{14}"
 CCCCCC <-  "\\d{6}"
 NNNN <- "\\d{4}"
@@ -73,15 +78,35 @@ FFFFFF <- "\\d{6}"
 EEEEEE <- "\\d{6}"
 NNNNNNN <- "\\d{7}"
 
-
 CAMERA <-	paste0(FLHTSTRT,"_","EH",CCCCCC, "(", IMAGEDATETIME, ")-", NNNN, "_ort.tif")
 LIDAR_UNCLASSIFIED <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", "L", NNN,"-", R, "_", FLIGHTSTRT, "_", DESC, "\\.laz")
 LIDAR_CLASSIFIED 	<- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_", NNNNNNN, "_", DESC, "\\.laz")
 L1_SPECTROMETER <-	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", FLHTDATE, "_", FFFFFF, "_", DESC, "\\.h5")
-LIDAR_WAVEFORM <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", "L", NNN, "-", R, "_", FLIGHTSTRT, "_", DESC, "\\.[wvz|plz]")
-L2_SPECTROMETER <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", FLHTDATE, "_", FFFFFF, "_", DESC, "\\.[zip|tif]")
-L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_", NNNNNNN, "_", DESC, "\\.laz")
+LIDAR_WAVEFORM <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", "L", NNN, "-", R, "_", FLIGHTSTRT, "_", DESC, "\\.(wvz|plz)")
+L2_SPECTROMETER <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", FLHTDATE, "_", FFFFFF, "_", DESC, "\\.(zip|tif)")
+L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_", NNNNNNN, "_", DESC, "\\.(laz|tif|[a-z]{3})")
 
+
+## Not in standard
+## There are other ZIP patterns: 
+## "CPER_2013_L3_Camera_Mosaic.zip"
+ZIP_ISOS <- paste(NEON,DOM,SITE,DPL,PRNUM,REV,YYYY_MM,PKGTYPE,GENTIME, "zip", sep = "\\.")
+ZIP_AOP3 <- paste0(paste(NEON,DOM,SITE,DPL,EEEEEE, NNNNNNN, DESC, sep = "_"), ".zip")
+ZIP_AOP2 <- paste0(paste(NEON,DOM,SITE,DPL,FLHTDATE, FFFFFF, DESC, sep = "_"), ".zip")
+
+
+## Not all READMEs have GENTIME or SITE
+README1 <- paste(NEON,DOM,SITE,DPL,PRNUM,REV,"readme",GENTIME, "txt", sep = "\\.")
+README2 <- paste(NEON,DOM,DPL,PRNUM,REV,"readme", "txt", sep = "\\.")
+
+#README <- "readme"
+META <- paste(NEON,DOM,SITE,DPL,PRNUM,REV,DESC,GENTIME, "csv", sep = "\\.")
+# NEON.D10.CPER.DP1.00001.001.EML.20140218-20140301.20200618T220539Z.xml
+EML <-  paste(NEON,DOM,SITE,DPL,PRNUM,REV,"EML", "\\d{8}-\\d{8}" ,GENTIME, "xml", sep = "\\.")
+
+## Unidentified XML formats:
+# "NEON.D10.CPER.DP1.00017.001.20170101-20170201.xml" 
+# "2013_CPER_1_DTM.tif.aux.xml"                    
 
 ## From the Products Table: productScienceTeamAbbr:
 ##  AIS and TIS are instrumented systems (IS) data.
@@ -89,9 +114,115 @@ L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_", NNNNNNN
 ##  AOP is airborne data
 ## EC is a type of TIS data
 
-neon_is_OS <- function(x) { grepl(OS_DATA, x) }
-neon_is_IS <- function(x) { grepl(IS_DATA, x) }
-neon_is_EC <- function(x)  { grepl(EC_ZIP, x) | grepl(EC_DAILY, x) | grepl(EC_MONTHLY, x) }
-neon_is_AOP <- function(x) { grepl(IS_DATA, x) }
+
+neon_filename_parser <- function(x){
+  
+  os_is_data <- ragged_bind(list(
+  name_parse(x, OS_DATA,
+        c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+          "YYYY_MM","PKGTYPE","GENTIME", "EXT")),
+  name_parse(x, IS_DATA,
+    c("NEON","DOM","SITE","DPL","PRNUM","REV","HOR","VER",
+      "TMI","DESC","YYYY_MM","PKGTYPE","GENTIME", "EXT")),
+  name_parse(x, ZIP_ISOS, 
+    c("NEON","DOM","SITE","DPL","PRNUM","REV","YYYY_MM",
+      "PKGTYPE","GENTIME", "EXT"))
+  ))
+ 
+  ec_data <- ragged_bind(list(
+  name_parse(x, EC_DAILY,
+    c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+      "YYYY_MM_DD","PKGTYPE", "EXT")),
+  name_parse(x, EC_MONTHLY,
+    c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+      "YYYY_MM","PKGTYPE", "EXT")),
+  name_parse(x, EC_DAILY2,
+             c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+               "YYYY_MM_DD","PKGTYPE", "GENTIME", "EXT")),
+  name_parse(x, EC_MONTHLY2,
+             c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+               "YYYY_MM","PKGTYPE", "GENTIME", "EXT")),
+  name_parse(x, EC_ZIP,
+    c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+      "YYYY_MM","PKGTYPE", "GENTIME", "EXT"))
+  ))
+ 
+ 
+  misc <- ragged_bind(list(
+  name_parse(x,META, 
+             c("NEON","DOM","SITE","DPL","PRNUM","REV",
+               "DESC","GENTIME", "EXT")),
+  name_parse(x, EML,  
+             c("NEON","DOM","SITE","DPL","PRNUM","REV","EML",
+              "DATE_RANGE" ,"GENTIME", "EXT")),
+
+  name_parse(x, README1, 
+             c("NEON","DOM","SITE","DPL","PRNUM",
+               "REV","README","GENTIME", "EXT"))
+             
+  ))
+  
+  #aop_data <- aop_parser(x)
+  
+  ragged_bind(list(os_is_data, ec_data, misc))
+  
+}
+
+## descriptions often have _, preventing us from splitting on _
+aop_parser <- function(x){
+  ragged_bind(list(
+    name_parse(x, CAMERA,	
+               c("FLHTSTRT","EHCCCCCC",  "IMAGEDATETIME", "NNNN", "DESC", "EXT"), 
+               split = "(\\.|_)", fixed = FALSE),
+
+  name_parse(x, LIDAR_UNCLASSIFIED, 
+             c("NEON", "DOM","SITE",  "DPL", "NNN", "FLIGHTSTRT", "DESC", "EXT"),
+             split = "(\\.|_)", fixed = FALSE),
+  
+    name_parse(x, LIDAR_CLASSIFIED,
+               c("NEON", "DOM", "SITE", "DPL", "EEEEEE", "NNNNNNN", "DESC", "EXT"),
+               split = "(\\.|_)", fixed = FALSE),
+
+    name_parse(x, L1_SPECTROMETER,
+               c("NEON", "DOM", "SITE", "DPL", "FLHTDATE", "FFFFFF", "DESC", "EXT"),
+               split = "(\\.|_)", fixed = FALSE),
+
+    name_parse(x, LIDAR_WAVEFORM,
+               c("NEON", "DOM", "SITE", "DPL", "NNN",  "FLIGHTSTRT",  "DESC", "EXT"),
+               split = "(\\.|_)", fixed = FALSE),
+  
+    name_parse(x, L2_SPECTROMETER,
+              c("NEON", "DOM",  "SITE", "DPL",  "FLHTDATE", "FFFFFF",  "DESC", "EXT"),
+              split = "(\\.|_)", fixed = FALSE),
+  
+    name_parse(x, L3_AOP,	
+               c("NEON", "DOM",  "SITE", "DPL", "EEEEEE", "NNNNNNN",  "DESC", "EXT"),
+               split = "(\\.|_)", fixed = FALSE),
+  
+  ## Not yet in the standard
+  ## There are other ZIP patterns: 
+  ## "CPER_2013_L3_Camera_Mosaic.zip"
+  name_parse(x, ZIP_AOP3,
+             c("NEON","DOM","SITE","DPL","EEEEEE", "NNNNNNN", "DESC", "EXT"), 
+             split = "(\\.|_)", fixed = FALSE),
+  name_parse(x, ZIP_AOP2, 
+              c("NEON","DOM","SITE","DPL","FLHTDATE", "FFFFFF", "DESC", "EXT"), 
+              split = "(\\.|_)", fixed = FALSE)
+    ))
+
+}
+
+
+
+## keep full path name as column?
+
+name_parse <- function(x, pattern, col_names, split = ".", fixed = TRUE){
+  x <- basename(x) # drop path before parsing
+  tmp <- strsplit(x[grepl(pattern, x)], split, fixed = fixed)
+  obs <- as_tibble(do.call("rbind", tmp))
+  colnames(obs) <- col_names
+  obs
+}
+
 
 
