@@ -38,12 +38,16 @@ PKGTYPE <- "(basic|expanded|)"
 GENTIME <- "(\\d{4}\\d{2}\\d{2}T\\d{2}\\d{2}\\d{2}Z)"
 
 
+
 ## Most data files are observation systems or instrument systems:
 OS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
                  YYYY_MM, PKGTYPE, GENTIME, "csv", sep = "\\.")
 IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
                  TMI, DESC, YYYY_MM, PKGTYPE, GENTIME, "csv", sep = "\\.")
 
+## NOTE! a few OS_DATA are missing YYYY_MM!
+OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
+                 PKGTYPE, GENTIME, "csv", sep = "\\.")
 ## GENTIME_optional <- paste0("(", "\\.", GENTIME, ")?")
 
 ## Eddy Covariance is a single product, with it's own formats:
@@ -97,6 +101,9 @@ neon_filename_parser <- function(x){
   name_parse(x, OS_DATA,
         c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
           "YYYY_MM","PKGTYPE","GENTIME", "EXT")),
+  name_parse(x, OS_DATA2,
+             c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+               "PKGTYPE","GENTIME", "EXT")),
   name_parse(x, IS_DATA,
     c("NEON","DOM","SITE","DPL","PRNUM","REV","HOR","VER",
       "TMI","DESC","YYYY_MM","PKGTYPE","GENTIME", "EXT")),
@@ -199,7 +206,7 @@ R <- "(\\d)"
 FFFFFF <- "(\\d{6})"
 EEEEEE <- "(\\d{6})"
 NNNNNNN <- "(\\d{7})"
-EXT <- "(\\.[0-9a-z]+$)"
+EXT <- "\\.([0-9a-z]+$)"
 
 CAMERA <-	paste0(FLHTSTRT,"_","EH",CCCCCC, "\\(", IMAGEDATETIME, "\\)-",
                  NNNN, "_ort", EXT) #.tif
@@ -216,10 +223,9 @@ L2_SPECTROMETER <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", FLHTDATE,
 L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_",
                   NNNNNNN, "_", DESC,  EXT) #"\\.(laz|tif|[a-z]{3})")
 ZIP_AOP3 <- paste0(paste(NEON,DOM,SITE,DPL,EEEEEE, NNNNNNN,
-                         DESC, sep = "_"), "(.zip)")
+                         DESC, sep = "_"), "\\.(zip)")
 ZIP_AOP2 <- paste0(paste(NEON,DOM,SITE,DPL,FLHTDATE, FFFFFF, DESC, sep = "_"),
-                   "(.zip)")
-
+                   "\\.(zip)")
 
 ## descriptions often have _, preventing us from splitting on _
 aop_parser <- function(x){
@@ -258,7 +264,11 @@ aop_parser <- function(x){
                 c("NEON","DOM","SITE","DPL","FLHTDATE",
                   "FFFFFF", "DESC", "EXT"))
   ))
-  ragged_bind(list(A,B,C))
+  out <- ragged_bind(list(A,B,C))
+  
+  ## distinct rows only (filenames differing only by extension match same regex)
+  unique_rows <- !duplicated(out)
+  out[unique_rows,]
 }
 
 
