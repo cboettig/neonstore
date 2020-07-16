@@ -14,7 +14,7 @@ neon_download(
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  keep_zips = FALSE,
+  unzip = TRUE,
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
 )
@@ -46,8 +46,9 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{keep_zips}{should we keep zip files after extracting contents?
-(default \code{FALSE})}
+\item{unzip}{should we extract .zip files?  Also removes the .zip files.
+(default \code{TRUE}).  Set to FALSE if you want to keep \code{.zip} archives and
+manually unzip them later.}
 
 \item{api}{the URL to the NEON API, leave as default.}
 
