@@ -130,7 +130,7 @@ meta_filter <- function(meta,
   
 }
 
-
+## REPLACE with neon_filename_parser
 filename_parser <- function(files){
   ## Parse metadata from NEON file names
   parsed <- gsub(neon_regex(),
