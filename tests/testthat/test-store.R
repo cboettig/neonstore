@@ -68,7 +68,7 @@ test_that("vroom_ragged()", {
   
 })
 
-test_that("neon_regex()", {
+test_that("filename_parser()", {
 
  x <- c(
 "NEON.D01.BART.DP1.10003.001.brd_countdata.2015-06.expanded.20191107T154457Z.csv",
@@ -82,7 +82,7 @@ test_that("neon_regex()", {
 
   meta <- filename_parser(x)
   expect_is(meta, "data.frame")
-  expect_equal(dim(meta), c(7,9))
+  expect_equal(dim(meta), c(7,8))
   
   expect_true(any(grepl("DP1.10003.001", meta$product)))
   expect_true(any(grepl("brd_countdata", meta$table)))

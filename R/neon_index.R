@@ -130,53 +130,40 @@ meta_filter <- function(meta,
   
 }
 
-## REPLACE with neon_filename_parser
+na_to_char <- function(x, char = ""){
+  x <- as.character(x)
+  x[is.na(x)] <- char
+  x
+}
+paste_na <- function(..., sep = "."){
+  do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
+}
+
+
 filename_parser <- function(files){
-  ## Parse metadata from NEON file names
-  parsed <- gsub(neon_regex(),
-                 "\\2%\\3%\\5-\\7%\\6%\\7%\\8%\\9%\\4%",
-                 files)
-  meta <- strsplit(parsed, "%", fixed = TRUE)
-  into <- c("site", "product", "table", "month",
-            "type", "timestamp", "ext", "misc")
   
-  ## Confirm parsing was successful
-  parts <- vapply(meta, length, integer(1L))
-  meta <- meta[parts == length(into)]
   
-  ## Drop unparse-able file names
-  filenames <- files[parts == length(into)]
-  dropped <- files[parts != length(into)]
+  df <- neon_filename_parser(files)
   
-  ## Format as tidy data.frame
-  meta_b <- jsonlite::fromJSON(jsonlite::toJSON(meta))
-  if(length(meta_b) == 0) return(NULL)
-  colnames(meta_b) <- into
-  meta_c <- as.data.frame(meta_b, stringsAsFactors = FALSE)
+  if(nrow(df) == 0) return(NULL)
   
-  ##drop trailing - on table name created by gsub w blank type
-  meta_c$table[meta_c$type == ""] <- 
-    gsub("-$", "", meta_c$table[meta_c$type == ""])
+  ## We may want more columns than this than this.  
+  out <- df[c("SITE", "DESC", "PKGTYPE", "EXT","YYYY_MM",  "GENTIME", "name")]
+  out$product <- paste_na(df$DPL, df$PRNUM, df$REV)
   
-  meta_c$path <- filenames
-  tibble::as_tibble(meta_c)
+  ## append type, historical but maybe dumb?
+  out$DESC <- paste_na(out$DESC, out$PKGTYPE, sep = "-")
+  
+  ## Apply names used originally -- FIXME maybe stick with NEON terms?
+  names(out) <- c("site", "table", "type", "ext",
+                  "month", "timestamp", "path", "product")
+  
+  ## re-order
+  out <- out[, c("product", "site", "table", "type",
+                 "ext", "month", "timestamp", "path")]
+  
+  out
 }
-
-
-neon_regex <- function(){
-  site <- "(NEON\\.D\\d\\d\\.(\\w{4}))\\."                   # \\1 + \\2
-  productCode <- "(DP\\d\\.\\d{5}\\.\\d{3})\\."              # \\3
-  misc <- "(:?\\d{3}\\.\\d*\\.*\\d*\\.*)?"                 #   \\4
-  name <- "(:?\\w+)?\\.?"                                    # \\5 
-  month <- "(:?\\d{4}-\\d{2})?\\.?"                          # \\6
-  type <- "(:?basic|expanded)?\\.?"                          # \\7
-  timestamp <- "(:?\\d{8}T\\d{6}Z)?\\.?"                     # \\8
-  ext <- "(\\w+$)"                                           # \\9
-  regex <- paste0(site, productCode, misc, name, month, type, timestamp, ext)
-  regex
-}
-
-
 
 
 #' @importFrom openssl md5 sha1 sha256

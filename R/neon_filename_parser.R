@@ -45,14 +45,15 @@
 #' EEEEEE 	UTM easting of lower left corner
 #' NNNNNNN 	UTM northing of lower left corner
 #' 
-#' 
+#' @export
 neon_filename_parser <- function(x){
   
   ragged_bind(list(
     os_is_parser(x),
     ec_parser(x),
     misc_parser(x),
-    aop_parser(x)
+    aop_parser(x),
+    schema() # ensure all colums are present
   ))
   
 }
@@ -238,12 +239,12 @@ misc_parser <- function(x){
                c("NEON","DOM","SITE","DPL","PRNUM","REV",
                  "DESC","GENTIME", "EXT")),
     name_parse(x, EML,  
-               c("NEON","DOM","SITE","DPL","PRNUM","REV","EML",
+               c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
                  "DATE_RANGE" ,"GENTIME", "EXT")),
     
     name_parse(x, README1, 
                c("NEON","DOM","SITE","DPL","PRNUM",
-                 "REV","README","GENTIME", "EXT"))
+                 "REV","DESC","GENTIME", "EXT"))
     
   ))
 }
@@ -297,5 +298,16 @@ aop_parser <- function(x){
   out[unique_rows,]
 }
 
-
+schema <- function(){
+  cols <- c("NEON", "DOM", "SITE", "DPL", "PRNUM", "REV", "DESC", "YYYY_MM", 
+            "PKGTYPE",  "GENTIME", "EXT", "HOR", "VER", "TMI",
+            "YYYY_MM_DD", "DATE_RANGE", "README", "FLHTSTRT",
+            "EHCCCCCC", "IMAGEDATETIME", "NNNN", "NNN", "R", "FLIGHTSTRT", 
+            "EEEEEE", "NNNNNNN", "FLHTDATE", "FFFFFF", "name")
+  
+  x <- as.list(rep(NA, length(cols)))
+  names(x) <- cols
+  as_tibble(x)[0,]
+}
+  
 
