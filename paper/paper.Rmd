@@ -83,8 +83,26 @@ The workhorse function of `neonstore` is `neon_download()`, which downloads all 
 neon_download("DP1.10003.001")
 ```
 
-To download this data, `neon_download()` must make many API calls.  It first uses `neon_sites()` to reference all sites containing this data product.  Then for each site, for each month for which that site collected data, the function will make an API call to the `/data` endpoint (using the `neonstore` function, `neon_data()`), which returns a table of files found for that product at the requested site and month range.  The  table from `neon_data()` indicates 4 values: the file name, the MD5 hash of the data file (confusingly labeled as the crc32 sum, though CRC32 hashes are used only for AOP data products.  Note that MD5 hashes are length-32 character strings, while the CRC32 hashes are 8 characters long), the file size (in bytes -- encoded as a character because some file sizes are too long to be represented as an integer), and a download URL.  The download URL embeds a temporary access token which expires after an hour, so users must complete all the downloads before this time expires.  The access string for each file is unique, thus it is (at the time of writing) impossible to download any given data file without making a corresponding API request, even if the precise file name and address is already known.  
+To download this data, `neon_download()` must make many API calls.  It first uses `neon_sites()` to reference all sites containing this data product.  Then for each site, for each month for which that site collected data, the function will make an API call to the `/data` endpoint (using the `neonstore` function, `neon_data()`), which returns a table of files found for that product at the requested site and month range.  The  table from `neon_data()` indicates 4 values: the file name, the MD5 hash of the data file (confusingly labeled as the crc32 sum, though CRC32 hashes are used only for AOP data products.  Note that MD5 hashes are length-32 character strings, while the CRC32 hashes are 8 characters long), the file size (in bytes -- encoded as a character because some file sizes are too long to be represented as an integer), and a download URL.  The download URL embeds a temporary access token which expires after an hour, so users must complete all the downloads before this time expires.  The access string for each file is unique, thus it is (at the time of writing) impossible to download any given data file without making a corresponding API request, even if the precise file name and address is already known.  For the most part, this issue is invisible to `neonstore` users, as `neon_download()` calls automatically pass all download URLs to the download step.  
 
+
+```{r}
+neon_download("DP1.10003.001", 
+               start_date = "2018-01-01", 
+               end_date = "2019-01-01",
+               site = "YELL")
+               
+ ## Advanced use: filter for a particular table in the product
+ neon_download(product = "DP1.10003.001",
+               start_date = "2018-01-01",
+               end_date = "2019-01-01",
+               site = "YELL",
+               file_regex = ".*brd_countdata.*\\.csv")
+```
+
+
+
+`neon_download()`
 
 
 The three-digit code identifies this as a Level 1 data product (DP1), product number 10003, revision 001, indicating this is the first and so far the only protocol used for bird survey sampling.   
