@@ -5,20 +5,11 @@
 \title{Table of all NEON Data Products}
 \usage{
 neon_products(
-  fields = c("productCode", "productName", "productDescription", "productStatus",
-    "themes", "keywords", "productCategory", "productAbstract",
-    "productDesignDescription", "productRemarks", "productSensor",
-    "productPublicationFormatType", "productHasExpanded", "productBasicDescription",
-    "productExpandedDescription"),
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
 )
 }
 \arguments{
-\item{fields}{a list of fields (columns) to include.  Default includes
-most common columns, set to NULL to display all columns
-(including list-columns).}
-
 \item{api}{the URL to the NEON API, leave as default.}
 
 \item{.token}{an authentication token from NEON. A token is not
@@ -31,6 +22,7 @@ access to them without further interaction required with the API.}
 \description{
 Return a table of all NEON Data Products, including product descriptions
 and the productCode needed for \link{neon_download}.
+(including list-columns).
 }
 \examples{
 \donttest{

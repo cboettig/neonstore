@@ -14,7 +14,7 @@ neon_download_s3(
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  keep_zips = FALSE,
+  unzip = TRUE,
   api = "https://minio.jetstream.carlboettiger.info/neonstore/"
 )
 }
@@ -45,8 +45,9 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{keep_zips}{should we keep zip files after extracting contents?
-(default \code{FALSE})}
+\item{unzip}{should we extract .zip files?  Also removes the .zip files.
+(default \code{TRUE}).  Set to FALSE if you want to keep \code{.zip} archives and
+manually unzip them later.}
 
 \item{api}{URL to an S3 bucket containing raw NEON data files (in
 flat file structure like that used by neonstore).}

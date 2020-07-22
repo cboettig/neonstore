@@ -133,12 +133,10 @@ ragged_bind <- function(x){
   col_schemas <- lapply(x, colnames)
   u_schemas <- unique(col_schemas)
   all_cols <- unique(unlist(u_schemas))
-  i <- 1
-  for(s in u_schemas){
+  for(i in seq_along(x)){
     ## append any columns missing from all_cols set
     missing <- all_cols[ !(all_cols %in% colnames(x[[i]])) ]
     x[[i]][ missing ] <- NA
-    i <- i+1
   }
   do.call(rbind, x)
   
