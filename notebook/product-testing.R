@@ -19,20 +19,24 @@ airborne_data  <- products %>% filter(productScienceTeamAbbr == "AOP")
 ### Observational Data first: 
 #codes <- observational_data$productCode
 
-codes <- products$productCode
+codes <- observational_data$productCode
 length(codes) 
 sites <- site$siteCode
 
 ## AND HERE WE GO.  
 ## (will almost surely run foul of rate limiting -- work by site or something)
 ## or work by product code at least?
-i <- j <- 1
+i <- 1
 datas <- vector("list", length(codes))
 some_datas <- vector("list", length(sites))
 
 
+## Avoid rate limiting by doing one product+site at a time,
+## with 10s sleep.  for loop makes checkpoint resume easier too. 
+
 for(p in codes){
   message(paste("product", p))
+  j <- 1
   for(s in sites){
    some_datas[[j]] <- neonstore:::neon_data(p,  site = s)
    j <- j+1
@@ -43,10 +47,8 @@ for(p in codes){
   Sys.sleep(10)
 }
 
-
-
-
-catalog <- dplyr::bind_rows(datas) %>% dplyr::mutate(size = fs::as_fs_bytes(size)) 
+catalog <- dplyr::bind_rows(datas) %>% dplyr::mutate(size = fs::as_fs_bytes(size)) %>% distinct()
+readr::write_csv(catalog, "neon_observation_systems.csv.gz")
 catalog %>% dplyr::summarize(total = sum(size))
 
 
