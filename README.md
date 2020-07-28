@@ -13,7 +13,7 @@ coverage](https://codecov.io/gh/cboettig/neonstore/branch/master/graph/badge.svg
 
 `neonstore` provides quick access and persistent storage of NEON data
 tables. `neonstore` emphasizes simplicity and a clean data provenance
-trail, see (Provenance)\[/\#Provenance\].
+trail, see Provenance section below.
 
 ## Installation
 
@@ -206,7 +206,7 @@ A few other differences are also worth noting.
     files to the appropriate app directory for your operating system
     (see `rappdirs`, [Ratnakumar et
     al 2016](https://CRAN.R-project.org/package=rappdirs)). More details
-    about this can be found in [Provenance](/#Provenance), below.
+    about this can be found in Provenance, below.
   - `neon_download()` provides clean and concise progress bars for the
     two key processes involved: querying the API to obtain download URLs
     (which involves no large data transfer but counts against API rate
