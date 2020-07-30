@@ -1,6 +1,6 @@
 Package: neonstore
 Title: NEON Data Store
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(person(
               "Carl", "Boettiger", 
               email = "cboettig@gmail.com", 
@@ -11,7 +11,8 @@ Authors@R: c(person(
                    comment = c("ORCID" = "0000-0002-4944-2083"))
             )
 Description: The National Ecological Observatory Network (NEON) provides access
-  to its numerous data products through its REST API. This package provides a
+  to its numerous data products through its REST API, 
+  <https://data.neonscience.org/data-api/>. This package provides a
   high-level user interface for downloading and storing NEON data products.
   While each of NEON's data products consist of hundreds or thousands of individual
   files.  Unlike neonUtilities, this package will avoid repeated downloading,
@@ -37,4 +38,6 @@ RoxygenNote: 7.1.1
 Suggests: 
     testthat,
     covr,
-    xml2
+    xml2,
+    spelling
+Language: en-US

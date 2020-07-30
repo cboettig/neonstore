@@ -56,7 +56,7 @@ flat file structure like that used by neonstore).}
 (invisibly) table of requested files and metadata
 }
 \description{
-Queries the AWS-S3 REST endpoint GET buucket for a file list
+Queries the AWS-S3 REST endpoint GET bucket for a file list
 in (in 1000-file chunks), then filters file names to determine
 what to download. This should be much faster than the NEON API and
 avoids rate-limiting.
