@@ -10,7 +10,7 @@
 #' a one-off argument to `dir` in the function call in place of the calling
 #' `neon_dir()` to access the default.  
 #'
-#' @return the active NEON storeage directory.
+#' @return the active `neonstore` directory.
 #' @export
 #' @examples 
 #' 

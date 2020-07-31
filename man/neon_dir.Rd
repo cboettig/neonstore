@@ -7,7 +7,7 @@
 neon_dir()
 }
 \value{
-the active NEON storeage directory.
+the active \code{neonstore} directory.
 }
 \description{
 Use \code{neon_dir()} to view or access the currently active local store.

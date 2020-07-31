@@ -8,3 +8,5 @@
 ^\.github$
 ^codecov\.yml$
 ^paper$
+^cran-comments\.md$
+^CRAN-RELEASE$

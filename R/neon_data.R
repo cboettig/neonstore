@@ -1,7 +1,7 @@
 ## 
 
 #' @importFrom progress progress_bar
-#' @importFrom httr GET content stop_for_status
+#' @importFrom httr GET content
 #' @importFrom jsonlite fromJSON
 #' @noRd
 neon_data <- function(product, 
@@ -64,7 +64,8 @@ neon_data <- function(product,
   data <- do.call(rbind,
                   lapply(resp, function(x) {
                     
-                    httr::stop_for_status(x)
+                    status <- neon_warn_http_errors(x)
+                    if(status > 0) return(NULL)
                     cont <- httr::content(x, as = "text")
                     dat <- jsonlite::fromJSON(cont)[[1]]
                     if(length(dat) == 0) return(NULL)
@@ -74,4 +75,18 @@ neon_data <- function(product,
   
   tibble::as_tibble(data)
 }
+
+#' @importFrom httr status_code content
+neon_warn_http_errors <- function(x){
+  status <- httr::status_code(x)
+  if(status < 400) return(invisible(0L))
+  out <- httr::content(x)
+  warning(paste(out$error$status, "error:", out$error$detail), call. = FALSE)
+  1L
+}
+
+## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 
+## https://data.neonscience.org/api/v0/data/DP1.20093.001/ARIK/2011-04
+## Hence, we warn on these errors but will continue with any other downloads in the list.
+
 
