@@ -9,7 +9,7 @@ products <- products %>% filter(productStatus == "ACTIVE") # 152 active products
 
 ## 76 observational products
 observational_data <- products %>% filter(productScienceTeamAbbr %in% c("TOS", "AOS"))
-## 76 instrument products
+## 47 instrument products
 instrument_data  <- products %>% filter(productScienceTeamAbbr %in% c("TIS", "AIS"))
 ## 29 Airborne products
 airborne_data  <- products %>% filter(productScienceTeamAbbr == "AOP")
@@ -18,8 +18,9 @@ airborne_data  <- products %>% filter(productScienceTeamAbbr == "AOP")
 
 ### Observational Data first: 
 #codes <- observational_data$productCode
+#codes <- instrument_data$productCode
+codes <- airborne_data$productCode
 
-codes <- observational_data$productCode
 length(codes) 
 sites <- site$siteCode
 
@@ -48,7 +49,7 @@ for(p in codes){
 }
 
 catalog <- dplyr::bind_rows(datas) %>% dplyr::mutate(size = fs::as_fs_bytes(size)) %>% distinct()
-readr::write_csv(catalog, "neon_observation_systems.csv.gz")
+readr::write_csv(catalog, "neon_aop.csv.gz")
 catalog %>% dplyr::summarize(total = sum(size))
 
 
