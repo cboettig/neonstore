@@ -15,7 +15,7 @@ Description: The National Ecological Observatory Network (NEON) provides access
   <https://data.neonscience.org/data-api/>. This package provides a
   high-level user interface for downloading and storing NEON data products.
   While each of NEON's data products consist of hundreds or thousands of individual
-  files.  Unlike neonUtilities, this package will avoid repeated downloading,
+  files.  Unlike 'neonUtilities', this package will avoid repeated downloading,
   provides persistent storage, and improves performance.  This package does not 
   provide expose interactions with the individual low-level NEON API endpoints.
 License: MIT + file LICENSE
