@@ -9,7 +9,7 @@ CRAN maintainers requested:
 programming interface) names in single quotes in title and description.
 e.g: --> 'neonUtilities'
 
-Done. Software is now in quotes.  
+Done. I have quoted all acroynms not recognized by CRAN spell check.  
 
 ## R CMD check results
 
