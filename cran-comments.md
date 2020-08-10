@@ -9,7 +9,11 @@ CRAN maintainers requested:
 programming interface) names in single quotes in title and description.
 e.g: --> 'neonUtilities'
 
-Done. I have quoted all acroynms not recognized by CRAN spell check.  
+Software names are now in quotes.  Unrecognized abbreviations that are 
+not software, package names, or API names are now added to the word list,
+i.e. NEON, the National Ecological Observatory Network, is a large US federal
+project, and REST, is not the name of specific software but refers to a type
+of API protocol (REpresentational State Transfer, i.e. a stateless API).
 
 ## R CMD check results
 
