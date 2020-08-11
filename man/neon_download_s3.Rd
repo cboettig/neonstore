@@ -69,10 +69,10 @@ Sys.setenv(NEONSTORE_HOME=tempdir())
 }
 
 \donttest{
- neon_download_s3("DP1.10003.001", 
-                  start_date = "2018-01-01", 
-                  end_date = "2019-01-01",
-                  site = "YELL")
+ neon_download("DP1.10003.001", 
+               start_date = "2018-01-01", 
+               end_date = "2019-01-01",
+               site = "YELL")
 }
 
 \dontshow{
