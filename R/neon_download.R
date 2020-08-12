@@ -115,7 +115,9 @@ neon_download <- function(product,
   
   ## Time to download, verify, and unzip
   download_all(files$url, files$path, quiet)
-  verify_hash(files$path, files$crc32, verify)
+  
+  algo <- hash_type(files)
+  verify_hash(files$path, files[algo], verify, algo)
   if(unzip) unzip_all(files$path, dir)
   
   ## file metadata (url, path, md5sum)  
@@ -150,11 +152,19 @@ download_filters <- function(files, file_regex,
   if(type == "basic")
     files <- files[!grepl("expanded", files$name), ]
   
-  ## Filter out duplicate files, e.g. have identical crc32 values
-  files <- take_first_match(files, "crc32")
+  ## Filter out duplicate files, e.g. have identical hash values
+  files <- take_first_match(files, hash_type(files))
   files
 }
 
+
+hash_type <- function(df){
+  type <- "md5"
+  if(is.null(df[[type]]) | any(is.na(df[[type]]))){
+    type <- "crc32"
+  }
+  type
+}
 
 
 download_all <- function(addr, dest, quiet){
@@ -184,11 +194,20 @@ unzip_all <- function(path, dir, keep_zips = FALSE){
 
 
 
-
-verify_hash <- function(path, hash, verify){
+#' @importFrom digest digest
+#' @importFrom openssl md5
+verify_hash <- function(path, hash, verify, algo = "md5"){
+  if(any(is.na(hash))){
+    return(NULL)
+  }
+  
+  
+  hashfn <- switch(algo,
+                   md5 = function(x) as.character(openssl::md5(file(x))),
+                   crc32 =  function(x) digest::digest(x, "crc32", file=TRUE))
+  
   if(verify){
-    md5 <- vapply(path, 
-                  function(y) as.character(openssl::md5(file(y))),
+    md5 <- vapply(path, hashfn,
                   character(1L), USE.NAMES = FALSE)
     i <- which(md5 != hash)
     if(length(i) > 0) {
@@ -197,12 +216,7 @@ verify_hash <- function(path, hash, verify){
                     path[i]), call. = FALSE)
     }
   }
-  
 }
-
-
-
-
 
 
 

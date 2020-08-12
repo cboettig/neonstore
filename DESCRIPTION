@@ -33,7 +33,8 @@ Imports:
     openssl,
     tibble,
     stats,
-    zip
+    zip,
+    digest
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
