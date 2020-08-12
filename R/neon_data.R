@@ -64,8 +64,8 @@ neon_data <- function(product,
     if(!quiet){ pb$tick() }
     resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
     if(i %% batch == 0){
-      message("Rate limiting enforced, waiting 100s\n")
-      Sys.sleep(100)
+      message("\nNEON rate limiting enforced, pausing for 100s\n")
+      Sys.sleep(101)
     }
   }
   
