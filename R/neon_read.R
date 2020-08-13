@@ -53,6 +53,9 @@ neon_read <- function(table = NA,
                        hash = NULL, 
                        dir = dir)
     
+    if(is.null(meta)) return(NULL)
+    if(dim(meta)[[1]] == 0 )  return(NULL)
+    
     ## If timestamp has changed but other metadata is the same, we only want the newer version
     meta <- filter_duplicates(meta)
     
