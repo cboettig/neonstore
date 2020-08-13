@@ -48,17 +48,26 @@ neon_data <- function(product,
     return(invisible(NULL))
   }
   
+  ## Adjust for rate-limiting
+  batch <- 1000                 # authenticated
+  if(.token == "") batch <- 200 # unauthenticated
+  
+  
   ## Extract the file list from the data endpoint.  O(sites * months) calls
   pb <- progress::progress_bar$new(
     format = "  querying API [:bar] :percent eta: :eta",
     total = length(data_api), 
     clear = FALSE, width= 60)
   
-  resp <- lapply(data_api, function(x){
+  resp <- vector("list", length = length(data_api))
+  for(i in seq_along(data_api)){
     if(!quiet){ pb$tick() }
-    httr::GET(x, httr::add_headers("X-API-Token" = .token))
-  })
-  
+    resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
+    if(i %% batch == 0){
+      message("\nNEON rate limiting enforced, pausing for 100s\n")
+      Sys.sleep(101)
+    }
+  }
   
   ## Format the result as a data.frame
   data <- do.call(rbind,
@@ -81,8 +90,8 @@ neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
   out <- httr::content(x)
-  warning(paste(out$error$status, "error:", out$error$detail), call. = FALSE)
-  1L
+  warning(paste(status, "error:", as.character(out)), call. = FALSE)
+  invisible(1L)
 }
 
 ## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 

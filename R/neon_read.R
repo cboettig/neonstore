@@ -52,6 +52,13 @@ neon_read <- function(table = NA,
                        ext = ext,
                        hash = NULL, 
                        dir = dir)
+    
+    if(is.null(meta)) return(NULL)
+    if(dim(meta)[[1]] == 0 )  return(NULL)
+    
+    ## If timestamp has changed but other metadata is the same, we only want the newer version
+    meta <- filter_duplicates(meta)
+    
     files <- meta$path
   }
   
@@ -141,5 +148,23 @@ ragged_bind <- function(x){
   do.call(rbind, x)
   
 }
+
+## Sometimes a NEON file will have changed
+filter_duplicates <- function(meta){
+  meta$timestamp <- as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
+  meta_b <- meta[order(meta$timestamp, decreasing = TRUE),] 
+  meta_b$id <- paste(meta$product, meta$site, meta$table, meta$month, sep="-")
+  out <- take_first_match(meta_b, "id")
+  
+  if(dim(out)[[1]] < dim(meta)[[1]])
+    message("Some raw files were detected with updated timestamps.\n
+            Using only most updated file to avoid duplicates.")
+  ## FIXME Maybe we should verify if the hash of said file(s) has changed.
+  ## maybe we should provide more information on how to check these?
+  
+  out
+}
+
+
 
 
