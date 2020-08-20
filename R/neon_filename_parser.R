@@ -98,25 +98,28 @@ EXT <- "\\.([0-9a-z]+$)"
 
 ## Data files for observation systems or instrument systems:
 OS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
-                 YYYY_MM, PKGTYPE, GENTIME, "csv", sep = "\\.")
+                 YYYY_MM, PKGTYPE, GENTIME, "csv$", sep = "\\.")
 IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
-                 TMI, DESC, YYYY_MM, PKGTYPE, GENTIME, "csv", sep = "\\.")
+                 TMI, DESC, YYYY_MM, PKGTYPE, GENTIME, "csv$", sep = "\\.")
 ## NOTE! a few OS_DATA are missing YYYY_MM!
 OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
-                 PKGTYPE, GENTIME, "csv", sep = "\\.")
+                 PKGTYPE, GENTIME, "csv$", sep = "\\.")
 
 ## Eddy Covariance is a single product, with its own formats:
 EC_ZIP <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", 
-                YYYY_MM, PKGTYPE, GENTIME, "zip", sep = "\\.")
+                YYYY_MM, PKGTYPE, GENTIME, "zip$", sep = "\\.")
 EC_MONTHLY <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
-                    YYYY_MM, PKGTYPE, "h5", sep = "\\.")
+                    YYYY_MM, PKGTYPE, "h5$", sep = "\\.")
 EC_DAILY <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
-                  YYYY_MM_DD, PKGTYPE, "h5", sep = "\\.")
+                  YYYY_MM_DD, PKGTYPE, "h5$", sep = "\\.")
 ## More recent EC products inculde the GENTIME field as well
 EC_MONTHLY2 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
-                     YYYY_MM, PKGTYPE, GENTIME, "h5", sep = "\\.")
+                     YYYY_MM, PKGTYPE, GENTIME, "h5$", sep = "\\.")
 EC_DAILY2 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
-                   YYYY_MM_DD, PKGTYPE, GENTIME, "h5", sep = "\\.")
+                   YYYY_MM_DD, PKGTYPE, GENTIME, "h5$", sep = "\\.")
+
+EC_DAILY3 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
+                   YYYY_MM_DD, PKGTYPE, GENTIME, "h5", "gz$", sep = "\\.")
 
 ######### Miscellaneous or Unspecified product types #########################
 ## This next group is not explicitly specified by the standard
@@ -125,11 +128,11 @@ ZIP_ISOS <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, YYYY_MM,
 README1 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV,
                  "readme", GENTIME, "txt", sep = "\\.")
 ## Not all READMEs have GENTIME or SITE
-README2 <- paste(NEON, DOM, DPL, PRNUM, REV, "readme", "txt", sep = "\\.")
+README2 <- paste(NEON, DOM, DPL, PRNUM, REV, "readme", "txt$", sep = "\\.")
 META <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC,
               GENTIME, "csv", sep = "\\.")
 EML <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, "EML",
-             "\\d{8}-\\d{8}", GENTIME, "xml", sep = "\\.")
+             "\\d{8}-\\d{8}", GENTIME, "xml$", sep = "\\.")
 
 ################# AOP Products ###############################################
 CAMERA <-	paste0(FLHTSTRT,"_","EH",CCCCCC, "\\(", IMAGEDATETIME, "\\)-",
@@ -147,9 +150,9 @@ L2_SPECTROMETER <- paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", FLHTDATE,
 L3_AOP <- 	paste0(NEON, "_", DOM, "_", SITE, "_", DPL, "_", EEEEEE, "_",
                   NNNNNNN, "_", DESC,  EXT) #"\\.(laz|tif|[a-z]{3})")
 ZIP_AOP3 <- paste0(paste(NEON,DOM,SITE,DPL,EEEEEE, NNNNNNN,
-                         DESC, sep = "_"), "\\.(zip)")
+                         DESC, sep = "_"), "\\.(zip)$")
 ZIP_AOP2 <- paste0(paste(NEON,DOM,SITE,DPL,FLHTDATE, FFFFFF, DESC, sep = "_"),
-                   "\\.(zip)")
+                   "\\.(zip)$")
 
 
 
@@ -171,7 +174,9 @@ name_parse <- function(x, pattern, col_names, split = ".", fixed = TRUE){
   y <- x[grepl(pattern, x)] # operate only on those matching the pattern
   tmp <- strsplit(y, split, fixed = fixed)
   out <- as_tibble(do.call("rbind", tmp), .name_repair = "minimal")
+  
   colnames(out) <- col_names
+  out <- out[ !is.na(colnames(out)) ]
   out$name <- y
   out
 }
@@ -223,6 +228,9 @@ ec_parser <- function(x){
     name_parse(x, EC_DAILY2,
                c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
                  "YYYY_MM_DD","PKGTYPE", "GENTIME", "EXT")),
+    name_parse(x, EC_DAILY3,
+               c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
+                 "YYYY_MM_DD","PKGTYPE", "GENTIME", "EXT", "COMPRESSION")),
     name_parse(x, EC_MONTHLY2,
                c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
                  "YYYY_MM","PKGTYPE", "GENTIME", "EXT")),
@@ -303,7 +311,7 @@ schema <- function(){
             "PKGTYPE",  "GENTIME", "EXT", "HOR", "VER", "TMI",
             "YYYY_MM_DD", "DATE_RANGE", "README", "FLHTSTRT",
             "EHCCCCCC", "IMAGEDATETIME", "NNNN", "NNN", "R", "FLIGHTSTRT", 
-            "EEEEEE", "NNNNNNN", "FLHTDATE", "FFFFFF", "name")
+            "EEEEEE", "NNNNNNN", "FLHTDATE", "FFFFFF", "COMPRESSION", "name")
   
   x <- as.list(rep(NA, length(cols)))
   names(x) <- cols

@@ -20,10 +20,10 @@
 #' }
 #' 
 #' \donttest{
-#'  neon_download_s3("DP1.10003.001", 
-#'                   start_date = "2018-01-01", 
-#'                   end_date = "2019-01-01",
-#'                   site = "YELL")
+#'  neon_download("DP1.10003.001", 
+#'                start_date = "2018-01-01", 
+#'                end_date = "2019-01-01",
+#'                site = "YELL")
 #' }
 #' 
 #' \dontshow{
@@ -41,7 +41,7 @@ neon_download_s3 <- function(product,
                              verify = TRUE,
                              dir = neon_dir(), 
                              unzip = TRUE,
-  api = "https://minio.jetstream.carlboettiger.info/neonstore/"){
+  api = "https://minio.thelio.carlboettiger.info/neonstore/"){
   
   if(!quiet) message("querying S3 API...")
   files <- s3_index_public(api)
