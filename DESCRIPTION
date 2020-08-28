@@ -1,6 +1,6 @@
 Package: neonstore
 Title: NEON Data Store
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(person(
               "Carl", "Boettiger", 
               email = "cboettig@gmail.com", 

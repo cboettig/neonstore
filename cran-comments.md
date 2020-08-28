@@ -1,7 +1,6 @@
 Dear CRAN,
 
-This fix improves rate limit handling and adapts to an upstream 
-change in the NEON API, as detailed in NEWS.md
+This fix adapts to another change in the upstream API.
 
 
 ## R CMD check results

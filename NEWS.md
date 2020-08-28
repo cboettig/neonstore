@@ -1,3 +1,6 @@
+# v0.2.1 
+
+- handle another change in API file naming (for eddy-covariance files [#7])
 
 # v0.2.0
 
