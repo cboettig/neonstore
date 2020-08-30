@@ -189,7 +189,12 @@ download_all <- function(addr, dest, quiet){
 unzip_all <- function(path, dir, keep_zips = FALSE){
   zips <- path[grepl("[.]zip", path)]
   lapply(zips, zip::unzip, exdir = dir)
-  if(!keep_zips) unlink(zips)
+  filename <- paste(dir, path[grepl("[.]gz", path)], sep = "/")
+  lapply(filename, R.utils::gunzip)
+  if(!keep_zips) {
+    unlink(zips)
+    unlink(filename)
+  }
 }
 
 
