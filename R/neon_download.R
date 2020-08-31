@@ -192,8 +192,9 @@ unzip_all <- function(path, dir, keep_zips = FALSE){
   lapply(zips, zip::unzip, exdir = dir)
   filename <- path[grepl("[.]gz", path)]
   filename <- paste(dir,filename, sep = "/")
+  destname <- tools::file_path_sans_ex(destname)
   if(length(filename) > 0){
-    lapply(filename, R.utils::gunzip, destname = filename)
+    mapply(R.utils::gunzip, filename, destname)
     unlink(filename)
   }
   if(!keep_zips) {
