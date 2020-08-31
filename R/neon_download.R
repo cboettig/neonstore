@@ -70,6 +70,7 @@
 #' @export
 #' @importFrom curl curl_download
 #' @importFrom R.utils gunzip
+#' @importFrom tools file_path_sans_ext
 #' @examples 
 #' \donttest{
 #'  

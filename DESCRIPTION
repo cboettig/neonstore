@@ -35,7 +35,8 @@ Imports:
     stats,
     zip,
     digest,
-    R.utils
+    R.utils,
+    tools
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
