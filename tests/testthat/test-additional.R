@@ -60,5 +60,14 @@ test_that("ECdata", {
   expect_is(df, "data.frame")
   expect_gt(nrow(df), 0)
   
+  path_gz <- df$path[grepl("[.]gz", df$path)]
+  path_h5 <- df$path[grepl("[.]h5", df$path)]
+  
+  expect_equal(length(path_gz), 0)
+  expect_gt(length(path_h5), 0)
+  
+  
+  
+  
 
 })
