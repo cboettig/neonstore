@@ -109,7 +109,7 @@ neon_download <- function(product,
                      site = site,  
                      api = api, 
                      .token = .token)
-
+  
   ## additional filters on already_have, type and file_regex:
   files <- download_filters(files, file_regex, type, quiet, dir)
   if(is.null(files)) return(invisible(NULL)) # nothing to download
@@ -132,7 +132,7 @@ download_filters <- function(files, file_regex,
                              type, quiet, dir){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
-
+  
   ## Omit those files we already have
   files <- files[!(files$name %in% list.files(dir)), ]
   
@@ -181,7 +181,7 @@ download_all <- function(addr, dest, quiet){
       curl::curl_download(addr[i], dest[i]),
       error = function(e) 
         warning(paste(e$message, "on", addr[i]),
-             call. = FALSE),
+                call. = FALSE),
       finally = NULL
     )
   }  
@@ -190,15 +190,13 @@ download_all <- function(addr, dest, quiet){
 unzip_all <- function(path, dir, keep_zips = FALSE){
   zips <- path[grepl("[.]zip", path)]
   lapply(zips, zip::unzip, exdir = dir)
-  filename <- path[grepl("[.]gz", path)]
-  filename <- paste(dir,filename, sep = "/")
-  destname <- tools::file_path_sans_ex(destname)
-  if(length(filename) > 0){
-    mapply(R.utils::gunzip, filename, destname)
-    unlink(filename)
-  }
   if(!keep_zips) {
     unlink(zips)
+  }
+  filename <- path[grepl("[.]gz", path)]
+  if(length(filename) > 0){
+    destname <- tools::file_path_sans_ext(filename)
+    mapply(R.utils::gunzip, filename, destname)
   }
 }
 
