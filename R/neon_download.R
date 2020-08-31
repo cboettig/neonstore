@@ -69,6 +69,7 @@
 #'
 #' @export
 #' @importFrom curl curl_download
+#' @importFrom R.utils gunzip
 #' @examples 
 #' \donttest{
 #'  
@@ -189,13 +190,17 @@ download_all <- function(addr, dest, quiet){
 unzip_all <- function(path, dir, keep_zips = FALSE){
   zips <- path[grepl("[.]zip", path)]
   lapply(zips, zip::unzip, exdir = dir)
-  filename <- paste(dir, path[grepl("[.]gz", path)], sep = "/")
-  lapply(filename, R.utils::gunzip)
-  if(!keep_zips) {
-    unlink(zips)
+  filename <- path[grepl("[.]gz", path)]
+  filename <- paste(dir,filename, sep = "/")
+  if(length(filename) > 0){
+    lapply(filename, R.utils::gunzip, destname = filename)
     unlink(filename)
   }
+  if(!keep_zips) {
+    unlink(zips)
+  }
 }
+
 
 
 
