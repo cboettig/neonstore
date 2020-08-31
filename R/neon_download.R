@@ -120,9 +120,9 @@ neon_download <- function(product,
   
   algo <- hash_type(files)
   verify_hash(files$path, files[algo], verify, algo)
-
-  if(unzip) unzip_all(files$path, dir)
   
+  if(unzip) unzip_all(files$path, dir)
+
   ## file metadata (url, path, md5sum)  
   invisible(files)
 }
@@ -189,7 +189,7 @@ download_all <- function(addr, dest, quiet){
   }  
 }
 
-unzip_all <- function(path, dir, keep_zips = FALSE){
+unzip_all <- function(path, dir, keep_zips = TRUE){
   zips <- path[grepl("[.]zip", path)]
   lapply(zips, zip::unzip, exdir = dir)
   if(!keep_zips) {
@@ -199,12 +199,10 @@ unzip_all <- function(path, dir, keep_zips = FALSE){
   filename <- path[grepl("[.]gz", path)]
   if(length(filename) > 0){
     destname <- tools::file_path_sans_ext(filename)
-    mapply(R.utils::gunzip, filename, destname)
+    mapply(R.utils::gunzip, filename, destname,remove = TRUE)
   }
+  
 }
-
-
-
 
 #' @importFrom digest digest
 #' @importFrom openssl md5
@@ -229,6 +227,8 @@ verify_hash <- function(path, hash, verify, algo = "md5"){
     }
   }
 }
+
+
 
 
 
