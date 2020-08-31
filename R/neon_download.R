@@ -147,7 +147,6 @@ download_filters <- function(files, file_regex,
   ## Filter to have only expanded or basic (not both)
   ## Note: this may not make sense if product is a vector!
   
-  print(paste("type is:", type))
   if(type == "expanded" & !any(grepl("expanded", files))){
     type <- "basic"
     if(!quiet) message("no expanded product, using basic product")
