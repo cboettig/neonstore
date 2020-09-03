@@ -1,6 +1,6 @@
 Dear CRAN,
 
-This fix adapts to another change in the upstream API.
+Bugfix, see NEWS.md
 
 
 ## R CMD check results
