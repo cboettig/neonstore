@@ -31,7 +31,7 @@ test_that("neon_index options", {
   expect_true(any(grepl("hash", colnames(x))))
   
   ## No data expected if timestamp predates data publication times!
-  x <- neon_index(timestamp = as.POSIXct("2018-01-01 01:00:00"))
+  x <- neon_index(timestamp = as.POSIXct("2017-01-01 01:00:00"))
   expect_true(nrow(x) == 0)
   
   x <- neon_index(dir = tempfile())

@@ -5,7 +5,7 @@
 \title{export local neon store as a zip archive}
 \usage{
 neon_export(
-  archive = "neon.zip",
+  archive = paste(Sys.Date(), "neonstore.zip", sep = "-"),
   product = NA,
   table = NA,
   site = NA,
@@ -13,6 +13,7 @@ neon_export(
   end_date = NA,
   type = NA,
   ext = NA,
+  timestamp = NA,
   hash = NULL,
   dir = neon_dir()
 )
@@ -37,6 +38,9 @@ as \code{NA} to download up to the most recent available data.}
 See details.}
 
 \item{ext}{only match files with this file extension(s)}
+
+\item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
 
 \item{hash}{name of a hashing algorithm to check file integrity. Can be
 \code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)

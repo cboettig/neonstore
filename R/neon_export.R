@@ -7,12 +7,14 @@
 #' re-created by other users without an API key, or without waiting for
 #' the individual download, or any other tiem you want to share or 
 #' distribute your local store. 
+#' 
 #' @return table of selected files and metadata, from [neon_index()], invisibly.
 #' @param archive path to the zip archive to be created.
+#' @details
 #' @inheritParams neon_index
 #' @importFrom zip zip unzip
 #' @seealso [neon_import()], [neon_citation()]
-neon_export <-  function(archive = "neon.zip",
+neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
                          product = NA, 
                          table = NA, 
                          site = NA,
@@ -20,6 +22,7 @@ neon_export <-  function(archive = "neon.zip",
                          end_date = NA,
                          type = NA,
                          ext = NA,
+                         timestamp = NA,
                          hash = NULL,
                          dir = neon_dir()){
   
@@ -30,6 +33,7 @@ neon_export <-  function(archive = "neon.zip",
                      end_date = end_date,
                      type = type,
                      ext = ext,
+                     timestamp = timestamp,
                      hash = hash, 
                      dir = dir)
   

@@ -45,9 +45,8 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{unzip}{should we extract .zip files?  Also removes the .zip files.
-(default \code{TRUE}).  Set to FALSE if you want to keep \code{.zip} archives and
-manually unzip them later.}
+\item{unzip}{should we extract .zip files? (default \code{TRUE}). Note: .zip
+files are preserved in the store to avoid repeated downloads.}
 
 \item{api}{URL to an S3 bucket containing raw NEON data files (in
 flat file structure like that used by neonstore).}

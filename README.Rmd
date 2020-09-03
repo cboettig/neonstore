@@ -99,8 +99,6 @@ neon_products()
 ```
 
 
-
-
 ## Design Details / comparison to `neonUtilities`
 
 `neonstore` is not meant as a replacement to the `neonUtilities` package
@@ -177,7 +175,7 @@ by consulting `neon_index()`:
 
 
 ```{r}
-raw_files <- neon_index(table = "brd_countdata-expanded", hash="md5")
+raw_files <- neon_index(table = "brd_countdata", hash="md5")
 raw_files
 ```
 
@@ -211,7 +209,8 @@ archival purposes. (Note that NEON is an Open Data provider, see
 
 ```{r message=FALSE}
 write.csv(raw_files, "index.csv")
-zip("brd_countdata.zip", raw_files$path)
+neon_export("my_neondata.zip", product = "DP1.10003.001")
+neon_import("my_neondata.zip")
 ```
 
 ## Data citation
