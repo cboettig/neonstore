@@ -39,3 +39,35 @@ test_that("beetles", {
   
 })
 
+test_that("ECdata", {
+  
+  
+  skip_on_cran()
+  skip_if_offline()
+  
+
+  x <- neon_download("DP4.00200.001",
+                     site = "BART",
+                     start_date = "2020-06-01",
+                     end_date = "2020-07-01",
+                     type = "basic")
+  expect_is(x, "data.frame")
+  expect_gt(nrow(x), 0)
+  
+  df <- neon_index(product = "DP4.00200.001",
+                                      start_date = "2020-06-01",
+                                      ext = "h5")
+  expect_is(df, "data.frame")
+  expect_gt(nrow(df), 0)
+  
+  path_gz <- df$path[grepl("[.]gz", df$path)]
+  path_h5 <- df$path[grepl("[.]h5", df$path)]
+  
+  expect_equal(length(path_gz), 0)
+  expect_gt(length(path_h5), 0)
+  
+  
+  
+  
+
+})
