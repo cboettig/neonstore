@@ -32,7 +32,7 @@ test_that("neon_index options", {
   
   ## No data expected if timestamp predates data publication times!
   x <- neon_index(timestamp = as.POSIXct("2010-01-01 01:00:00"))
-  expect_true(nrow(x) == 0)
+  expect_true(is.null(x) || nrow(x) == 0)
   
   x <- neon_index(dir = tempfile())
   expect_null(x)
