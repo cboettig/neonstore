@@ -11,6 +11,7 @@ neon_read(
   start_date = NA,
   end_date = NA,
   ext = NA,
+  timestamp = NA,
   dir = neon_dir(),
   files = NULL,
   sensor_metadata = TRUE,
@@ -32,6 +33,9 @@ as \code{NA} to download up to the most recent available data.}
 \code{NA} to download all prior data.}
 
 \item{ext}{only match files with this file extension(s)}
+
+\item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
