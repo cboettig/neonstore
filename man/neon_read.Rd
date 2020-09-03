@@ -20,7 +20,7 @@ neon_read(
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
-see \link{neon_store}}
+see \link{neon_index}}
 
 \item{product}{Include only files matching this NEON productCode(s)}
 
@@ -64,6 +64,10 @@ data table that has been sharded into many files like this much
 much faster than other parsers can read in each table iteratively,
 (and thus can greatly out-perform the 'stacking" methods in \code{neonUtilities}).
 
+When reading in very large numbers of files, it may be helpful to set
+\code{altrep = FALSE} to opt out of \code{vroom}'s fast altrep mechanism, which
+can cause \code{\link[=neon_read]{neon_read()}} to fail when stacking thousands of files.
+
 Unfortunately, not all datasets are entirely consistent in their use
 of columns.  \code{neon_read} works around this by parsing such tables in
 groups of matching schema, which is still reasonably fast.
@@ -89,7 +93,7 @@ files <- neon_index(table = "brd_countdata-expanded")$path
 neon_read(files = files)
 
 ## Sensor inputs will add metadata columns by default
-neon_read("waq_instantaneous",site = c("CRAM","SUGG"))
+neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
 
 
 }

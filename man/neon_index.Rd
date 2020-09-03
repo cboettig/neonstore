@@ -73,7 +73,7 @@ it may be necessary to access older version instead. Setting the timestamp
 argument allows the user to filter out newer files and select the original
 ones instead.  Unfortunately, at this time users cannot request the outdated
 data files from NEON API.  For strict reproducibility, users should also
-archive their local store, see \code{\link[=neon_archive]{neon_archive()}}.
+archive their local store.
 }
 \examples{
 
@@ -94,5 +94,5 @@ neon_index("DP1.10003.001")
 
 }
 \seealso{
-\code{\link[=neon_archive]{neon_archive()}}, \code{\link[=neon_download]{neon_download()}}
+\code{\link[=neon_download]{neon_download()}}
 }

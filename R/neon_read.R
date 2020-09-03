@@ -7,6 +7,10 @@
 #' data table that has been sharded into many files like this much
 #' much faster than other parsers can read in each table iteratively, 
 #' (and thus can greatly out-perform the 'stacking" methods in `neonUtilities`).
+#' 
+#' When reading in very large numbers of files, it may be helpful to set
+#' `altrep = FALSE` to opt out of `vroom`'s fast altrep mechanism, which
+#' can cause [neon_read()] to fail when stacking thousands of files.
 #'
 #' Unfortunately, not all datasets are entirely consistent in their use
 #' of columns.  `neon_read` works around this by parsing such tables in
@@ -26,7 +30,7 @@
 #' 
 #' 
 #' @param table the name of a downloaded NEON table in the store,
-#'  see [neon_store]
+#'  see [neon_index]
 #' @param sensor_metadata logical, default TRUE. Should we add 
 #' metadata fields from file names of sensor data into the table?  Adds
 #' DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
@@ -47,7 +51,7 @@
 #' neon_read(files = files)
 #' 
 #' ## Sensor inputs will add metadata columns by default
-#' neon_read("waq_instantaneous",site = c("CRAM","SUGG"))
+#' neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
 #'
 #' 
 neon_read <- function(table = NA,

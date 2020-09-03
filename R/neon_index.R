@@ -23,9 +23,9 @@
 #' argument allows the user to filter out newer files and select the original
 #' ones instead.  Unfortunately, at this time users cannot request the outdated
 #' data files from NEON API.  For strict reproducibility, users should also
-#' archive their local store, see [neon_archive()].
+#' archive their local store.
 #' 
-#' @seealso [neon_archive()], [neon_download()]
+#' @seealso  [neon_download()]
 #' 
 #' @param product Include only files matching this NEON productCode(s)
 #' @param table Include only files matching this table name (or regex pattern). 
