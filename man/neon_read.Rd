@@ -13,7 +13,7 @@ neon_read(
   ext = NA,
   dir = neon_dir(),
   files = NULL,
-  .id = NA,
+  sensor_metadata = TRUE,
   ...
 )
 }
@@ -42,7 +42,10 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 \item{files}{optionally, specify a vector of file paths directly (e.g. as
 provided from \link{neon_index}) and specify \code{table} argument as NULL.}
 
-\item{.id}{add an additional id column with metadata from filename.}
+\item{sensor_metadata}{logical, default TRUE. Should we add
+metadata fields from file names of sensor data into the table?  Adds
+DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
+Results in slower parsing.}
 
 \item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
 }
@@ -61,7 +64,17 @@ Unfortunately, not all datasets are entirely consistent in their use
 of columns.  \code{neon_read} works around this by parsing such tables in
 groups of matching schema, which is still reasonably fast.
 
-For convenience, \code{neon_read} takes the name of a table in the local store.
+NEON sensor data products currently do not include important metadata columns
+containing DomainID, SiteID, horizontalPosition, verticalPosition, and
+publicationDate in the data files themselves, but only encode this in the
+in the raw file names. All though these values are shared across a raw
+data file, this information is lost when stacking the tables unless explicit
+columns are added to the data.  This requires us to parse the files
+one-by-one, which is much slower.  By default this information is added to
+the table, altering the stacked table schema from that of the raw table.
+Disable this behavior by setting \code{sensor_metadata = FALSE}.  Future
+NEON sensor data products may start including this information in
+the raw data files, as is already the case for observational data.
 }
 \examples{
 
@@ -70,5 +83,9 @@ neon_read("brd_countdata-expanded")
 ## Read in specific files from the neon_index():
 files <- neon_index(table = "brd_countdata-expanded")$path
 neon_read(files = files)
+
+## Sensor inputs will add metadata columns by default
+neon_read("waq_instantaneous",site = c("CRAM","SUGG"))
+
 
 }

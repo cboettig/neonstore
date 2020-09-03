@@ -70,6 +70,7 @@ neon_index <- function(product = NA,
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
+  meta$timestamp <-  as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   
   tibble::as_tibble(meta)
 }
