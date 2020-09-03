@@ -16,7 +16,10 @@
 #' @seealso [neon_import()], [neon_citation()]
 #' @examples 
 #' 
-#' neon_export()
+#' archive <- tempfile()
+#' dir <- tempdir()
+#' neon_export(archive, dir = dir)
+#' 
 neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
                          product = NA, 
                          table = NA, 
@@ -42,12 +45,12 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
   
   if(is.null(meta)){
     message("No files found.")
-    return(NULL)
+    return(invisible(NULL))
   }
   
   if(nrow(meta) == 0){
     message("No files found.")
-    return(NULL)
+    return(invisible(NULL))
   }
   
   
@@ -66,11 +69,16 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
 #' @seealso [neon_export()]
 #' @export
 #' @examples 
+#' 
 #' archive <- tempfile()
 #' neon_export(archive)
 #' neon_import(archive)
 #' 
 neon_import <- function(archive, overwrite = TRUE, dir = neon_dir()){
+  if(!file.exists(archive)){
+    warning(paste(archive, "not found"), call. = FALSE)
+    return(invisible(NULL))
+  }
   if(!dir.exists(dir)) dir.create(dir, FALSE, TRUE)
   zip::unzip(archive, overwrite = overwrite, exdir = dir)
 }

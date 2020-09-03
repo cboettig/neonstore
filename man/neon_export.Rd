@@ -65,7 +65,10 @@ distribute your local store.
 }
 \examples{
 
-neon_export()
+archive <- tempfile()
+dir <- tempdir()
+neon_export(archive, dir = dir)
+
 }
 \seealso{
 \code{\link[=neon_import]{neon_import()}}, \code{\link[=neon_citation]{neon_citation()}}

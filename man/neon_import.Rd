@@ -23,6 +23,7 @@ This can be useful in cases where
 see \code{\link[=neon_download]{neon_download()}} to download data directly from NEON.
 }
 \examples{
+
 archive <- tempfile()
 neon_export(archive)
 neon_import(archive)
