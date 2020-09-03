@@ -19,7 +19,7 @@ neon_export(
 )
 }
 \arguments{
-\item{archive}{path to the zip archive to be created.}
+\item{archive}{path to the zip archive to be created.#'}
 
 \item{product}{Include only files matching this NEON productCode(s)}
 
@@ -62,6 +62,10 @@ archiving the files required for your analysis so that they can be
 re-created by other users without an API key, or without waiting for
 the individual download, or any other tiem you want to share or
 distribute your local store.
+}
+\examples{
+
+neon_export()
 }
 \seealso{
 \code{\link[=neon_import]{neon_import()}}, \code{\link[=neon_citation]{neon_citation()}}

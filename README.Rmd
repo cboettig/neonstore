@@ -6,13 +6,13 @@ output:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%",
-  cache = TRUE
+  cache = FALSE
 )
 library(neonstore)
 Sys.setenv("NEONSTORE_HOME" = tempfile())
@@ -40,6 +40,9 @@ devtools::install_github("cboettig/neonstore")
 ```
 ## Quickstart
 
+```{r}
+library(neonstore)
+```
 
 Discover data products of interest:
 
@@ -56,7 +59,6 @@ products[i, c("productCode", "productName")]
 Download all data files in the bird survey data products.  
 
 ```{r}
-library(neonstore)
 neon_download("DP1.10003.001")
 
 ```
@@ -208,7 +210,10 @@ archival purposes. (Note that NEON is an Open Data provider, see
 [LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
 
 ```{r message=FALSE}
+# index list alone
 write.csv(raw_files, "index.csv")
+
+# zip archive
 neon_export("my_neondata.zip", product = "DP1.10003.001")
 neon_import("my_neondata.zip")
 ```
@@ -247,7 +252,7 @@ queries of the from `/data/<product>/<site>`, and pool the results, rather than
 require each month of sampling separately!)
 
 ```{r include=FALSE}
-unlink("brd_countdata.zip")
+unlink("my_neondata.zip")
 unlink("index.csv")
 Sys.unsetenv("NEONSTORE_HOME")
 ```

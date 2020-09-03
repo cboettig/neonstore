@@ -9,11 +9,14 @@
 #' distribute your local store. 
 #' 
 #' @return table of selected files and metadata, from [neon_index()], invisibly.
-#' @param archive path to the zip archive to be created.
-#' @details
+#' @param archive path to the zip archive to be created.#' 
 #' @inheritParams neon_index
 #' @importFrom zip zip unzip
+#' @export
 #' @seealso [neon_import()], [neon_citation()]
+#' @examples 
+#' 
+#' neon_export()
 neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
                          product = NA, 
                          table = NA, 
@@ -37,6 +40,17 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
                      hash = hash, 
                      dir = dir)
   
+  if(is.null(meta)){
+    message("No files found.")
+    return(NULL)
+  }
+  
+  if(nrow(meta) == 0){
+    message("No files found.")
+    return(NULL)
+  }
+  
+  
   zip::zipr(archive, meta$path, include_directories=FALSE)
   invisible(meta)
 }
@@ -50,6 +64,11 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
 #' @param overwrite should we overwrite any existing files?
 #' @inheritParams neon_index
 #' @seealso [neon_export()]
+#' @export
+#' @examples 
+#' archive <- tempfile()
+#' neon_export(archive)
+#' neon_import(archive)
 #' 
 neon_import <- function(archive, overwrite = TRUE, dir = neon_dir()){
   if(!dir.exists(dir)) dir.create(dir, FALSE, TRUE)
