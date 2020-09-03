@@ -67,7 +67,7 @@ previously-released raw data files (which may or may not actually differ).
 The NEON download API, and hence \code{\link[=neon_download]{neon_download()}}, only serve the most recent
 of such files, but earlier versions may still exist in your local \code{neonstore}
 if you downloaded them before the updated files were released.  By default,
-\code{\link[=read_neon]{read_neon()}} will always select the most recent of such files, thus avoiding
+\code{\link[=neon_read]{neon_read()}} will always select the most recent of such files, thus avoiding
 duplication and providing the most updated data.  For reproducibility however,
 it may be necessary to access older version instead. Setting the timestamp
 argument allows the user to filter out newer files and select the original

@@ -15,8 +15,8 @@ By default, \code{\link[=neon_download]{neon_download()}} downloads files into t
 which uses an appropriate application directory for your operating system,
 see \code{\link[rappdirs:user_data_dir]{rappdirs::user_data_dir()}}.  This location can be overridden by setting
 the environmental variable \code{NEONSTORE_HOME}.  \code{neonstore} functions
-(e.g. \code{\link[=neon_index]{neon_index()}}, \code{\link[=neon_store]{neon_store()}}, and \code{\link[=neon_read]{neon_read()}}) look for files in
-the \code{neon_store()} directory by default.  (All functions can also take
+(e.g. \code{\link[=neon_index]{neon_index()}}, and \code{\link[=neon_read]{neon_read()}}) look for files in
+the \code{neon_dir()} directory by default.  (All functions can also take
 a one-off argument to \code{dir} in the function call in place of the calling
 \code{neon_dir()} to access the default.
 }

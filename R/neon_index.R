@@ -17,7 +17,7 @@
 #' The NEON download API, and hence [neon_download()], only serve the most recent
 #' of such files, but earlier versions may still exist in your local `neonstore`
 #' if you downloaded them before the updated files were released.  By default,
-#' [read_neon()] will always select the most recent of such files, thus avoiding
+#' [neon_read()] will always select the most recent of such files, thus avoiding
 #' duplication and providing the most updated data.  For reproducibility however,
 #' it may be necessary to access older version instead. Setting the timestamp 
 #' argument allows the user to filter out newer files and select the original
