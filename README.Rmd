@@ -6,13 +6,13 @@ output:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%",
-  cache = TRUE
+  cache = FALSE
 )
 library(neonstore)
 Sys.setenv("NEONSTORE_HOME" = tempfile())
@@ -40,6 +40,9 @@ devtools::install_github("cboettig/neonstore")
 ```
 ## Quickstart
 
+```{r}
+library(neonstore)
+```
 
 Discover data products of interest:
 
@@ -56,7 +59,6 @@ products[i, c("productCode", "productName")]
 Download all data files in the bird survey data products.  
 
 ```{r}
-library(neonstore)
 neon_download("DP1.10003.001")
 
 ```
@@ -65,12 +67,12 @@ neon_download("DP1.10003.001")
 Now, view your store of NEON products:
 
 ```{r }
-neon_store()
+neon_index()
 ```
 
 These will persist between sessions, so you only need to download once
-or to retrieve updates. `neon_store()` can take arguments to filter by product
-or pattern in table name, e.g. `neon_store(table = "brd")`.
+or to retrieve updates. `neon_index()` can take arguments to filter by product
+or pattern (regular expression) in table name, e.g. `neon_index(table = "brd")`.
 
 Once you determine the table of interest, you can
 read in all the component tables into a single `data.frame`
@@ -97,8 +99,6 @@ given product:
 ```{r}
 neon_products()
 ```
-
-
 
 
 ## Design Details / comparison to `neonUtilities`
@@ -177,7 +177,7 @@ by consulting `neon_index()`:
 
 
 ```{r}
-raw_files <- neon_index(table = "brd_countdata-expanded", hash="md5")
+raw_files <- neon_index(table = "brd_countdata", hash="md5")
 raw_files
 ```
 
@@ -210,8 +210,12 @@ archival purposes. (Note that NEON is an Open Data provider, see
 [LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
 
 ```{r message=FALSE}
+# index list alone
 write.csv(raw_files, "index.csv")
-zip("brd_countdata.zip", raw_files$path)
+
+# zip archive
+neon_export("my_neondata.zip", product = "DP1.10003.001")
+neon_import("my_neondata.zip")
 ```
 
 ## Data citation
@@ -229,21 +233,26 @@ neon_citation()
 
 ## Note on API limits
 
+If `neon_download()` exceeds the API request limit (with or without the token),
+`neonstore` will simply pause for the required amount of time to avoid 
+rate-limit-based errors.  
+
 [The NEON API now rate-limits requests.](https://data.neonscience.org/data-api/rate-limiting/#api-tokens).
-Using a personal token will increase the number of requests you can make.
-See that link for directions on registering for a token.
+Using a personal token will increase the number of requests you can make before
+encountering this delay.  See link for directions on registering for a token.
 Then pass this token in `.token` argument of `neon_download()`,
 or for frequent use, add this token as  an environmental variable, `NEON_DATA`
-to your local `.Renviron` file in your user's home directory.  
-
-`neon_download()` must first query each the API of eacn NEON site which collects
+to your local `.Renviron` file in your user's home directory. 
+`neon_download()` must first query each the API of each NEON site which collects
 that product, for each month the product is collected.
+
+
 (It would be much more efficient on the NEON server if the API could take
 queries of the from `/data/<product>/<site>`, and pool the results, rather than
 require each month of sampling separately!)
 
 ```{r include=FALSE}
-unlink("brd_countdata.zip")
+unlink("my_neondata.zip")
 unlink("index.csv")
 Sys.unsetenv("NEONSTORE_HOME")
 ```

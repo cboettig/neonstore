@@ -39,6 +39,23 @@ test_that("beetles", {
   
 })
 
+test_that("Aquatic sensor data", {
+  
+  skip_on_cran()
+  skip_if_offline()
+  
+  neon_download("DP1.20288.001", site = c("CRAM","SUGG"), type="basic")
+  df <- neon_read("waq_instantaneous")
+  expect_true("siteID" %in% colnames(df))
+
+  df <- neon_read("waq_instantaneous", sensor_metadata = FALSE)
+  
+  expect_false("siteID" %in% colnames(df))
+
+  
+})
+
+
 test_that("ECdata", {
   
   

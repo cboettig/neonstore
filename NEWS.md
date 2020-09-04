@@ -1,8 +1,12 @@
+# v0.2.2
+
+- Keep .zip files so we can take advantage of not re-downloading [#13]
+
 # v0.2.1 
 
 - handle another change in API file naming (for eddy-covariance files [#7])
 
-# v0.2.0
+# v0.2.0 
 
 - API queries will now automatically detect rate limiting events and pause for required time.
 - Upstream API has changed how hashes are reported, `neonstore` now handles this change.
