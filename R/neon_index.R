@@ -12,10 +12,27 @@
 #' `neon_index()` parses this metadata from the file name string and returns
 #' the information in a convenient table, along with a path to each file.
 #' 
+#' **Regarding timestamps:**  NEON will occasionally publish new versions of
+#' previously-released raw data files (which may or may not actually differ).
+#' The NEON download API, and hence [neon_download()], only serve the most recent
+#' of such files, but earlier versions may still exist in your local `neonstore`
+#' if you downloaded them before the updated files were released.  By default,
+#' [neon_read()] will always select the most recent of such files, thus avoiding
+#' duplication and providing the most updated data.  For reproducibility however,
+#' it may be necessary to access older version instead. Setting the timestamp 
+#' argument allows the user to filter out newer files and select the original
+#' ones instead.  Unfortunately, at this time users cannot request the outdated
+#' data files from NEON API.  For strict reproducibility, users should also
+#' archive their local store.
+#' 
+#' @seealso  [neon_download()]
+#' 
 #' @param product Include only files matching this NEON productCode(s)
 #' @param table Include only files matching this table name (or regex pattern). 
 #' (optional).
 #' @param ext only match files with this file extension(s)
+#' @param timestamp only match timestamps prior this. See details in [neon_index()].
+#'        Should be a datetime POSIXct object (or coerce-able string)
 #' @param hash name of a hashing algorithm to check file integrity. Can be
 #'  `"md5"`, `"sha1"`, or `"sha256"` currently; or set to [NULL] (default)
 #'   to skip hash computation.
@@ -46,6 +63,7 @@ neon_index <- function(product = NA,
                        end_date = NA,
                        type = NA,
                        ext = NA,
+                       timestamp = NA,
                        hash = NULL,
                        dir = neon_dir()){
   
@@ -57,6 +75,7 @@ neon_index <- function(product = NA,
   
   ## Include full paths to files
   meta$path <- file.path(dir, meta$path)
+  meta$timestamp <-  as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   
   ## Apply filters
   meta <- meta_filter(meta, 
@@ -66,6 +85,7 @@ neon_index <- function(product = NA,
                       start_date = start_date,
                       end_date = end_date,
                       type = type,
+                      timestamp = timestamp,
                       ext = ext)
   
   ## Compute hashes, if requested
@@ -81,6 +101,7 @@ meta_filter <- function(meta,
                         start_date = NA, 
                         end_date = NA, 
                         type = NA,
+                        timestamp = NA,
                         ext = NA){
   
   ## Arguably, filtering could be done on file names
@@ -113,6 +134,10 @@ meta_filter <- function(meta,
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
     meta <- meta[keep, ]
+  }
+  
+  if(!is.na(timestamp)){
+    meta <- meta[meta$timestamp < as.POSIXct(timestamp),]
   }
   
   if(!is.na(type)){

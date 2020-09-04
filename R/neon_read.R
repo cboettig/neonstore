@@ -7,16 +7,34 @@
 #' data table that has been sharded into many files like this much
 #' much faster than other parsers can read in each table iteratively, 
 #' (and thus can greatly out-perform the 'stacking" methods in `neonUtilities`).
+#' 
+#' When reading in very large numbers of files, it may be helpful to set
+#' `altrep = FALSE` to opt out of `vroom`'s fast altrep mechanism, which
+#' can cause [neon_read()] to fail when stacking thousands of files.
 #'
 #' Unfortunately, not all datasets are entirely consistent in their use
 #' of columns.  `neon_read` works around this by parsing such tables in
 #' groups of matching schema, which is still reasonably fast.
 #' 
-#' For convenience, `neon_read` takes the name of a table in the local store.
+#' NEON sensor data products currently do not include important metadata columns
+#' containing DomainID, SiteID, horizontalPosition, verticalPosition, and
+#' publicationDate in the data files themselves, but only encode this in the 
+#' in the raw file names. All though these values are shared across a raw 
+#' data file, this information is lost when stacking the tables unless explicit
+#' columns are added to the data.  This requires us to parse the files
+#' one-by-one, which is much slower.  By default this information is added to
+#' the table, altering the stacked table schema from that of the raw table.  
+#' Disable this behavior by setting `sensor_metadata = FALSE`.  Future
+#' NEON sensor data products may start including this information in 
+#' the raw data files, as is already the case for observational data.
+#' 
 #' 
 #' @param table the name of a downloaded NEON table in the store,
-#'  see [neon_store]
-#' @param .id add an additional id column with metadata from filename.
+#'  see [neon_index]
+#' @param sensor_metadata logical, default TRUE. Should we add 
+#' metadata fields from file names of sensor data into the table?  Adds
+#' DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
+#' Results in slower parsing.  
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
@@ -32,15 +50,20 @@
 #' files <- neon_index(table = "brd_countdata-expanded")$path
 #' neon_read(files = files)
 #' 
+#' ## Sensor inputs will add metadata columns by default
+#' neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
+#'
+#' 
 neon_read <- function(table = NA,
                       product = NA, 
                       site = NA,
                       start_date = NA,
                       end_date = NA,
                       ext = NA,
+                      timestamp = NA,
                       dir = neon_dir(),
                       files = NULL,
-                      .id = NA,
+                      sensor_metadata = TRUE,
                       ...){
   
   if(is.null(files)){
@@ -58,7 +81,6 @@ neon_read <- function(table = NA,
     
     ## If timestamp has changed but other metadata is the same, we only want the newer version
     meta <- filter_duplicates(meta)
-    
     files <- meta$path
   }
   
@@ -68,23 +90,42 @@ neon_read <- function(table = NA,
                   "perhaps you need to download them first?"))
     return(NULL)
   }
-  
-  ## Handle the case of needing to add an id column 
-  if(!is.na(.id)){
-    id <- unique(meta[[.id]])
-    groups <- 
-      lapply(id,
-             function(x){
-              paths <- meta$path[meta[[.id]] == x]
-              out <- read_csvs(paths, ...)
-              out[.id] <- x
-              out
-    })
-    ragged_bind(groups)
+
+  ## Handle the case of needing to add columns extracted from filenames
+  if(is_sensor_data(files) && sensor_metadata){
+    neon_read_sensor(meta, ...)
   ## Otherwise we can just read in:  
   } else {
     read_csvs(files, ...)
   }
+  
+}
+
+
+neon_read_sensor <- function(meta, ..., .id = "path") {
+    suppressMessages({
+      id <- unique(meta[[.id]])
+      groups <- 
+        lapply(id,
+               function(x){
+                 paths <- meta$path[meta[[.id]] == x]
+                 out <- read_csvs(paths, ...)
+                 out[.id] <- x
+                 out
+               })
+    })
+    suppressWarnings({
+      df <- ragged_bind(groups)
+    })
+  
+  filename_meta <- neon_filename_parser(df$path)
+  df$domainID <- filename_meta$DOM
+  df$siteID <- filename_meta$SITE
+  df$horizontalPosition <- filename_meta$HOR
+  df$verticalPosition <- filename_meta$VER
+  df$publicationDate <- as.POSIXct(filename_meta$GENTIME, format = "%Y%m%dT%H%M%OS")
+  
+  df
 }
 
 read_csvs <- function(files, ...){

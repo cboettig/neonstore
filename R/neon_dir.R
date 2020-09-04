@@ -5,8 +5,8 @@
 #' which uses an appropriate application directory for your operating system,
 #' see [rappdirs::user_data_dir()].  This location can be overridden by setting
 #' the environmental variable `NEONSTORE_HOME`.  `neonstore` functions 
-#' (e.g. [neon_index()], [neon_store()], and [neon_read()]) look for files in
-#' the `neon_store()` directory by default.  (All functions can also take
+#' (e.g. [neon_index()], and [neon_read()]) look for files in
+#' the `neon_dir()` directory by default.  (All functions can also take
 #' a one-off argument to `dir` in the function call in place of the calling
 #' `neon_dir()` to access the default.  
 #'

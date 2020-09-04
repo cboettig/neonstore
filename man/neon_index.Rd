@@ -12,6 +12,7 @@ neon_index(
   end_date = NA,
   type = NA,
   ext = NA,
+  timestamp = NA,
   hash = NULL,
   dir = neon_dir()
 )
@@ -35,6 +36,9 @@ See details.}
 
 \item{ext}{only match files with this file extension(s)}
 
+\item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
+
 \item{hash}{name of a hashing algorithm to check file integrity. Can be
 \code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)
 to skip hash computation.}
@@ -57,6 +61,19 @@ File names include metadata such as the file productCode,
 table name, site, and sampling month, as well as timestamp of creation.
 \code{neon_index()} parses this metadata from the file name string and returns
 the information in a convenient table, along with a path to each file.
+
+\strong{Regarding timestamps:}  NEON will occasionally publish new versions of
+previously-released raw data files (which may or may not actually differ).
+The NEON download API, and hence \code{\link[=neon_download]{neon_download()}}, only serve the most recent
+of such files, but earlier versions may still exist in your local \code{neonstore}
+if you downloaded them before the updated files were released.  By default,
+\code{\link[=neon_read]{neon_read()}} will always select the most recent of such files, thus avoiding
+duplication and providing the most updated data.  For reproducibility however,
+it may be necessary to access older version instead. Setting the timestamp
+argument allows the user to filter out newer files and select the original
+ones instead.  Unfortunately, at this time users cannot request the outdated
+data files from NEON API.  For strict reproducibility, users should also
+archive their local store.
 }
 \examples{
 
@@ -75,4 +92,7 @@ neon_index("DP1.10003.001")
  Sys.unsetenv("NEONSTORE_HOME")
 }
 
+}
+\seealso{
+\code{\link[=neon_download]{neon_download()}}
 }

@@ -51,9 +51,8 @@
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
 #' reported by the NEON API to verify integrity? (default `TRUE`)
-#' @param unzip should we extract .zip files?  Also removes the .zip files.
-#'  (default `TRUE`).  Set to FALSE if you want to keep `.zip` archives and
-#'  manually unzip them later.
+#' @param unzip should we extract .zip files? (default `TRUE`). Note: .zip
+#' files are preserved in the store to avoid repeated downloads. 
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
 #' (see [rappdirs::user_data_dir]).  This default also be configured by

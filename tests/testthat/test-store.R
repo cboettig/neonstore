@@ -15,8 +15,7 @@ test_that("neon_index()", {
   x <- neon_index()
   expect_is(x, "data.frame")
   expect_true(any(grepl("DP1.10003.001", x$product)))
-  x <- neon_index(dir = tempfile())
-  
+
 })
 
 
@@ -31,22 +30,15 @@ test_that("neon_index options", {
   expect_true(any(grepl("DP1.10003.001", x$product)))
   expect_true(any(grepl("hash", colnames(x))))
   
+  ## No data expected if timestamp predates data publication times!
+  x <- neon_index(timestamp = as.POSIXct("2010-01-01 01:00:00"))
+  ## sometimes draws a row of all NAs
+  expect_true(nrow(x) <= 1)
   
   x <- neon_index(dir = tempfile())
-  
+  expect_null(x)
 })
 
-test_that("neon_store()", {
-  
-  x <- neon_store()
-  expect_true(any(grepl("brd_countdata", x$table)))
-  d <- tempfile()
-  expect_message(
-    x <- neon_store(dir = d)
-  )
-  expect_null(x)
-  
-})
 
 test_that("neon_read()", {
   
