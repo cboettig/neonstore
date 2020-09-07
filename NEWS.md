@@ -1,6 +1,11 @@
 # v0.2.2
 
 - Keep .zip files so we can take advantage of not re-downloading [#13]
+- drop `neon_store()` [#10]
+- Document & export `neon_export()` and `neon_import()` for importing/exporting a whole neonstore [#9]
+- `neon_read()` now parses additional columns into Instrumental Systems (sensor data) by default:
+   DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
+- g'zipped hdf5 products are now extracted [#12]
 
 # v0.2.1 
 
