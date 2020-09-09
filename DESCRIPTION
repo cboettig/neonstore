@@ -6,9 +6,12 @@ Authors@R: c(person(
               email = "cboettig@gmail.com", 
               role = c("aut", "cre"),
               comment = c(ORCID = "0000-0002-1642-628X")),
-            person("Quinn", "Thomas", role = "ctb"),
+            person("Quinn", "Thomas", role = "aut",
+                   comment = c(ORCID = "0000-0003-1282-7825")),
             person("Christine", "Laney", role = "aut", 
-                   comment = c("ORCID" = "0000-0002-4944-2083"))
+                   comment = c("ORCID" = "0000-0002-4944-2083")),
+            person("Claire", "Lunch", role = "aut",
+                   comment = c("ORCID" = "0000-0001-8753-6593"))
             )
 Description: The National Ecological Observatory Network (NEON) provides access
   to its numerous data products through its REST API, 
