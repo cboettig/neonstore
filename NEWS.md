@@ -1,3 +1,7 @@
+# v0.2.3
+
+- bugfix for altrep defaults, see `?neon_read`
+
 # v0.2.2
 
 - Keep .zip files so we can take advantage of not re-downloading [#13]

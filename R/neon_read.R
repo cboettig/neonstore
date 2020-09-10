@@ -36,6 +36,9 @@
 #' DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
 #' Results in slower parsing.  
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
+#' @param altrep enable or disable altrep.  Logical, default `FALSE`. Setting to 
+#' `TRUE` can speed up reading, but may cause [vroom::vroom] to throw
+#' `mapping error: Too many open files`.  
 #' @param files optionally, specify a vector of file paths directly (e.g. as
 #' provided from [neon_index]) and specify `table` argument as NULL.
 #' @inheritParams neon_index
@@ -64,6 +67,7 @@ neon_read <- function(table = NA,
                       dir = neon_dir(),
                       files = NULL,
                       sensor_metadata = TRUE,
+                      altrep = FALSE,
                       ...){
   
   if(is.null(files)){
@@ -93,23 +97,23 @@ neon_read <- function(table = NA,
 
   ## Handle the case of needing to add columns extracted from filenames
   if(is_sensor_data(files) && sensor_metadata){
-    neon_read_sensor(meta, ...)
+    neon_read_sensor(meta, altrep = altrep, ...)
   ## Otherwise we can just read in:  
   } else {
-    read_csvs(files, ...)
+    read_csvs(files,  altrep = altrep, ...)
   }
   
 }
 
 
-neon_read_sensor <- function(meta, ..., .id = "path") {
+neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
     suppressMessages({
       id <- unique(meta[[.id]])
       groups <- 
         lapply(id,
                function(x){
                  paths <- meta$path[meta[[.id]] == x]
-                 out <- read_csvs(paths, ...)
+                 out <- read_csvs(paths, altrep = altrep, ...)
                  out[.id] <- x
                  out
                })
@@ -128,20 +132,20 @@ neon_read_sensor <- function(meta, ..., .id = "path") {
   df
 }
 
-read_csvs <- function(files, ...){
+read_csvs <- function(files, altrep = FALSE, ...){
   ## vroom can read in a list of files, but only if columns are consistent
-  tryCatch(vroom::vroom(files, ...),
-           error = function(e) vroom_ragged(files, ...),
+  tryCatch(vroom::vroom(files, altrep = altrep,  ...),
+           error = function(e) vroom_ragged(files, altrep = altrep, ...),
            finally = NULL)  
 }
 
 
 #' @importFrom vroom vroom spec
-vroom_ragged <- function(files, ...){
+vroom_ragged <- function(files, altrep = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
   suppressMessages(
-    schema <- lapply(files, vroom::vroom, n_max = 1, ...)
+    schema <- lapply(files, vroom::vroom, n_max = 1, altrep = altrep, ...)
   )
   
   

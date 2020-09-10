@@ -15,6 +15,7 @@ neon_read(
   dir = neon_dir(),
   files = NULL,
   sensor_metadata = TRUE,
+  altrep = FALSE,
   ...
 )
 }
@@ -50,6 +51,10 @@ provided from \link{neon_index}) and specify \code{table} argument as NULL.}
 metadata fields from file names of sensor data into the table?  Adds
 DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
 Results in slower parsing.}
+
+\item{altrep}{enable or disable altrep.  Logical, default \code{FALSE}. Setting to
+\code{TRUE} can speed up reading, but may cause \link[vroom:vroom]{vroom::vroom} to throw
+\verb{mapping error: Too many open files}.}
 
 \item{...}{additional arguments to \link[vroom:vroom]{vroom::vroom}, can usually be omitted.}
 }
