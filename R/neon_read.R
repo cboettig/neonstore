@@ -141,7 +141,7 @@ vroom_ragged <- function(files, ...){
   
   ## We read the 1st line of every file to determine schema  
   suppressMessages(
-    schema <- lapply(files, vroom::vroom, n_max = 1, altrep = FALSE, ...)
+    schema <- lapply(files, vroom::vroom, n_max = 1, ...)
   )
   
   
