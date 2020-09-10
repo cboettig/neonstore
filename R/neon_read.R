@@ -198,8 +198,8 @@ filter_duplicates <- function(meta){
   out <- take_first_match(meta_b, "id")
   
   if(dim(out)[[1]] < dim(meta)[[1]])
-    message("Some raw files were detected with updated timestamps.\n
-            Using only most updated file to avoid duplicates.")
+    message(paste("Some raw files were detected with updated timestamps.\n",
+                  "Using only most updated file to avoid duplicates."))
   ## FIXME Maybe we should verify if the hash of said file(s) has changed.
   ## maybe we should provide more information on how to check these?
   
