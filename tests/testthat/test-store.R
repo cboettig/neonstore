@@ -48,6 +48,14 @@ test_that("neon_read()", {
   
 })
 
+test_that("neon_read() args", {
+  
+  x <- neon_read("brd_countdata-expanded", altrep=FALSE)
+  expect_is(x, "data.frame")
+  expect_true(any(grepl("observerDistance", colnames(x))))
+  
+})
+
 test_that("ragged_bind()", {
   
   A <- data.frame(A = 1:5, B = 1:5)
