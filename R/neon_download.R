@@ -112,7 +112,14 @@ neon_download <- function(product,
   
   ## additional filters on already_have, type and file_regex:
   files <- download_filters(files, file_regex, type, quiet, dir)
-  if(is.null(files)) return(invisible(NULL)) # nothing to download
+  if(is.null(files)){
+    if(!quiet) message("nothing more to download\n")
+    return(invisible(NULL)) # nothing to download
+  }
+  if(length(files) == 0) {
+    if(!quiet) message("nothing more to download\n")
+    return(invisible(NULL)) # nothing to download
+  }
   
   ## Time to download, verify, and unzip
   download_all(files$url, files$path, quiet)
