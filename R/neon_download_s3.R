@@ -36,7 +36,7 @@ neon_download_s3 <- function(product,
                              end_date = NA,
                              site = NA,
                              type = "expanded",
-                             file_regex =  "[.]csv",
+                             file_regex =  "[.]zip",
                              quiet = FALSE,
                              verify = TRUE,
                              dir = neon_dir(), 
@@ -76,7 +76,7 @@ neon_download_s3 <- function(product,
   
   ## URL and destination
   addr <- paste0(api, meta$path)
-  dest <- file.path(dir, meta$path)
+  dest <- neon_subdir(meta$path, dir)
   
   download_all(addr, dest, quiet)
   # verify_hash(dest, files$crc32, verify)

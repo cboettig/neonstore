@@ -148,7 +148,7 @@ download_filters <- function(files, file_regex,
   files <- files[grepl(file_regex, files$name), ]
   
   ## create path column for dest
-  files$path <- file.path(dir, files$name)
+  files$path <- neon_subdir(files$name, dir = dir)
   
   ## Filter to have only expanded or basic (not both)
   ## Note: this may not make sense if product is a vector!
@@ -166,6 +166,19 @@ download_filters <- function(files, file_regex,
   files <- take_first_match(files, hash_type(files))
   files
 }
+
+
+## Generate subdir paths and ensure they exist
+neon_subdir <- function(path, dir){
+  df <- neon_filename_parser(basename(path))
+  product <- paste_na(df$DPL, df$PRNUM, df$REV)
+  dirs <- file.path(dir, paste(product, df$SITE, df$YYYY_MM,sep = "/"))
+  lapply(unique(dirs), dir.create, FALSE, TRUE)
+  file.path(dirs, path)
+}
+
+
+
 
 
 hash_type <- function(df){

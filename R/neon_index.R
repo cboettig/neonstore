@@ -151,6 +151,10 @@ meta_filter <- function(meta,
     meta <- meta[meta$ext %in% ext, ]
   }
   
+  if(any(is.na(meta$path))){
+    meta <- meta[!is.na(meta$path), ]
+  }
+  
   tibble::as_tibble(meta)
   
 }

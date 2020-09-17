@@ -3,6 +3,7 @@ altrep
 AOP
 api
 bibtex
+bugfix
 CCCCCC
 Codecov
 crc
@@ -21,7 +22,9 @@ FLHTDATE
 FLHTSTRT
 flightline
 FLIGHTSTRT
+g'zipped
 GENTIME
+hdf
 HOR
 horizontalPosition
 http
