@@ -54,7 +54,10 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
   }
   
   
-  zip::zipr(archive, meta$path, include_directories=FALSE)
+  zip::zipr(zipfile = archive, 
+            files = meta$path, 
+            root = dir, 
+            include_directories = TRUE)
   invisible(meta)
 }
 

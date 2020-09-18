@@ -100,7 +100,7 @@ test_that("filename_parser()", {
 
   meta <- filename_parser(x)
   expect_is(meta, "data.frame")
-  expect_equal(dim(meta), c(7,8))
+  expect_equal(dim(meta), c(7,11))
   
   expect_true(any(grepl("DP1.10003.001", meta$product)))
   expect_true(any(grepl("brd_countdata", meta$table)))
@@ -126,9 +126,19 @@ test_that("neon_citation()", {
 
 test_that("neon_export()/neon_import()", {
   
+  neondir1 <-  tempfile()
+  
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01",
+                     dir = neondir1)
+  
+  meta1 <- neon_index(dir = neondir1)
+  
   archive <- tempfile(fileext = ".zip")
   suppressMessages({
-    meta <- neon_export(archive)
+    meta <- neon_export(archive, dir = neondir1)
   })
   
   expect_true(file.exists(archive))
@@ -143,7 +153,7 @@ test_that("neon_export()/neon_import()", {
   neon_import(archive, dir = neondir)
   meta2 <- neon_index(dir = neondir)
   expect_false(is.null(meta2))
-  expect_equal(basename(meta$path), basename(meta2$path))
+  expect_equal(basename(meta1$path), basename(meta2$path))
   
 })
 

@@ -147,8 +147,6 @@ download_filters <- function(files, file_regex,
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
   
-  ## create path column for dest
-  files$path <- neon_subdir(files$name, dir = dir)
   
   ## Filter to have only expanded or basic (not both)
   ## Note: this may not make sense if product is a vector!
@@ -164,6 +162,11 @@ download_filters <- function(files, file_regex,
   
   ## Filter out duplicate files, e.g. have identical hash values
   files <- take_first_match(files, hash_type(files))
+
+  ## create path column for dest
+  files$path <- neon_subdir(files$name, dir = dir)
+  
+  
   files
 }
 
@@ -172,9 +175,9 @@ download_filters <- function(files, file_regex,
 neon_subdir <- function(path, dir){
   df <- neon_filename_parser(basename(path))
   product <- paste_na(df$DPL, df$PRNUM, df$REV)
-  dirs <- file.path(dir, paste(product, df$SITE, df$YYYY_MM,sep = "/"))
+  dirs <- file.path(dir, paste(product, df$SITE, df$YYYY_MM, sep = "/"))
   lapply(unique(dirs), dir.create, FALSE, TRUE)
-  file.path(dirs, path)
+  paste(dirs, path, sep="/")
 }
 
 
@@ -211,15 +214,15 @@ download_all <- function(addr, dest, quiet){
 
 unzip_all <- function(path, dir, keep_zips = TRUE){
   zips <- path[grepl("[.]zip", path)]
-  lapply(zips, zip::unzip, exdir = dir)
+  lapply(zips, function(x) zip::unzip(x, exdir = dirname(x)))
   if(!keep_zips) {
     unlink(zips)
   }
-  path <- list.files(path = dir, full.names = TRUE)
+  path <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
   filename <- path[grepl("[.]gz", path)]
   if(length(filename) > 0){
     destname <- tools::file_path_sans_ext(filename)
-    mapply(R.utils::gunzip, filename, destname,remove = TRUE)
+    mapply(R.utils::gunzip, filename, destname, remove = TRUE)
   }
   
 }
