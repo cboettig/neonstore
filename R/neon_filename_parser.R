@@ -83,14 +83,15 @@
 #' @export
 neon_filename_parser <- function(x){
   
-  ragged_bind(list(
+  df <- ragged_bind(list(
     os_is_parser(x),
     ec_parser(x),
     misc_parser(x),
     aop_parser(x),
-    schema() # ensure all colums are present
+    schema() # ensure all columns are present
   ))
-  
+  #unique(df)
+  df
 }
 
 
@@ -207,31 +208,35 @@ ZIP_AOP2 <- paste0(paste(NEON,DOM,SITE,DPL,FLHTDATE, FFFFFF, DESC, sep = "_"),
 #################################### Helper Functions ########################
 
 ## Simple strplit based parser
-name_parse <- function(x, pattern, col_names, split = ".", fixed = TRUE){
-  x <- basename(x) # drop path before parsing
-  y <- x[grepl(pattern, x)] # operate only on those matching the pattern
-  tmp <- strsplit(y, split, fixed = fixed)
+name_parse <- function(path, pattern, col_names, split = ".", fixed = TRUE){
+  x <- basename(path) # drop path before parsing
+  y <- path[grepl(pattern, x)] # operate only on those matching the pattern
+  z <- basename(y)
+  tmp <- strsplit(z, split, fixed = fixed)
   out <- as_tibble(do.call("rbind", tmp), .name_repair = "minimal")
   
   colnames(out) <- col_names
   out <- out[ !is.na(colnames(out)) ]
   out$name <- y
+  #out$path <- path
   out
 }
 
 ## Alternate strategy relying on grouping, more robust than strsplit()
 ## Handles case where _ is used both as sep and within a field (DESC)
 ## Used for parsing AOP products
-name_parse_gsub <- function(x, pattern, col_names){
-  x <- basename(x) # drop path before parsing
-  y <- x[grepl(pattern, x)]
+name_parse_gsub <- function(path, pattern, col_names){
+  x <- basename(path) # drop path before parsing
+  y <- path[grepl(pattern, x)]
+  z <- basename(y)
   tmp <- vector("list", length(col_names))
   names(tmp) <- col_names
   for(i in seq_along(col_names)){
-    tmp[[i]] <- gsub(pattern, paste0("\\", as.character(i)), y)
+    tmp[[i]] <- gsub(pattern, paste0("\\", as.character(i)), z)
   }
   out <- as_tibble(tmp, .name_repair = "check_unique")
   out$name <- y
+  #out$path <- path
   out
 }
 
@@ -271,10 +276,11 @@ ec_parser <- function(x){
                  "YYYY_MM_DD","PKGTYPE", "GENTIME", "EXT", "COMPRESSION")),
     name_parse(x, EC_MONTHLY2,
                c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
-                 "YYYY_MM","PKGTYPE", "GENTIME", "EXT")),
-    name_parse(x, EC_ZIP,
-               c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
                  "YYYY_MM","PKGTYPE", "GENTIME", "EXT"))
+## already matched by OS parser
+#    name_parse(x, EC_ZIP,
+#               c("NEON","DOM","SITE","DPL","PRNUM","REV",
+#                 "YYYY_MM","PKGTYPE", "GENTIME", "EXT"))
   ))
   
 }
@@ -349,7 +355,8 @@ schema <- function(){
             "PKGTYPE",  "GENTIME", "EXT", "HOR", "VER", "TMI",
             "YYYY_MM_DD", "DATE_RANGE", "README", "FLHTSTRT",
             "EHCCCCCC", "IMAGEDATETIME", "NNNN", "NNN", "R", "FLIGHTSTRT", 
-            "EEEEEE", "NNNNNNN", "FLHTDATE", "FFFFFF", "COMPRESSION", "name")
+            "EEEEEE", "NNNNNNN", "FLHTDATE", "FFFFFF", "COMPRESSION", 
+            "name")
   
   x <- as.list(rep(NA, length(cols)))
   names(x) <- cols

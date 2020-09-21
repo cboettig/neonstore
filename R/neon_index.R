@@ -67,15 +67,15 @@ neon_index <- function(product = NA,
                        hash = NULL,
                        dir = neon_dir()){
   
-  files <- list.files(dir)
+  files <- list.files(dir, recursive = TRUE, full.names = TRUE)
   
   ## Turn file names into a metadata table
   meta <- filename_parser(files)
   if(is.null(meta)) return(NULL)
   
   ## Include full paths to files
-  meta$path <- file.path(dir, meta$path)
-  meta$timestamp <-  as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
+  #meta$path <- files
+  meta$timestamp <- as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   
   ## Apply filters
   meta <- meta_filter(meta, 
@@ -151,6 +151,10 @@ meta_filter <- function(meta,
     meta <- meta[meta$ext %in% ext, ]
   }
   
+  if(any(is.na(meta$path))){
+    meta <- meta[!is.na(meta$path), ]
+  }
+  
   tibble::as_tibble(meta)
   
 }
@@ -173,7 +177,8 @@ filename_parser <- function(files){
   if(nrow(df) == 0) return(NULL)
   
   ## We may want more columns than this than this.  
-  out <- df[c("SITE", "DESC", "PKGTYPE", "EXT","YYYY_MM",  "GENTIME", "name")]
+  out <- df[c("SITE", "DESC", "PKGTYPE", "EXT","YYYY_MM",  "GENTIME", 
+              "HOR", "VER", "TMI",  "name")]
   out$product <- paste_na(df$DPL, df$PRNUM, df$REV)
   
   ## append type, historical but maybe dumb?
@@ -181,11 +186,15 @@ filename_parser <- function(files){
   
   ## Apply names used originally -- FIXME maybe stick with NEON terms?
   names(out) <- c("site", "table", "type", "ext",
-                  "month", "timestamp", "path", "product")
+                  "month", "timestamp", 
+                  "horizontalPosition", "verticalPosition", "samplingInterval",
+                  "path", "product")
   
   ## re-order
   out <- out[, c("product", "site", "table", "type",
-                 "ext", "month", "timestamp", "path")]
+                 "ext", "month", "timestamp",
+                 "horizontalPosition", "verticalPosition", "samplingInterval",
+                 "path")]
   
   out
 }

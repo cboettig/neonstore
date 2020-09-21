@@ -8,7 +8,7 @@ test_that("neon_download_s3()", {
   skip_on_cran()
   skip_if_offline()
   
-  x <- neon_download_s3("DP1.10003.001",
+  x <- neon_download_s3(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-01-01",
                      end_date = "2019-01-01")
@@ -63,7 +63,7 @@ test_that("ECdata", {
   skip_if_offline()
   
 
-  x <- neon_download("DP4.00200.001",
+  x <- neon_download(product = "DP4.00200.001",
                      site = "BART",
                      start_date = "2020-06-01",
                      end_date = "2020-07-01",
