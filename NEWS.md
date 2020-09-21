@@ -1,5 +1,9 @@
 # v0.2.3
 
+- Use subdir structure (product/site/month) inside the neon directory [#17]
+- extend `neon_index()` defaults to include `horizontalPosition` and `verticalPosition`  & `samplingInterval` metadata from filename for sensor data [#11]
+- bugfix for reading most recent files only when working with sensor data. 
+- bugfix for potential error when no new files to download are found [#19]
 - bugfix for altrep defaults, see `?neon_read`
 
 # v0.2.2
