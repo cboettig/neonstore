@@ -196,9 +196,9 @@ ragged_bind <- function(x){
 
 ## Sometimes a NEON file will have changed
 filter_duplicates <- function(meta){
-  meta$timestamp <- as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   meta_b <- meta[order(meta$timestamp, decreasing = TRUE),] 
-  meta_b$id <- paste(meta$product, meta$site, meta$table, meta$month, sep="-")
+  meta_b$id <- paste_na(meta$product, meta$site, meta$table, meta$month, 
+                     meta$verticalPosition, meta$horizontalPosition, sep="-")
   out <- take_first_match(meta_b, "id")
   
   if(dim(out)[[1]] < dim(meta)[[1]])
@@ -209,7 +209,6 @@ filter_duplicates <- function(meta){
   
   out
 }
-
 
 
 
