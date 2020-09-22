@@ -142,7 +142,7 @@ download_filters <- function(files, file_regex,
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   
   ## Omit those files we already have
-  files <- files[!(files$name %in% list.files(dir)), ]
+  files <- files[!(files$name %in% basename(list.files(dir))), ]
   
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
