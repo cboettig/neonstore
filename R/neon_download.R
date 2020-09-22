@@ -141,8 +141,9 @@ download_filters <- function(files, file_regex,
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   
-  ## Omit those files we already have
-  files <- files[!(files$name %in% basename(list.files(dir))), ]
+  ## Omit those file names we already have
+  ## NOTE list.files returns only basename by default
+  files <- files[!(files$name %in% list.files(dir, recursive = TRUE)), ]
   
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
@@ -161,6 +162,7 @@ download_filters <- function(files, file_regex,
     files <- files[!grepl("expanded", files$name), ]
   
   ## Filter out duplicate files, e.g. have identical hash values
+  ## (as reported by NEON's own hash)
   files <- take_first_match(files, hash_type(files))
 
   ## create path column for dest
