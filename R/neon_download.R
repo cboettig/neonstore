@@ -142,8 +142,11 @@ download_filters <- function(files, file_regex,
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   
   ## Omit those file names we already have
-  ## NOTE list.files returns only basename by default
-  files <- files[!(files$name %in% list.files(dir, recursive = TRUE)), ]
+  already_have <- files$name %in% basename(list.files(dir, recursive = TRUE))
+  if(sum(already_have) > 0 && !quiet){
+    message(paste("omitting", sum(already_have), "files previously downloaded"))
+  }
+  files <- files[!already_have, ]
   
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
