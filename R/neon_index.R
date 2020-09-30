@@ -37,6 +37,8 @@
 #'  `"md5"`, `"sha1"`, or `"sha256"` currently; or set to [NULL] (default)
 #'   to skip hash computation.
 #' @inheritParams neon_download
+#' @param deprecated Should the index include files that have since been deprecated by
+#' more recent downloads?  logical, default [TRUE]. 
 #' 
 #' @export
 #' @examples
@@ -65,7 +67,8 @@ neon_index <- function(product = NA,
                        ext = NA,
                        timestamp = NA,
                        hash = NULL,
-                       dir = neon_dir()){
+                       dir = neon_dir(),
+                       deprecated = TRUE){
   
   files <- list.files(dir, recursive = TRUE, full.names = TRUE)
   
@@ -90,6 +93,10 @@ neon_index <- function(product = NA,
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
+  
+  if(!deprecated){
+    meta <- filter_deprecated(meta)
+  }
   
   tibble::as_tibble(meta)
 }
@@ -164,6 +171,7 @@ na_to_char <- function(x, char = ""){
   x[is.na(x)] <- char
   x
 }
+
 paste_na <- function(..., sep = "."){
   do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
 }
@@ -228,3 +236,25 @@ file_hash <- function(x, hash = "md5"){
   hashes
   
 }
+
+
+
+
+## Sometimes a NEON file will have changed
+filter_deprecated <- function(meta){
+  meta_b <- meta[order(meta$timestamp, decreasing = TRUE),] 
+  meta_b$id <- paste_na(meta$product, meta$site, meta$table, meta$month, 
+                        meta$verticalPosition, meta$horizontalPosition, sep="-")
+  out <- take_first_match(meta_b, "id")
+  
+  if(dim(out)[[1]] < dim(meta)[[1]])
+    message(paste("Some raw files were detected with updated timestamps.\n",
+                  "Using only most updated file to avoid duplicates."))
+  ## FIXME Maybe we should verify if the hash of said file(s) has changed.
+  ## maybe we should provide more information on how to check these?
+  
+  out
+}
+
+
+
