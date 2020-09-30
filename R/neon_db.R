@@ -11,25 +11,15 @@
 #' @export
 #' 
 neon_store <- function(table = NA,
-                        product = NA, 
-                        site = NA,
-                        start_date = NA,
-                        end_date = NA,
-                        ext = NA,
-                        timestamp = NA,
-                        dir = neon_dir(),
-                        n = 1000L,
-                        quiet = FALSE, 
-                        ...)
+                       type = "expanded", 
+                       dir = neon_dir(),
+                       n = 1000L,
+                       quiet = FALSE, 
+                       ...)
     {
 
-  index <- neon_index(product = product,
-                      table = table,
-                      site = site,
-                      start_date = start_date,
-                      end_date = end_date,
-                      ext = ext,
-                      timestamp = timestamp,
+  index <- neon_index(table = table,
+                      type = type,
                       hash = "md5",
                       dir = dir,
                       deprecated = FALSE)
@@ -38,7 +28,10 @@ neon_store <- function(table = NA,
 
   ## Omit already imported files
   index <- omit_imported(con, index)
-  
+  if(nrow(index) == 0){
+    message("all files for this table have been imported")
+    return(invisible(con))
+  }
   ## work through files list in chunks, with progress
   db_chunks(con = con, 
             files = index$path,

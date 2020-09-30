@@ -6,12 +6,7 @@
 \usage{
 neon_store(
   table = NA,
-  product = NA,
-  site = NA,
-  start_date = NA,
-  end_date = NA,
-  ext = NA,
-  timestamp = NA,
+  type = "expanded",
   dir = neon_dir(),
   n = 1000L,
   quiet = FALSE,
@@ -22,20 +17,8 @@ neon_store(
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
 
-\item{product}{Include only files matching this NEON productCode(s)}
-
-\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
-
-\item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
-as \code{NA} to download up to the most recent available data.}
-
-\item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
-\code{NA} to download all prior data.}
-
-\item{ext}{only match files with this file extension(s)}
-
-\item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
-Should be a datetime POSIXct object (or coerce-able string)}
+\item{type}{Should we prefer the basic or expanded version of this product?
+See details.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -59,6 +42,15 @@ Results in slower parsing.}
 \verb{mapping error: Too many open files}.}
     \item{\code{files}}{optionally, specify a vector of file paths directly (e.g. as
 provided from \link{neon_index}) and specify \code{table} argument as NULL.}
+    \item{\code{product}}{Include only files matching this NEON productCode(s)}
+    \item{\code{site}}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
+    \item{\code{start_date}}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
+as \code{NA} to download up to the most recent available data.}
+    \item{\code{end_date}}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
+\code{NA} to download all prior data.}
+    \item{\code{ext}}{only match files with this file extension(s)}
+    \item{\code{timestamp}}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
   }}
 }
 \value{

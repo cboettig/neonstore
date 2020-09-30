@@ -110,6 +110,9 @@ neon_download <- function(product,
                      api = api, 
                      .token = .token)
   
+  ## confirm product has expanded type, if requested
+  type <- type_check(product, type)
+  
   ## additional filters on already_have, type and file_regex:
   files <- download_filters(files, file_regex, type, quiet, dir)
   if(is.null(files)){
@@ -133,7 +136,19 @@ neon_download <- function(product,
   invisible(files)
 }
 
-
+type_check <- function(product, type){
+  if(type == "basic"){
+    return("basic")
+  }
+  
+  p <- neon_products()
+  x <- p[p$productCode %in% product,]
+  if(!x$productHasExpanded){
+    message("product has no expanded format, using basic")
+    return("basic")
+  }
+  "expanded"
+}
 
 
 download_filters <- function(files, file_regex, 
@@ -151,14 +166,7 @@ download_filters <- function(files, file_regex,
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
   
-  
   ## Filter to have only expanded or basic (not both)
-  ## Note: this may not make sense if product is a vector!
-  
-  if(type == "expanded" & !any(grepl("expanded", files))){
-    type <- "basic"
-    if(!quiet) message("no expanded product, using basic product")
-  }
   if(type == "expanded")
     files <- files[!grepl("basic", files$name), ]
   if(type == "basic")
