@@ -8,6 +8,7 @@
 #' come only from the filename metadata and are only added
 #' to instrument tables, not observation tables etc.
 #' 
+#' @export
 #' @importFrom DBI dbGetQuery
 #' 
 neon_table <- function(table,

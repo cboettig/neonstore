@@ -4,7 +4,7 @@
 \alias{neon_delete_db}
 \title{delete the local NEON database}
 \usage{
-neon_delete_db(dir = neon_dir(), interactive = interactive())
+neon_delete_db(dir = neon_dir(), ask = interactive())
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will
@@ -13,7 +13,7 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{interactive}{Ask for confirmation first?}
+\item{ask}{Ask for confirmation first?}
 }
 \description{
 delete the local NEON database
@@ -35,7 +35,7 @@ dir <- tempfile()
 neon_db(dir)
 
 # Delete it
-neon_delete_db(dir, interactive = FALSE)
+neon_delete_db(dir, ask = FALSE)
 
 
 }

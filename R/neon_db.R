@@ -32,12 +32,12 @@ neon_db <- function (dir = neon_dir(), ...) {
 
 
 #' Disconnect from the neon database
-#' 
+#' @inheritParams neon_db
 #' @export
 #' @importFrom DBI dbDisconnect
-neon_disconnect <- function () {
+neon_disconnect <- function (dir) {
   
-  db <- neon_db()
+  db <- neon_db(dir)
   if (inherits(db, "DBIConnection")) {
     suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
   }
@@ -51,7 +51,7 @@ neonstore_cache <- new.env()
 #' delete the local NEON database
 #' 
 #' @inheritParams neon_db
-#' @param interactive Ask for confirmation first?
+#' @param ask Ask for confirmation first?
 #' @details Just a helper function that deletes the NEON database
 #' files, which are found under `file.path(neon_dir(), "database")`.
 #' This does not delete downloaded raw data, which can easily be 
@@ -69,16 +69,17 @@ neonstore_cache <- new.env()
 #' neon_db(dir)
 #' 
 #' # Delete it
-#' neon_delete_db(dir, interactive = FALSE)
+#' neon_delete_db(dir, ask = FALSE)
 #' 
 #' 
-neon_delete_db <- function(dir = neon_dir(), interactive = interactive()){
+neon_delete_db <- function(dir = neon_dir(), ask = interactive()){
   continue <- TRUE
-  if(interactive){
+  if(ask){
     continue <- utils::askYesNo(paste("Delete the local duckdb database?", 
              "(downloaded files will be kept)"))
   }
   if(continue){
+    neon_disconnect(dir)
     unlink(file.path(dir, "database"), TRUE)
   }
   return(invisible(continue))

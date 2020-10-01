@@ -9,7 +9,7 @@
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
-neon_store <- function(table = NA,
+neon_store <- function(table,
                        type = "expanded", 
                        dir = neon_dir(),
                        n = 20L,
@@ -74,20 +74,22 @@ db_chunks <- function(con, files, table,
   pb <- progress::progress_bar$new(
     format = "  importing [:bar] :percent eta: :eta",
     total = total, 
-    clear = FALSE, width= 60)
+    clear = FALSE, 
+    width = 60)
   
   for(i in 0:(total-1)){
     if(!quiet) pb$tick()
+    
+    suppressMessages({
     chunk <- files[ (i*n+1):((i+1)*n) ]
     df <- neon_stack(files = chunk,
                      keep_filename = TRUE,
                      sensor_metadata = TRUE, 
-                     altrep = FALSE,
-                     ...)
+                     altrep = FALSE)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
-    return(invisible(con))
-    
+    })
   }
+  return(invisible(con))
   
 }
 

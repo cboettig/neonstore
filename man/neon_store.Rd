@@ -5,7 +5,7 @@
 \title{import neon data into a local database}
 \usage{
 neon_store(
-  table = NA,
+  table,
   type = "expanded",
   dir = neon_dir(),
   n = 20L,
