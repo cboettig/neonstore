@@ -127,7 +127,9 @@ drop_deprecated <- function(table,
                 "verticalPosition", "horizontalPosition")
   deprecated <- duplicated(meta[key_cols])
   
-  if(any(deprecated)){
+  if(!any(deprecated)){
+   return(invisible(NULL))
+  } else {
     message(
       paste("Updated version of previously imported data found.\n",
             "Overwriting some previously imported rows with revised data."
