@@ -55,7 +55,7 @@ db_chunks <- function(con, files, table,
   
   
   pb <- progress::progress_bar$new(
-    format = "  importing [:bar] :percent eta: :eta",
+    format = "  importing [:bar] :percent in :elapsed, eta: :eta",
     total = length(files), 
     clear = FALSE, 
     width = 60,

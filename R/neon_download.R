@@ -210,7 +210,7 @@ hash_type <- function(df){
 download_all <- function(addr, dest, quiet){
   
   pb <- progress::progress_bar$new(
-    format = "  downloading [:bar] :percent eta: :eta",
+    format = "  downloading [:bar] :percent in :elapsed, eta: :eta",
     total = length(addr), 
     clear = FALSE, width= 60)
   
@@ -231,7 +231,7 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   zips <- path[grepl("[.]zip", path)]
   
   pb <- progress::progress_bar$new(
-    format = "  unzipping [:bar] :percent eta: :eta",
+    format = "  unzipping [:bar] :percent in :elapsed, eta: :eta",
     total = length(zips), 
     clear = FALSE, width= 60)
   
