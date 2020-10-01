@@ -1,18 +1,17 @@
 
 #' import neon data into a local database
 #' 
-#' @param n number of files that should be read per iteration
 #' @param quiet show progress?
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
 #' @return the connection object (invisibly)
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
+#' @importFrom utils read.csv
 #' @export
 #' 
 neon_store <- function(table,
                        type = "expanded", 
                        dir = neon_dir(),
-                       n = 20L,
                        quiet = FALSE, 
                        ...)
 {
@@ -39,7 +38,6 @@ neon_store <- function(table,
   db_chunks(con = con, 
             files = index$path,
             table = table, 
-            n = n, 
             quiet = quiet, 
             ...)
   
@@ -53,42 +51,29 @@ neon_store <- function(table,
 
 
 db_chunks <- function(con, files, table, 
-                      n = 100L, quiet = FALSE, ...){
+                      quiet = FALSE, ...){
   
-  total <- length(files) %/% n
-  if(length(files) %% n > 0)  ## and the remainder
-    total <- total + 1
   
-  ## all files in one go
-  if(total == 1){
-    df <- neon_stack(files = files,
-                     keep_filename = TRUE,
-                     sensor_metadata = TRUE,
-                     altrep = FALSE,
-                     ...)
-    DBI::dbWriteTable(con, table, df, append = TRUE)
-    return(invisible(con))
-  }
-  
-  ## Otherwise do chinks
   pb <- progress::progress_bar$new(
     format = "  importing [:bar] :percent eta: :eta",
-    total = total, 
+    total = length(files), 
     clear = FALSE, 
-    width = 60)
-  
-  for(i in 0:(total-1)){
+    width = 60,
+    show_after = 0)
+
+  for(x in files){
     if(!quiet) pb$tick()
     
-    suppressMessages({
-    chunk <- files[ (i*n+1):((i+1)*n) ]
-    df <- neon_stack(files = chunk,
-                     keep_filename = TRUE,
-                     sensor_metadata = TRUE, 
-                     altrep = FALSE)
-    DBI::dbWriteTable(con, table, df, append = TRUE)  
-    })
+    ## vroom is doing weird stuff to progress bar
+    df <- utils::read.csv(x)
+    df$file <- x
+    rownames(df) <- NULL
+    if(is_sensor_data(basename(x)))
+    df <-add_sensor_columns(df)
+    
+    silent <- DBI::dbWriteTable(con, table, df, append = TRUE)  
   }
+
   return(invisible(con))
   
 }

@@ -130,7 +130,8 @@ neon_download <- function(product,
   algo <- hash_type(files)
   verify_hash(files$path, files[algo], verify, algo)
   
-  if(unzip) unzip_all(files$path, dir)
+  if(unzip) 
+    unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
   ## file metadata (url, path, md5sum)  
   invisible(files)
@@ -225,9 +226,19 @@ download_all <- function(addr, dest, quiet){
   }  
 }
 
-unzip_all <- function(path, dir, keep_zips = TRUE){
+unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
+  
   zips <- path[grepl("[.]zip", path)]
-  lapply(zips, function(x) zip::unzip(x, exdir = dirname(x)))
+  
+  pb <- progress::progress_bar$new(
+    format = "  unzipping [:bar] :percent eta: :eta",
+    total = length(zips), 
+    clear = FALSE, width= 60)
+  
+  lapply(zips, function(x){
+    if(!quiet) pb$tick()
+    zip::unzip(x, exdir = dirname(x))
+    })
   if(!keep_zips) {
     unlink(zips)
   }

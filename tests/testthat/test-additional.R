@@ -30,7 +30,7 @@ test_that("bigger neon_store() import", {
                         start_date = "2018-01-01",
                         end_date = "2019-01-01")
   
-  db <- neon_store(table = "brd_countdata-expanded", n = 2)
+  db <- neon_store(table = "brd_countdata-expanded")
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)

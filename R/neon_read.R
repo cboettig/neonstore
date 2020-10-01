@@ -110,11 +110,9 @@ neon_stack <- function(files,
                        altrep = FALSE, 
                        ...){
   
-  ## Handle the case of needing to add columns extracted from filenames
-  ## automatically keeps filenames
   if(is_sensor_data(files) && sensor_metadata){
-    meta <- filename_parser(files)
-    neon_read_sensor(meta, altrep = altrep, ...)
+    df <- vroom_each(files, altrep = altrep, ...)
+    add_sensor_columns(df)
   } else if(keep_filename) {
     ## Just keeps files names as an additional column in stacked data
     vroom_each(files, altrep = altrep, ...)
@@ -127,7 +125,7 @@ neon_stack <- function(files,
 ## read each file in separately and then stack them.
 ## include file name as additional id column
 vroom_each <- function(files, altrep = FALSE, ...){
-  suppressMessages({
+  suppress_msg({
     groups <-  lapply(files,
                       function(x){
                         out <- vroom::vroom(x, altrep = altrep, ...)
@@ -140,10 +138,8 @@ vroom_each <- function(files, altrep = FALSE, ...){
   }) 
 }
 
-neon_read_sensor <- function(meta, altrep = FALSE, ...) {
-  files <- unique(meta$path)
-  df <- vroom_each(files, altrep = altrep, ...)
-  
+
+add_sensor_columns <- function(df){
   filename_meta <- neon_filename_parser(df$file)
   df$domainID <- filename_meta$DOM
   df$siteID <- filename_meta$SITE
@@ -155,11 +151,10 @@ neon_read_sensor <- function(meta, altrep = FALSE, ...) {
 }
 
 
-
 ## vroom can read in a list of files, but only if columns are consistent
 ## So this attempts vroom over a list of files, but falls back on vroom_ragged
 vroom_many <- function(files, altrep = FALSE, ...){
-  suppressMessages({ ## We don't need vroom telling us every table spec!
+  suppress_msg({ ## We don't need vroom telling us every table spec!
   tryCatch(vroom::vroom(files, altrep = altrep,  ...),
            error = function(e) vroom_ragged(files, altrep = altrep, ...),
            finally = NULL)
@@ -171,7 +166,7 @@ vroom_many <- function(files, altrep = FALSE, ...){
 vroom_ragged <- function(files, altrep = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
-  suppressMessages(
+  suppress_msg(
     schema <- lapply(files, vroom::vroom, n_max = 1, altrep = altrep, ...)
   )
   ## Now, we read in tables in groups of matching schema,
@@ -219,3 +214,13 @@ ragged_bind <- function(x){
   do.call(rbind, x)
   
 }
+
+
+suppress_msg <- function(expr, pattern = c("Rows:")){
+  withCallingHandlers(expr,
+                      message = function(e){
+                        if(any(vapply(pattern, grepl, logical(1), e$message)))
+                          invokeRestart("muffleMessage")
+                      })
+}
+

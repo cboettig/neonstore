@@ -4,14 +4,7 @@
 \alias{neon_store}
 \title{import neon data into a local database}
 \usage{
-neon_store(
-  table,
-  type = "expanded",
-  dir = neon_dir(),
-  n = 20L,
-  quiet = FALSE,
-  ...
-)
+neon_store(table, type = "expanded", dir = neon_dir(), quiet = FALSE, ...)
 }
 \arguments{
 \item{table}{Include only files matching this table name (or regex pattern).
@@ -25,8 +18,6 @@ use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
-
-\item{n}{number of files that should be read per iteration}
 
 \item{quiet}{show progress?}
 
