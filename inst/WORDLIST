@@ -9,11 +9,13 @@ Codecov
 crc
 csv
 datetime
+dbConnect
 DESC
 dir
 DOM
 DomainID
 DPL
+duckdb
 easting
 EEEEEE
 et
