@@ -6,7 +6,7 @@
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
 #' @return the connection object (invisibly)
-#' 
+#' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
 neon_store <- function(table = NA,
@@ -25,12 +25,16 @@ neon_store <- function(table = NA,
   
   con <- neon_db(dir)
   
+  ## Drop rows from the database which come from deprecated files
+  drop_deprecated(table, dir, con)
+  
   ## Omit already imported files
   index <- omit_imported(con, index)
   if(nrow(index) == 0){
     message("all files for this table have been imported")
     return(invisible(con))
   }
+  
   ## work through files list in chunks, with progress
   db_chunks(con = con, 
             files = index$path,
@@ -48,7 +52,6 @@ neon_store <- function(table = NA,
 
 
 
-#' @importFrom DBI dbWriteTable
 db_chunks <- function(con, files, table, 
                       n = 100L, quiet = FALSE, ...){
   
@@ -59,7 +62,9 @@ db_chunks <- function(con, files, table,
   ## all files in one go
   if(total == 1){
     df <- neon_stack(files = files,
-                     sensor_metadata = TRUE, 
+                     keep_filename = TRUE,
+                     sensor_metadata = TRUE,
+                     altrep = FALSE,
                      ...)
     DBI::dbWriteTable(con, table, df, append = TRUE)
     return(invisible(con))
@@ -75,7 +80,9 @@ db_chunks <- function(con, files, table,
     if(!quiet) pb$tick()
     chunk <- files[ (i*n+1):((i+1)*n) ]
     df <- neon_stack(files = chunk,
+                     keep_filename = TRUE,
                      sensor_metadata = TRUE, 
+                     altrep = FALSE,
                      ...)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
     return(invisible(con))
@@ -102,5 +109,41 @@ omit_imported <- function(con, index){
   df <- DBI::dbGetQuery(con, query)
   df
 }
+
+
+drop_deprecated <- function(table, 
+                            dir = neon_dir(),
+                            con = neon_db(dir)){
+  
+  if( !(table %in% DBI::dbListTables(con)) ){
+    return(invisible(NULL))
+  }
+  
+  meta <- neon_index(table = table, 
+                     dir = dir, 
+                     deprecated = TRUE)
+  key_cols <- c("product", "site", "month", "table", 
+                "verticalPosition", "horizontalPosition")
+  deprecated <- duplicated(meta[key_cols])
+  
+  old <- paste(lapply(meta$path[deprecated], 
+                      function(x) paste0("'", x, "'")),
+               collapse = ", ")
+  # Could be a big query!
+  query <- paste(paste0("DELETE from \"", table, "\" WHERE "),
+                 paste0("file IN (", old, ")"))
+
+  ## drop the deprecated rows from the database
+  res <- DBI::dbSendQuery(con, old)        
+  
+  ## Should we also drop those files from the provenance table? 
+  ## Not necessary, better to keep the record!
+  
+  ## Now we can re-import the tables
+  
+}
+
+
+
 
 

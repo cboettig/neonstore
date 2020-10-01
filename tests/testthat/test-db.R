@@ -66,9 +66,8 @@ test_that("neon_table", {
   
   tbl2 <- neon_read("brd_countdata-expanded")
   
-  ## row ordering may not be preserved, but content should match
-  # expect_identical(dim(tbl), dim(tbl2))
-  expect_identical(colnames(tbl), colnames(tbl2))
+  ## neon_read won't have the "file" column
+  expect_true(all(colnames(tbl2) %in% colnames(tbl)))
   
 })
 

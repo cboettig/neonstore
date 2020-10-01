@@ -24,3 +24,9 @@ instance in the provided directory (see \code{\link[=neon_dir]{neon_dir()}}).  T
 connection is also cached, so that code which repeatedly calls
 \verb{[neon_db]} will not stall or hang.
 }
+\examples{
+
+# tempfile used for illustration only
+neon_db(tempfile())
+
+}

@@ -1,8 +1,4 @@
 
-
-
-
-
 #' Cache-able duckdb database connection
 #' 
 #' @details Creates a connection to a permanent duckdb database
@@ -14,6 +10,11 @@
 #' @param ... additional arguments to dbConnect
 #' @importFrom DBI dbConnect
 #' @importFrom duckdb duckdb
+#' @examples 
+#' 
+#' # tempfile used for illustration only
+#' neon_db(tempfile())
+#' 
 neon_db <- function (dir = neon_dir(), ...) {
   dir.create(dir, FALSE, TRUE)
   dbname <- file.path(dir, "database")
@@ -47,6 +48,39 @@ neon_disconnect <- function () {
 
 neonstore_cache <- new.env()
 
-
-
+#' delete the local NEON database
+#' 
+#' @inheritParams neon_db
+#' @param interactive Ask for confirmation first?
+#' @details Just a helper function that deletes the NEON database
+#' files, which are found under `file.path(neon_dir(), "database")`.
+#' This does not delete downloaded raw data, which can easily be 
+#' re-loaded with `neon_store()`.  Usually unnecessary but can be
+#' helpful in resetting a corrupt database.  
+#' 
+#' If you want to delete all raw data files downloaded by neonstore
+#' as well, simply delete the entire directory given by [neon_dir()]
+#' @importFrom utils askYesNo
+#' @export
+#' @examples 
+#' 
+#' # Create a db
+#' dir <- tempfile()
+#' neon_db(dir)
+#' 
+#' # Delete it
+#' neon_delete_db(dir, interactive = FALSE)
+#' 
+#' 
+neon_delete_db <- function(dir = neon_dir(), interactive = interactive()){
+  continue <- TRUE
+  if(interactive){
+    continue <- utils::askYesNo(paste("Delete the local duckdb database?", 
+             "(downloaded files will be kept)"))
+  }
+  if(continue){
+    unlink(file.path(dir, "database"), TRUE)
+  }
+  return(invisible(continue))
+}
 

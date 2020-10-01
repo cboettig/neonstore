@@ -95,6 +95,7 @@ neon_read <- function(table = NA,
   }
 
   neon_stack(files, 
+             keep_filename = FALSE,
              sensor_metadata = sensor_metadata, 
              altrep = altrep, 
              ...)
@@ -103,37 +104,47 @@ neon_read <- function(table = NA,
 }
 
 
-neon_stack <- function(files, sensor_metadata = TRUE, altrep = FALSE, ...){
+neon_stack <- function(files, 
+                       keep_filename = FALSE,
+                       sensor_metadata = TRUE, 
+                       altrep = FALSE, 
+                       ...){
   
   ## Handle the case of needing to add columns extracted from filenames
+  ## automatically keeps filenames
   if(is_sensor_data(files) && sensor_metadata){
     meta <- filename_parser(files)
     neon_read_sensor(meta, altrep = altrep, ...)
-    ## Otherwise we can just read in:  
+  } else if(keep_filename) {
+    ## Just keeps files names as an additional column in stacked data
+    vroom_each(files, altrep = altrep, ...)
   } else {
-    read_csvs(files,  altrep = altrep, ...)
+    ## Usually much much faster if we can do this one
+    vroom_many(files,  altrep = altrep, ...)
   }
-  
 }
 
+## read each file in separately and then stack them.
+## include file name as additional id column
+vroom_each <- function(files, altrep = FALSE, ...){
+  suppressMessages({
+    groups <-  lapply(files,
+                      function(x){
+                        out <- vroom::vroom(x, altrep = altrep, ...)
+                        out$file <- basename(x)
+                        out
+                      })
+  })
+  suppressWarnings({
+    df <- ragged_bind(groups)
+  }) 
+}
 
-neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
-    suppressMessages({
-      id <- unique(meta[[.id]])
-      groups <- 
-        lapply(id,
-               function(x){
-                 paths <- meta$path[meta[[.id]] == x]
-                 out <- read_csvs(paths, altrep = altrep, ...)
-                 out[.id] <- x
-                 out
-               })
-    })
-    suppressWarnings({
-      df <- ragged_bind(groups)
-    })
+neon_read_sensor <- function(meta, altrep = FALSE, ...) {
+  files <- unique(meta$path)
+  df <- vroom_each(files, altrep = altrep, ...)
   
-  filename_meta <- neon_filename_parser(df$path)
+  filename_meta <- neon_filename_parser(df$file)
   df$domainID <- filename_meta$DOM
   df$siteID <- filename_meta$SITE
   df$horizontalPosition <- filename_meta$HOR
@@ -143,8 +154,11 @@ neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
   df
 }
 
-read_csvs <- function(files, altrep = FALSE, ...){
-  ## vroom can read in a list of files, but only if columns are consistent
+
+
+## vroom can read in a list of files, but only if columns are consistent
+## So this attempts vroom over a list of files, but falls back on vroom_ragged
+vroom_many <- function(files, altrep = FALSE, ...){
   suppressMessages({ ## We don't need vroom telling us every table spec!
   tryCatch(vroom::vroom(files, altrep = altrep,  ...),
            error = function(e) vroom_ragged(files, altrep = altrep, ...),
@@ -153,15 +167,13 @@ read_csvs <- function(files, altrep = FALSE, ...){
 }
 
 
-#' @importFrom vroom vroom spec
+## Apply vroom over files that share a common schema.
 vroom_ragged <- function(files, altrep = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
   suppressMessages(
     schema <- lapply(files, vroom::vroom, n_max = 1, altrep = altrep, ...)
   )
-  
-  
   ## Now, we read in tables in groups of matching schema,
   ## filling in additional columns as in bind_rows.
   
@@ -192,7 +204,8 @@ vroom_ragged <- function(files, altrep = FALSE, ...){
   
 }
 
-## simpler case
+## A base-R version of (recent versions of) dplyr::bind_rows,
+## which can handle varying numbers of columns
 ragged_bind <- function(x){
   
   col_schemas <- lapply(x, colnames)

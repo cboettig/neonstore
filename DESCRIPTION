@@ -42,7 +42,8 @@ Imports:
     digest,
     progress,
     stats,
-    tools
+    tools,
+    utils
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,

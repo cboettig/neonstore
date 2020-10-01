@@ -248,12 +248,17 @@ file_hash <- function(x, hash = "md5"){
 
 ## Sometimes a NEON file will have changed
 filter_deprecated <- function(meta){
-  meta_b <- meta[order(meta$timestamp, decreasing = TRUE),] 
-  meta_b$id <- paste_na(meta_b$product, meta_b$site, meta_b$table, meta_b$month, 
-                        meta_b$verticalPosition, meta_b$horizontalPosition, sep="-")
-  out <- take_first_match(meta_b, "id")
+
+  ## Sort by most recent timestamp
+  meta <- meta[order(meta$timestamp, decreasing = TRUE),] 
   
-  if(dim(out)[[1]] < dim(meta)[[1]])
+  ## de-duplicate.  always takes first match(?)
+  key_cols <- c("product", "site", "month", "table", 
+    "verticalPosition", "horizontalPosition")
+  deprecated <- duplicated(meta[key_cols])
+  out <- meta[!deprecated,]
+  
+  if(any(deprecated))
     message(paste("Some raw files were detected with updated timestamps.\n",
                   "Using only most updated file to avoid duplicates."))
   ## FIXME Maybe we should verify if the hash of said file(s) has changed.
