@@ -110,9 +110,5 @@ test_that("ECdata", {
   
   expect_equal(length(path_gz), 0)
   expect_gt(length(path_h5), 0)
-  
-  
-  
-  
 
 })
