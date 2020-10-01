@@ -13,7 +13,7 @@
 neon_store <- function(table = NA,
                        type = "expanded", 
                        dir = neon_dir(),
-                       n = 1000L,
+                       n = 20L,
                        quiet = FALSE, 
                        ...)
     {
@@ -36,7 +36,6 @@ neon_store <- function(table = NA,
   db_chunks(con = con, 
             files = index$path,
             table = table, 
-            meta = index,
             n = n, 
             quiet = quiet, 
             ...)
@@ -51,28 +50,37 @@ neon_store <- function(table = NA,
 
 
 #' @importFrom DBI dbWriteTable
-db_chunks <- function(con, files, table, meta, 
-                      n = 1000L, quiet = FALSE, ...){
+db_chunks <- function(con, files, table, 
+                      n = 100L, quiet = FALSE, ...){
   
   total <- length(files) %/% n
   if(length(files) %% n > 0)  ## and the remainder
     total <- total + 1
   
+  ## all files in one go
+  if(total == 1){
+    df <- neon_stack(files = files,
+                     sensor_metadata = TRUE, 
+                     ...)
+    DBI::dbWriteTable(con, table, df, append = TRUE)
+    return(invisible(con))
+  }
+  
+  ## Otherwise do chinks
   pb <- progress::progress_bar$new(
     format = "  importing [:bar] :percent eta: :eta",
     total = total, 
     clear = FALSE, width= 60)
   
   for(i in 0:(total-1)){
+    if(!quiet) pb$tick()
     chunk <- files[ (i*n+1):((i+1)*n) ]
-    suppressMessages({
-    df <- neon_stack(files = files,
-                     meta = meta,
+    df <- neon_stack(files = chunk,
                      sensor_metadata = TRUE, 
                      ...)
-    })
-    DBI::dbWriteTable(con, table, df, append = TRUE)    
-    if(!quiet) pb$tick()
+    DBI::dbWriteTable(con, table, df, append = TRUE)  
+    return(invisible(con))
+    
   }
   
 }
@@ -118,7 +126,7 @@ neon_table <- function(table,
   table <- check_tablename(table)
   
   where <- NULL
-  query <- paste("SELECT * FROM", table)
+  query <- paste0("SELECT * FROM \"", table, "\"")
   
   if(!any(is.na(site))){
     tmp <- paste(lapply(site, function(x) paste0("'", x, "'")),
@@ -142,18 +150,27 @@ neon_table <- function(table,
 check_tablename <- function(x) x
   
 
-## Cache-able connection
-
-neon_db <- function (dbdir = neon_dir(), ...) {
-  dir.create(dbdir, FALSE, TRUE)
-  dbname <- file.path(dbdir, "database")
+#' Cache-able duckdb database connection
+#' 
+#' @details Creates a connection to a permanent duckdb database
+#' instance in the provided directory (see [neon_dir()]).  This 
+#' connection is also cached, so that code which repeatedly calls 
+#' `[neon_db]` will not stall or hang.  
+#' @export
+#' @inheritParams neon_download
+#' @param ... additional arguments to dbConnect
+#' @importFrom DBI dbConnect
+#' @importFrom duckdb duckdb
+neon_db <- function (dir = neon_dir(), ...) {
+  dir.create(dir, FALSE, TRUE)
+  dbname <- file.path(dir, "database")
   db <- mget("neon_db", envir = neonstore_cache, ifnotfound = NA)[[1]]
   if (inherits(db, "DBIConnection")) {
     if (DBI::dbIsValid(db)) {
       return(db)
     }
   }
-  db <- duckdb::dbConnect(duckdb::duckdb(), dbdir = dbname, ...)
+  db <- DBI::dbConnect(duckdb::duckdb(), dbdir = dbname, ...)
 
   assign("neon_db", db, envir = neonstore_cache)
   db

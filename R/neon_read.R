@@ -95,7 +95,6 @@ neon_read <- function(table = NA,
   }
 
   neon_stack(files, 
-             meta, 
              sensor_metadata = sensor_metadata, 
              altrep = altrep, 
              ...)
@@ -103,10 +102,12 @@ neon_read <- function(table = NA,
   
 }
 
-neon_stack <- function(files, meta, sensor_metadata = TRUE, altrep = FALSE, ...){
+
+neon_stack <- function(files, sensor_metadata = TRUE, altrep = FALSE, ...){
   
   ## Handle the case of needing to add columns extracted from filenames
   if(is_sensor_data(files) && sensor_metadata){
+    meta <- filename_parser(files)
     neon_read_sensor(meta, altrep = altrep, ...)
     ## Otherwise we can just read in:  
   } else {
@@ -144,9 +145,11 @@ neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
 
 read_csvs <- function(files, altrep = FALSE, ...){
   ## vroom can read in a list of files, but only if columns are consistent
+  suppressMessages({ ## We don't need vroom telling us every table spec!
   tryCatch(vroom::vroom(files, altrep = altrep,  ...),
            error = function(e) vroom_ragged(files, altrep = altrep, ...),
-           finally = NULL)  
+           finally = NULL)
+  })
 }
 
 

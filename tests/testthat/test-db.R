@@ -37,3 +37,26 @@ test_that("neon_store", {
   ## compare provenance to index
   
 })
+
+test_that("neon_table", {
+  
+  db <- neon_store(table = "brd_countdata-expanded")
+  expect_is(db, "DBIConnection")
+  x <- DBI::dbListTables(db)
+  expect_true("brd_countdata-expanded" %in% x)
+
+  
+  tbl <- neon_table("brd_countdata-expanded")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) > 0)
+  expect_true(any(grepl("observerDistance", colnames(tbl))))
+  
+  tbl2 <- neon_read("brd_countdata-expanded")
+  
+  ## row ordering may not be preserved, but content should match
+  expect_identical(dim(tbl), dim(tbl2))
+  expect_identical(colnames(tbl), colnames(tbl2))
+  
+})
+
+

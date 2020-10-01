@@ -74,11 +74,13 @@ neon_index <- function(product = NA,
   
   ## Turn file names into a metadata table
   meta <- filename_parser(files)
+
+  ## Paths should not have NAs
+  meta <- meta[!is.na(meta$path),]
+  
+  
   if(is.null(meta)) return(NULL)
   
-  ## Include full paths to files
-  #meta$path <- files
-  meta$timestamp <- as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   
   ## Apply filters
   meta <- meta_filter(meta, 
@@ -203,6 +205,10 @@ filename_parser <- function(files){
                  "ext", "month", "timestamp",
                  "horizontalPosition", "verticalPosition", "samplingInterval",
                  "path")]
+  
+  ## cast timestamp as POSIXct
+  out$timestamp <- as.POSIXct(out$timestamp, format = "%Y%m%dT%H%M%OS")
+  
   
   out
 }

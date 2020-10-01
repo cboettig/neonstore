@@ -8,7 +8,7 @@ neon_store(
   table = NA,
   type = "expanded",
   dir = neon_dir(),
-  n = 1000L,
+  n = 20L,
   quiet = FALSE,
   ...
 )
