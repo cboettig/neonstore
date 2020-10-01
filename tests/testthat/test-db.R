@@ -1,13 +1,7 @@
 context("db")
 
 ## setup so we have something in the store
-testthat::setup({
-  x <- neon_download(product = "DP1.10003.001",
-                     site = "YELL",
-                     start_date = "2018-05-01",
-                     end_date = "2018-08-01")
-  
-})
+
 
 
 test_that("neon_db", {
@@ -21,7 +15,14 @@ test_that("neon_db", {
 
 test_that("neon_store", {
 
-
+  skip_if_offline()
+  skip_on_cran()
+  
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01")
+  
   db <- neon_store(table = "brd_countdata-expanded")
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
@@ -40,6 +41,15 @@ test_that("neon_store", {
 
 test_that("neon_table", {
   
+  skip_if_offline()
+  skip_on_cran()
+  
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01")
+  
+  
   db <- neon_store(table = "brd_countdata-expanded")
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
@@ -50,6 +60,9 @@ test_that("neon_table", {
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))
+  
+  ## Confirm no duplicates
+  expect_identical(tbl, unique(tbl))
   
   tbl2 <- neon_read("brd_countdata-expanded")
   

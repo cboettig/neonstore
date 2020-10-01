@@ -1,32 +1,6 @@
 context("read")
 
 
-## setup so we have something in the store
-testthat::setup({
-x <- neon_download(product = "DP1.10003.001",
-                   site = "YELL",
-                   start_date = "2018-05-01",
-                   end_date = "2018-08-01")
-
-})
-
-
-test_that("neon_read()", {
-  
-  x <- neon_read("brd_countdata-expanded")
-  expect_is(x, "data.frame")
-  expect_true(any(grepl("observerDistance", colnames(x))))
-  
-})
-
-test_that("neon_read() args", {
-  
-  x <- neon_read("brd_countdata-expanded", altrep=FALSE)
-  expect_is(x, "data.frame")
-  expect_true(any(grepl("observerDistance", colnames(x))))
-  
-})
-
 test_that("ragged_bind()", {
   
   A <- data.frame(A = 1:5, B = 1:5)
@@ -54,5 +28,36 @@ test_that("vroom_ragged()", {
   expect_is(out, "data.frame")
   expect_equal(colnames(out), colnames(B))
   
+  
+})
+
+
+test_that("neon_read()", {
+
+  skip_if_offline()
+  skip_on_cran()
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01")
+    
+  x <- neon_read("brd_countdata-expanded")
+  expect_is(x, "data.frame")
+  expect_true(any(grepl("observerDistance", colnames(x))))
+  
+})
+
+test_that("neon_read() args", {
+  
+  skip_if_offline()
+  skip_on_cran()
+  x <- neon_download(product = "DP1.10003.001",
+                     site = "YELL",
+                     start_date = "2018-05-01",
+                     end_date = "2018-08-01")
+  
+  x <- neon_read("brd_countdata-expanded", altrep=FALSE)
+  expect_is(x, "data.frame")
+  expect_true(any(grepl("observerDistance", colnames(x))))
   
 })

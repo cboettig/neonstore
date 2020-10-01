@@ -11,7 +11,8 @@ test_that("neon_download_s3()", {
   x <- neon_download_s3(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-01-01",
-                     end_date = "2019-01-01")
+                     end_date = "2019-01-01",
+                     dir = tempfile())
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
   
@@ -29,7 +30,7 @@ test_that("bigger neon_store() import", {
                         start_date = "2018-01-01",
                         end_date = "2019-01-01")
   
-  db <- neon_store(table = "brd_countdata-expanded")
+  db <- neon_store(table = "brd_countdata-expanded", n = 2)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)
