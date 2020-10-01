@@ -66,8 +66,9 @@ test_that("neon_table", {
   
   ## Compare to neon_read
   tbl2 <- neon_read("brd_countdata-expanded")
-  ## neon_read won't have the "file" column
-  tbl1 <- tbl[!colname(tbl) == "file"]
+  
+  ## neon_read won't have the "file" column on obs data
+  tbl1 <- tbl[!colnames(tbl) == "file"]
   expect_identical(colnames(tbl1), colnames(tbl2))
   expect_identical(dim(tbl1), dim(tbl2))
   
