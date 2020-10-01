@@ -119,6 +119,7 @@ drop_deprecated <- function(table,
     return(invisible(NULL))
   }
   
+  ## Detect updated files
   meta <- neon_index(table = table, 
                      dir = dir, 
                      deprecated = TRUE)
@@ -126,19 +127,26 @@ drop_deprecated <- function(table,
                 "verticalPosition", "horizontalPosition")
   deprecated <- duplicated(meta[key_cols])
   
+  if(any(deprecated)){
+    message(
+      paste("Updated version of previously imported data found.\n",
+            "Overwriting some previously imported rows with revised data."
+            ))
+  }
+  
+  ## Build SQL query
   old <- paste(lapply(meta$path[deprecated], 
                       function(x) paste0("'", x, "'")),
                collapse = ", ")
-  # Could be a big query!
   query <- paste(paste0("DELETE from \"", table, "\" WHERE "),
                  paste0("file IN (", old, ")"))
 
-  ## drop the deprecated rows from the database
-  res <- DBI::dbSendQuery(con, old)        
+  ## Execute the DELETE query
+  res <- DBI::dbSendQuery(con, query)        
   
-  ## Should we also drop those files from the provenance table? 
-  ## Not necessary, better to keep the record!
-  
+  ## Note that dropped file names will remain part of 
+  ## the provenance table.
+
   ## Now we can re-import the tables
   
 }
