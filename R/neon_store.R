@@ -153,7 +153,3 @@ drop_deprecated <- function(table,
   
 }
 
-
-
-
-
