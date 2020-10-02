@@ -8,7 +8,7 @@
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
-neon_store2 <- function(table,
+neon_store <- function(table,
                         dir = neon_dir(),
                         n = 200L,
                         quiet = FALSE, 
