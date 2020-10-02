@@ -125,15 +125,15 @@ neon_stack <- function(files,
 ## read each file in separately and then stack them.
 ## include file name as additional id column
 vroom_each <- function(files, altrep = FALSE, ...){
-  vroom_one <- function(x){
-    out <- vroom::vroom(x, 
-                        col_types = vroom::cols(.default = "c"),
-                        altrep = altrep, ...)
-    out$file <- basename(x)
-    out
-  }
-  groups <-  lapply(files, vroom_one)
-
+  suppress_msg({
+    groups <-  lapply(files,
+                      function(x){
+                        out <- vroom::vroom(x, guess_max = 5e4,
+                                            altrep = altrep, ...)
+                        out$file <- basename(x)
+                        out
+                      })
+  })
   suppressWarnings({
     df <- ragged_bind(groups)
   }) 
@@ -155,16 +155,12 @@ add_sensor_columns <- function(df){
 ## vroom can read in a list of files, but only if columns are consistent
 ## So this attempts vroom over a list of files, but falls back on vroom_ragged
 vroom_many <- function(files, altrep = FALSE, ...){
-  tryCatch(vroom::vroom(files, 
-                        altrep = altrep,
-                        col_types = vroom::cols(.default = "c"),
-                        ...),
-           error = function(e) 
-             vroom_ragged(files, 
-                          altrep = altrep,
-                          col_types = vroom::cols(.default = "c"),
-                          ...),
+  suppress_msg({ ## We don't need vroom telling us every table spec!
+  tryCatch(vroom::vroom(files, guess_max = 5e4, altrep = altrep,  ...),
+           error = function(e) vroom_ragged(files, guess_max = 5e4,
+                                            altrep = altrep, ...),
            finally = NULL)
+  })
 }
 
 
