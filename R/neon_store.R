@@ -9,16 +9,21 @@
 #' @export
 #' 
 neon_store <- function(table,
-                        dir = neon_dir(),
-                        n = 200L,
-                        quiet = FALSE, 
-                        ...)
+                       dir = neon_dir(),
+                       n = 200L,
+                       quiet = FALSE, 
+                       ...)
 {
   
   index <- neon_index(table = table,
                       hash = "md5",
                       dir = dir,
                       deprecated = FALSE)
+  
+  if(nrow(index) == 0){
+    message("table", table, "not found, do you need to import it first?")
+    return(invisible(con))
+  }
   
   ## standardize table name
   table <- unique(index$table)
@@ -35,12 +40,12 @@ neon_store <- function(table,
   }
   
   ## work through files list in chunks, with progress
-  db_chunks2(con = con, 
-             files = index$path,
-             table = table, 
-             n = n, 
-             quiet = quiet, 
-             ...)
+  db_chunks(con = con, 
+            files = index$path,
+            table = table, 
+            n = n, 
+            quiet = quiet, 
+            ...)
   
   ## update the provenance table
   DBI::dbWriteTable(con, "provenance", index, append = TRUE)
@@ -51,8 +56,8 @@ neon_store <- function(table,
 
 
 
-db_chunks2 <- function(con, files, table, 
-                       n = 100L, quiet = FALSE, ...){
+db_chunks <- function(con, files, table, 
+                       n = 200L, quiet = FALSE, ...){
   
   total <- length(files) %/% n
   if(length(files) %% n > 0)  ## and the remainder
