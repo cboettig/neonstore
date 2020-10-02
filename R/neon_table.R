@@ -14,7 +14,9 @@
 neon_table <- function(table,
                        site = NA,
                        con = neon_db()){
-  table <- check_tablename(table)
+  
+  tables <- DBI::dbListTables(con)
+  table <- check_tablename(table, tables)
   
   where <- NULL
   query <- paste0("SELECT * FROM \"", table, "\"")
@@ -38,5 +40,17 @@ neon_table <- function(table,
 
 
 ## Sanitize table names, particularly extended/basic matching
-check_tablename <- function(x) x
+check_tablename <- function(x, tables){
+ out <- tables[grepl(x, tables)]
+ if(length(out) > 1){
+   stop(paste("multiple matches for table", 
+              x, ":", out), call. = FALSE)
+ } else if(length(out) < 1) {
+   stop(paste("no table", x, "found.",
+              "Maybe you need to run neon_store() first?"),
+        call. = FALSE)
+ }
+ 
+ out
+}
 

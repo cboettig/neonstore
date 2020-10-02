@@ -22,6 +22,8 @@ neon_store <- function(table,
                       dir = dir,
                       deprecated = FALSE)
   
+  ## enforce table name convention
+  table <- unique(index$table)
   con <- neon_db(dir)
   
   ## Drop rows from the database which come from deprecated files
