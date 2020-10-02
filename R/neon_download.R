@@ -87,6 +87,35 @@
 #' 
 #' }
 neon_download <- function(product, 
+                           start_date = NA,
+                           end_date = NA,
+                           site = NA,
+                           type = "expanded",
+                           file_regex =  "[.]zip",
+                           quiet = FALSE,
+                           verify = TRUE,
+                           dir = neon_dir(), 
+                           unzip = TRUE,
+                           api = "https://data.neonscience.org/api/v0",
+                           .token =  Sys.getenv("NEON_TOKEN")){
+  
+  x <- lapply(product, neon_download_, 
+              start_date = start_date,
+              end_date = end_date,
+              site = site,
+              type = type,
+              file_regex =  file_regex,
+              quiet = quiet,
+              verify = verify,
+              dir = dir, 
+              unzip = unzip,
+              api = api,
+              .token =  .token)
+  invisible(do.call(rbind, x))
+      
+}
+
+neon_download_ <- function(product, 
                           start_date = NA,
                           end_date = NA,
                           site = NA,
@@ -212,7 +241,7 @@ download_all <- function(addr, dest, quiet){
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent in :elapsed, eta: :eta",
     total = length(addr), 
-    clear = FALSE, width= 60)
+    clear = FALSE, width= 80)
   
   for(i in seq_along(addr)){
     if(!quiet) pb$tick()
@@ -233,7 +262,7 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   pb <- progress::progress_bar$new(
     format = "  unzipping [:bar] :percent in :elapsed, eta: :eta",
     total = length(zips), 
-    clear = FALSE, width= 60)
+    clear = FALSE, width= 80)
   
   lapply(zips, function(x){
     if(!quiet) pb$tick()

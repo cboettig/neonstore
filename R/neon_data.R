@@ -26,9 +26,10 @@ neon_data <- function(product,
   
   ## Extract the file list from the data endpoint.  O(sites * months) calls
   pb <- progress::progress_bar$new(
-    format = "  querying API [:bar] :percent in :elapsed, eta: :eta",
+    format = paste("  requesting", product, 
+                   "from API [:bar] :percent in :elapsed, eta: :eta"),
     total = length(data_api), 
-    clear = FALSE, width= 60)
+    clear = FALSE, width= 80)
   
   resp <- vector("list", length = length(data_api))
   for(i in seq_along(data_api)){
