@@ -15,7 +15,9 @@ neon_data <- function(product,
   data_api <- data_api_queries(product = product, 
                                start_date = start_date, 
                                end_date = end_date, 
-                               site = site)
+                               site = site, 
+                               api = api,
+                               .token = .token)
   
   ## Adjust for rate-limiting
   batch <- 950                 # authenticated
@@ -72,7 +74,9 @@ neon_warn_http_errors <- function(x){
 data_api_queries <- function(product, 
                             start_date = NA,
                             end_date = NA,
-                            site = NA){
+                            site = NA,
+                            api = "https://data.neonscience.org/api/v0", 
+                            .token = Sys.getenv("NEON_TOKEN")){
   
   start_date <- as.Date(start_date)
   end_date <- as.Date(end_date)
