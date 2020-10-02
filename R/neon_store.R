@@ -80,7 +80,10 @@ db_chunks <- function(con, files, table,
     format = "  importing [:bar] :percent in :elapsed, eta: :eta",
     total = total, 
     clear = FALSE, 
+    show_after = 0,
     width = 60)
+  
+  pb$tick(0)
   
   for(i in 0:(total-1)){
     if(!quiet) pb$tick()
