@@ -8,7 +8,7 @@ neon_store(
   table = NA,
   product = NA,
   dir = neon_dir(),
-  n = 500L,
+  n = 100L,
   quiet = FALSE,
   ...
 )
