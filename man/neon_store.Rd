@@ -4,11 +4,20 @@
 \alias{neon_store}
 \title{import neon data into a local database}
 \usage{
-neon_store(table, dir = neon_dir(), n = 200L, quiet = FALSE, ...)
+neon_store(
+  table = NA,
+  product = NA,
+  dir = neon_dir(),
+  n = 500L,
+  quiet = FALSE,
+  ...
+)
 }
 \arguments{
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
+
+\item{product}{Include only files matching this NEON productCode(s)}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -32,7 +41,6 @@ Results in slower parsing.}
 \verb{mapping error: Too many open files}.}
     \item{\code{files}}{optionally, specify a vector of file paths directly (e.g. as
 provided from \link{neon_index}) and specify \code{table} argument as NULL.}
-    \item{\code{product}}{Include only files matching this NEON productCode(s)}
     \item{\code{site}}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
     \item{\code{start_date}}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
 as \code{NA} to download up to the most recent available data.}

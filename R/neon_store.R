@@ -8,29 +8,35 @@
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
-neon_store <- function(table,
+neon_store <- function(table = NA,
+                       product = NA,
                        dir = neon_dir(),
-                       n = 200L,
+                       n = 100L,
                        quiet = FALSE, 
                        ...)
 {
   
   index <- neon_index(table = table,
+                      product = product,
                       hash = "md5",
                       dir = dir,
+                      ext = "csv",
                       deprecated = FALSE)
   
   if(nrow(index) == 0){
-    message("table", table, "not found, do you need to import it first?")
+    if(!is.na(table))
+      message(paste("table", table, 
+                    "not found, do you need to download first?"))
+    if(!is.na(product))
+      message(paste("No csv files for product", product,
+              "found. do you need to download first?"))
     return(invisible(con))
   }
   
   ## standardize table name
-  table <- unique(index$table)
+  tables <- unique(index$table)
   con <- neon_db(dir)
   
-  ## Drop rows from the database which come from deprecated files
-  drop_deprecated(table, dir, con)
   
   ## Omit already imported files
   index <- omit_imported(con, index)
@@ -39,14 +45,19 @@ neon_store <- function(table,
     return(invisible(con))
   }
   
-  ## work through files list in chunks, with progress
-  db_chunks(con = con, 
-            files = index$path,
-            table = table, 
-            n = n, 
-            quiet = quiet, 
-            ...)
+  lapply(tables, 
+         function(table){
   
+    ## Drop rows from the database which come from deprecated files
+    drop_deprecated(table, dir, con)
+    files <- index[index$table == table, ]$path     
+    db_chunks(con = con, 
+              files = files,
+              table = table, 
+              n = n, 
+              quiet = quiet, 
+              ...)
+  })
   ## update the provenance table
   DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   
@@ -77,11 +88,12 @@ db_chunks <- function(con, files, table,
   
   ## Otherwise do chinks
   pb <- progress::progress_bar$new(
-    format = "  importing [:bar] :percent in :elapsed, eta: :eta",
+    format = paste("  importing", table,
+                   "[:bar] :percent in :elapsed, eta: :eta"),
     total = total, 
     clear = FALSE, 
     show_after = 0,
-    width = 60)
+    width = 80)
   
   pb$tick(0)
   
