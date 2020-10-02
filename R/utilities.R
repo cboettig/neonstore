@@ -1,6 +1,7 @@
 na_bool_to_char <- function(df){
+  if(is.null(df)) return(df)
   
-  types <- vapply(df, class, character(1L))
+  types <- vapply(df, function(x) class(x)[[1]], "")
   bool <- which(types %in% "logical")
   
   if(length(bool) == 0 ){
