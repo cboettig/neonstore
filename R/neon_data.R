@@ -49,8 +49,8 @@ neon_data <- function(product,
   }
   
   ## Adjust for rate-limiting
-  batch <- 1000                 # authenticated
-  if(.token == "") batch <- 200 # unauthenticated
+  batch <- 950                 # authenticated
+  if(.token == "") batch <- 150 # unauthenticated
   
   
   ## Extract the file list from the data endpoint.  O(sites * months) calls
@@ -65,7 +65,7 @@ neon_data <- function(product,
     resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
     if(i %% batch == 0){
       message("\nNEON rate limiting enforced, pausing for 100s\n")
-      Sys.sleep(101)
+      Sys.sleep(105)
     }
   }
   

@@ -168,6 +168,8 @@ meta_filter <- function(meta,
   
 }
 
+na_omit <- function(x) x[!is.na(x)]
+
 na_to_char <- function(x, char = ""){
   x <- as.character(x)
   x[is.na(x)] <- char

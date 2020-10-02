@@ -1,28 +1,26 @@
-
 #' import neon data into a local database
 #' 
+#' @param n number of files that should be read per iteration
 #' @param quiet show progress?
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
 #' @return the connection object (invisibly)
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
-#' @importFrom utils read.csv
 #' @export
 #' 
-neon_store <- function(table,
-                       type = "expanded", 
-                       dir = neon_dir(),
-                       quiet = FALSE, 
-                       ...)
+neon_store2 <- function(table,
+                        dir = neon_dir(),
+                        n = 200L,
+                        quiet = FALSE, 
+                        ...)
 {
   
   index <- neon_index(table = table,
-                      type = type,
                       hash = "md5",
                       dir = dir,
                       deprecated = FALSE)
   
-  ## enforce table name convention
+  ## standardize table name
   table <- unique(index$table)
   con <- neon_db(dir)
   
@@ -37,11 +35,12 @@ neon_store <- function(table,
   }
   
   ## work through files list in chunks, with progress
-  db_chunks(con = con, 
-            files = index$path,
-            table = table, 
-            quiet = quiet, 
-            ...)
+  db_chunks2(con = con, 
+             files = index$path,
+             table = table, 
+             n = n, 
+             quiet = quiet, 
+             ...)
   
   ## update the provenance table
   DBI::dbWriteTable(con, "provenance", index, append = TRUE)
@@ -52,33 +51,46 @@ neon_store <- function(table,
 
 
 
-db_chunks <- function(con, files, table, 
-                      quiet = FALSE, ...){
+db_chunks2 <- function(con, files, table, 
+                       n = 100L, quiet = FALSE, ...){
   
+  total <- length(files) %/% n
+  if(length(files) %% n > 0)  ## and the remainder
+    total <- total + 1
   
+  ## all files in one go
+  if(total == 1){
+    df <- neon_stack(files = files,
+                     keep_filename = TRUE,
+                     sensor_metadata = TRUE,
+                     altrep = FALSE,
+                     progress = FALSE,
+                     ...)
+    DBI::dbWriteTable(con, table, df, append = TRUE)
+    return(invisible(con))
+  }
+  
+  ## Otherwise do chinks
   pb <- progress::progress_bar$new(
     format = "  importing [:bar] :percent in :elapsed, eta: :eta",
-    total = length(files), 
+    total = total, 
     clear = FALSE, 
-    width = 60,
-    show_after = 0)
-
-  for(x in files){
+    width = 60)
+  
+  for(i in 0:(total-1)){
     if(!quiet) pb$tick()
-    
-    ## vroom is doing weird stuff to progress bar
-    df <- utils::read.csv(x)
-    df$file <- x
-    rownames(df) <- NULL
-    if(is_sensor_data(basename(x)))
-    df <-add_sensor_columns(df)
-    
-    silent <- DBI::dbWriteTable(con, table, df, append = TRUE)  
+    chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])
+    df <- neon_stack(files = chunk,
+                     keep_filename = TRUE,
+                     sensor_metadata = TRUE, 
+                     altrep = FALSE,
+                     progress = FALSE)
+    DBI::dbWriteTable(con, table, df, append = TRUE)  
   }
-
   return(invisible(con))
   
 }
+
 
 #' @importFrom DBI dbWriteTable dbListTables dbGetQuery
 omit_imported <- function(con, index){
