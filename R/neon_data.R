@@ -34,9 +34,10 @@ neon_data <- function(product,
   resp <- vector("list", length = length(data_api))
   for(i in seq_along(data_api)){
     if(!quiet){ pb$tick() }
-    resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
+    resp[[i]] <- httr::GET(data_api[[i]],
+                           httr::add_headers("X-API-Token" = .token))
     if(i %% batch == 0){
-      message("\nNEON rate limiting enforced, pausing for 100s\n")
+      if(!quiet) message("  NEON rate limiting enforced, pausing for 100s\n")
       Sys.sleep(105)
     }
   }
@@ -111,7 +112,7 @@ data_api_queries <- function(product,
   }
   
   if(length(data_api) == 0){
-    message("No files to download.")
+    if(!quiet) message("  No files to download.")
     return(invisible(NULL))
   }
   data_api

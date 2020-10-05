@@ -145,11 +145,9 @@ neon_download_ <- function(product,
   ## additional filters on already_have, type and file_regex:
   files <- download_filters(files, file_regex, type, quiet, dir)
   if(is.null(files)){
-    if(!quiet) message("nothing more to download\n")
     return(invisible(NULL)) # nothing to download
   }
   if(length(files) == 0) {
-    if(!quiet) message("nothing more to download\n")
     return(invisible(NULL)) # nothing to download
   }
   
@@ -185,11 +183,14 @@ download_filters <- function(files, file_regex,
                              type, quiet, dir){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
+  if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
   
   ## Omit those file names we already have
   already_have <- files$name %in% basename(list.files(dir, recursive = TRUE))
   if(sum(already_have) > 0 && !quiet){
-    message(paste("omitting", sum(already_have), "files previously downloaded"))
+    message(paste("  omitting", 
+                  sum(already_have), 
+                  "files previously downloaded"))
   }
   files <- files[!already_have, ]
   
@@ -201,6 +202,9 @@ download_filters <- function(files, file_regex,
     files <- files[!grepl("basic", files$name), ]
   if(type == "basic")
     files <- files[!grepl("expanded", files$name), ]
+
+  
+  if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
   
   ## Filter out duplicate files, e.g. have identical hash values
   ## (as reported by NEON's own hash)

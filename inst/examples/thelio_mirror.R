@@ -12,9 +12,9 @@ neonstore::neon_download(product="DP4.00200.001", site = ter_sites)
 neonstore::neon_download(product="DP1.00094.001", site = ter_sites, type="basic")
 
 #Aquatic
-sites <- c("BARC", "FLNT")
-neonstore::neon_download(product="DP1.20053.001",site = sites)
-neonstore::neon_download(product="DP1.20288.001",site = sites)
+aq_sites <- c("BARC", "FLNT")
+neonstore::neon_download(product="DP1.20053.001",site = aq_sites)
+neonstore::neon_download(product="DP1.20288.001",site = aq_sites)
 
 
 ## import into local database

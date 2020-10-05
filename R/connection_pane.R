@@ -25,7 +25,7 @@ neon_pane <- function() {
         )
       },
       listObjects = function(type = "datasets") {
-        tbls <- DBI::dbListTables(neon_db(read_only = TRUE))
+        tbls <- DBI::dbListTables(neon_db())
         data.frame(
           name = tbls,
           type = rep("table", length(tbls)),
@@ -33,7 +33,7 @@ neon_pane <- function() {
         )
       },
       listColumns = function(table) {
-        res <- DBI::dbGetQuery(neon_db(read_only = TRUE),
+        res <- DBI::dbGetQuery(neon_db(),
                                paste("SELECT * FROM", table, "LIMIT 1"))
         data.frame(
           name = names(res), 
@@ -42,7 +42,7 @@ neon_pane <- function() {
         )
       },
       previewObject = function(rowLimit, table) {  #nolint
-        DBI::dbGetQuery(neon_db(read_only = TRUE),
+        DBI::dbGetQuery(neon_db(),
                         paste("SELECT * FROM", table, "LIMIT", rowLimit))
       },
       actions = list(
@@ -55,7 +55,7 @@ neon_pane <- function() {
           callback = sql_action
         )
       ),
-      connectionObject = neon_db(read_only = TRUE)
+      connectionObject = neon_db()
     )
   }
 }
@@ -71,7 +71,7 @@ sql_action <- function() {
   if (requireNamespace("rstudioapi", quietly = TRUE) &&
       exists("documentNew", asNamespace("rstudioapi"))) {
     contents <- paste(
-      "-- !preview conn=neonstore::neon_db(read_only = TRUE)",
+      "-- !preview conn=neonstore::neon_db()",
       "",
       "SELECT * FROM provenance LIMIT 10",
       "",
@@ -87,7 +87,7 @@ sql_action <- function() {
 }
 
 neon_status <- function () {
-  con <- neon_db(read_only = TRUE)
+  con <- neon_db()
   inherits(con, "DBIConnection")
 }
 
