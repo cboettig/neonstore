@@ -30,11 +30,12 @@ neon_store <- function(table = NA,
     if(!is.na(product))
       message(paste("No csv files for product", product,
               "found. do you need to download first?"))
-    return(invisible(con))
+    return(invisible(NULL))
   }
   
   ## standardize table name
-  tables <- unique(index$table)
+  
+  tables <- stackable_tables(index$table)
   con <- neon_db(dir)
   
   
@@ -64,7 +65,13 @@ neon_store <- function(table = NA,
   invisible(con)
 }
 
-
+stackable_tables <- function(tables){
+  tables <- unique(tables)
+  tables <- tables[!grepl("^variables", tables)]
+  tables <- tables[!grepl("^readme", tables)]
+  
+  tables
+}
 
 
 db_chunks <- function(con, files, table, 
