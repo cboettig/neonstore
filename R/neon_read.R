@@ -78,13 +78,12 @@ neon_read <- function(table = NA,
                        end_date = end_date,
                        ext = ext,
                        hash = NULL, 
-                       dir = dir)
+                       dir = dir,
+                       deprecated = FALSE)
     
     if(is.null(meta)) return(NULL)
     if(dim(meta)[[1]] == 0 )  return(NULL)
     
-    ## If timestamp has changed but other metadata is the same, we only want the newer version
-    meta <- filter_duplicates(meta)
     files <- meta$path
   }
   
@@ -95,34 +94,37 @@ neon_read <- function(table = NA,
     return(NULL)
   }
 
-  ## Handle the case of needing to add columns extracted from filenames
-  if(is_sensor_data(files) && sensor_metadata){
-    neon_read_sensor(meta, altrep = altrep, ...)
-  ## Otherwise we can just read in:  
-  } else {
-    read_csvs(files,  altrep = altrep, ...)
-  }
+  neon_stack(files, 
+             keep_filename = FALSE,
+             sensor_metadata = sensor_metadata, 
+             altrep = altrep, 
+             ...)
+  
   
 }
 
 
-neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
-    suppressMessages({
-      id <- unique(meta[[.id]])
-      groups <- 
-        lapply(id,
-               function(x){
-                 paths <- meta$path[meta[[.id]] == x]
-                 out <- read_csvs(paths, altrep = altrep, ...)
-                 out[.id] <- x
-                 out
-               })
-    })
-    suppressWarnings({
-      df <- ragged_bind(groups)
-    })
+neon_stack <- function(files, 
+                       keep_filename = FALSE,
+                       sensor_metadata = TRUE, 
+                       altrep = FALSE, 
+                       ...){
   
-  filename_meta <- neon_filename_parser(df$path)
+  if(is_sensor_data(files) && sensor_metadata){
+    df <- vroom_each(files, altrep = altrep, ...)
+    add_sensor_columns(df)
+  } else if(keep_filename) {
+    ## Just keeps files names as an additional column in stacked data
+    vroom_each(files, altrep = altrep, ...)
+  } else {
+    ## Usually much much faster if we can do this one
+    vroom_many(files,  altrep = altrep, ...)
+  }
+}
+
+
+add_sensor_columns <- function(df){
+  filename_meta <- neon_filename_parser(df$file)
   df$domainID <- filename_meta$DOM
   df$siteID <- filename_meta$SITE
   df$horizontalPosition <- filename_meta$HOR
@@ -132,23 +134,47 @@ neon_read_sensor <- function(meta, altrep = FALSE, ..., .id = "path") {
   df
 }
 
-read_csvs <- function(files, altrep = FALSE, ...){
-  ## vroom can read in a list of files, but only if columns are consistent
-  tryCatch(vroom::vroom(files, altrep = altrep,  ...),
-           error = function(e) vroom_ragged(files, altrep = altrep, ...),
-           finally = NULL)  
+
+
+## read each file in separately and then stack them.
+## include file name as additional id column
+vroom_each <- function(files, altrep = FALSE, ...){
+  suppress_msg({
+    groups <-  lapply(files,
+                      function(x){
+                        out <- vroom::vroom(x, guess_max = 5e4,
+                                            altrep = altrep, ...)
+                        out$file <- basename(x)
+                        na_bool_to_char(out)
+                      })
+  })
+  suppressWarnings({
+    df <- ragged_bind(groups)
+  }) 
 }
 
 
-#' @importFrom vroom vroom spec
+
+## vroom can read in a list of files, but only if columns are consistent
+## So this attempts vroom over a list of files, but falls back on vroom_ragged
+vroom_many <- function(files, altrep = FALSE, ...){
+  suppress_msg({ ## We don't need vroom telling us every table spec!
+  df <- tryCatch(vroom::vroom(files, guess_max = 5e4, altrep = altrep,  ...),
+           error = function(e) vroom_ragged(files, guess_max = 5e4,
+                                            altrep = altrep, ...),
+           finally = NULL)
+  })
+  na_bool_to_char(df)
+}
+
+
+## Apply vroom over files that share a common schema.
 vroom_ragged <- function(files, altrep = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
-  suppressMessages(
+  suppress_msg(
     schema <- lapply(files, vroom::vroom, n_max = 1, altrep = altrep, ...)
   )
-  
-  
   ## Now, we read in tables in groups of matching schema,
   ## filling in additional columns as in bind_rows.
   
@@ -179,7 +205,8 @@ vroom_ragged <- function(files, altrep = FALSE, ...){
   
 }
 
-## simpler case
+## A base-R version of (recent versions of) dplyr::bind_rows,
+## which can handle varying numbers of columns
 ragged_bind <- function(x){
   
   col_schemas <- lapply(x, colnames)
@@ -194,21 +221,12 @@ ragged_bind <- function(x){
   
 }
 
-## Sometimes a NEON file will have changed
-filter_duplicates <- function(meta){
-  meta_b <- meta[order(meta$timestamp, decreasing = TRUE),] 
-  meta_b$id <- paste_na(meta$product, meta$site, meta$table, meta$month, 
-                     meta$verticalPosition, meta$horizontalPosition, sep="-")
-  out <- take_first_match(meta_b, "id")
-  
-  if(dim(out)[[1]] < dim(meta)[[1]])
-    message(paste("Some raw files were detected with updated timestamps.\n",
-                  "Using only most updated file to avoid duplicates."))
-  ## FIXME Maybe we should verify if the hash of said file(s) has changed.
-  ## maybe we should provide more information on how to check these?
-  
-  out
+
+suppress_msg <- function(expr, pattern = c("Rows:")){
+  withCallingHandlers(expr,
+                      message = function(e){
+                        if(any(vapply(pattern, grepl, logical(1), e$message)))
+                          invokeRestart("muffleMessage")
+                      })
 }
-
-
 

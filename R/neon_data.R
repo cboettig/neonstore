@@ -12,6 +12,73 @@ neon_data <- function(product,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
   
+  data_api <- data_api_queries(product = product, 
+                               start_date = start_date, 
+                               end_date = end_date, 
+                               site = site, 
+                               api = api,
+                               .token = .token)
+  
+  ## Adjust for rate-limiting
+  batch <- 950                 # authenticated
+  if(.token == "") batch <- 150 # unauthenticated
+  
+  
+  ## Extract the file list from the data endpoint.  O(sites * months) calls
+  pb <- progress::progress_bar$new(
+    format = paste("  requesting", product, 
+                   "from API [:bar] :percent in :elapsed, eta: :eta"),
+    total = length(data_api), 
+    clear = FALSE, width= 80)
+  
+  resp <- vector("list", length = length(data_api))
+  for(i in seq_along(data_api)){
+    if(!quiet){ pb$tick() }
+    resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
+    if(i %% batch == 0){
+      message("\nNEON rate limiting enforced, pausing for 100s\n")
+      Sys.sleep(105)
+    }
+  }
+  
+  ## Format the result as a data.frame
+  data <- do.call(rbind,
+                  lapply(resp, function(x) {
+                    
+                    status <- neon_warn_http_errors(x)
+                    if(status > 0) return(NULL)
+                    cont <- httr::content(x, as = "text")
+                    dat <- jsonlite::fromJSON(cont)[[1]]
+                    if(length(dat) == 0) return(NULL)
+                    if(length(dat$files) == 0) return(NULL)
+                    dat$files
+                  }))
+  
+  tibble::as_tibble(data)
+}
+
+#' @importFrom httr status_code content
+neon_warn_http_errors <- function(x){
+  status <- httr::status_code(x)
+  if(status < 400) return(invisible(0L))
+  out <- httr::content(x)
+  warning(paste(status, "error:", as.character(out)), call. = FALSE)
+  invisible(1L)
+}
+
+## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 
+## https://data.neonscience.org/api/v0/data/DP1.20093.001/ARIK/2011-04
+## Hence, we warn on these errors but will continue with any other downloads in the list.
+
+
+## prepare a vector of API queries
+data_api_queries <- function(product, 
+                            start_date = NA,
+                            end_date = NA,
+                            site = NA,
+                            api = "https://data.neonscience.org/api/v0", 
+                            .token = Sys.getenv("NEON_TOKEN")){
+  
   start_date <- as.Date(start_date)
   end_date <- as.Date(end_date)
   
@@ -47,55 +114,11 @@ neon_data <- function(product,
     message("No files to download.")
     return(invisible(NULL))
   }
-  
-  ## Adjust for rate-limiting
-  batch <- 1000                 # authenticated
-  if(.token == "") batch <- 200 # unauthenticated
-  
-  
-  ## Extract the file list from the data endpoint.  O(sites * months) calls
-  pb <- progress::progress_bar$new(
-    format = "  querying API [:bar] :percent eta: :eta",
-    total = length(data_api), 
-    clear = FALSE, width= 60)
-  
-  resp <- vector("list", length = length(data_api))
-  for(i in seq_along(data_api)){
-    if(!quiet){ pb$tick() }
-    resp[[i]] <- httr::GET(data_api[[i]], httr::add_headers("X-API-Token" = .token))
-    if(i %% batch == 0){
-      message("\nNEON rate limiting enforced, pausing for 100s\n")
-      Sys.sleep(101)
-    }
-  }
-  
-  ## Format the result as a data.frame
-  data <- do.call(rbind,
-                  lapply(resp, function(x) {
-                    
-                    status <- neon_warn_http_errors(x)
-                    if(status > 0) return(NULL)
-                    cont <- httr::content(x, as = "text")
-                    dat <- jsonlite::fromJSON(cont)[[1]]
-                    if(length(dat) == 0) return(NULL)
-                    if(length(dat$files) == 0) return(NULL)
-                    dat$files
-                  }))
-  
-  tibble::as_tibble(data)
+  data_api
 }
 
-#' @importFrom httr status_code content
-neon_warn_http_errors <- function(x){
-  status <- httr::status_code(x)
-  if(status < 400) return(invisible(0L))
-  out <- httr::content(x)
-  warning(paste(status, "error:", as.character(out)), call. = FALSE)
-  invisible(1L)
-}
 
-## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 
-## https://data.neonscience.org/api/v0/data/DP1.20093.001/ARIK/2011-04
-## Hence, we warn on these errors but will continue with any other downloads in the list.
+
+
 
 

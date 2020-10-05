@@ -14,7 +14,8 @@ neon_index(
   ext = NA,
   timestamp = NA,
   hash = NULL,
-  dir = neon_dir()
+  dir = neon_dir(),
+  deprecated = TRUE
 )
 }
 \arguments{
@@ -48,6 +49,9 @@ use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
+
+\item{deprecated}{Should the index include files that have since been deprecated by
+more recent downloads?  logical, default \link{TRUE}.}
 }
 \description{
 NEON products consist of several individual components, which are in turn

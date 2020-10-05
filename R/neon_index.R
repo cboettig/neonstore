@@ -37,6 +37,8 @@
 #'  `"md5"`, `"sha1"`, or `"sha256"` currently; or set to [NULL] (default)
 #'   to skip hash computation.
 #' @inheritParams neon_download
+#' @param deprecated Should the index include files that have since been deprecated by
+#' more recent downloads?  logical, default [TRUE]. 
 #' 
 #' @export
 #' @examples
@@ -65,17 +67,20 @@ neon_index <- function(product = NA,
                        ext = NA,
                        timestamp = NA,
                        hash = NULL,
-                       dir = neon_dir()){
+                       dir = neon_dir(),
+                       deprecated = TRUE){
   
   files <- list.files(dir, recursive = TRUE, full.names = TRUE)
   
   ## Turn file names into a metadata table
   meta <- filename_parser(files)
+
+  ## Paths should not have NAs
+  meta <- meta[!is.na(meta$path),]
+  
+  
   if(is.null(meta)) return(NULL)
   
-  ## Include full paths to files
-  #meta$path <- files
-  meta$timestamp <- as.POSIXct(meta$timestamp, format = "%Y%m%dT%H%M%OS")
   
   ## Apply filters
   meta <- meta_filter(meta, 
@@ -90,6 +95,10 @@ neon_index <- function(product = NA,
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
+  
+  if(!deprecated){
+    meta <- filter_deprecated(meta)
+  }
   
   tibble::as_tibble(meta)
 }
@@ -159,11 +168,14 @@ meta_filter <- function(meta,
   
 }
 
+na_omit <- function(x) x[!is.na(x)]
+
 na_to_char <- function(x, char = ""){
   x <- as.character(x)
   x[is.na(x)] <- char
   x
 }
+
 paste_na <- function(..., sep = "."){
   do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
 }
@@ -195,6 +207,10 @@ filename_parser <- function(files){
                  "ext", "month", "timestamp",
                  "horizontalPosition", "verticalPosition", "samplingInterval",
                  "path")]
+  
+  ## cast timestamp as POSIXct
+  out$timestamp <- as.POSIXct(out$timestamp, format = "%Y%m%dT%H%M%OS")
+  
   
   out
 }
@@ -228,3 +244,30 @@ file_hash <- function(x, hash = "md5"){
   hashes
   
 }
+
+
+
+
+## Sometimes a NEON file will have changed
+filter_deprecated <- function(meta){
+
+  ## Sort by most recent timestamp
+  meta <- meta[order(meta$timestamp, decreasing = TRUE),] 
+  
+  ## de-duplicate.  always takes first match(?)
+  key_cols <- c("product", "site", "month", "table", 
+    "verticalPosition", "horizontalPosition")
+  deprecated <- duplicated(meta[key_cols])
+  out <- meta[!deprecated,]
+  
+  if(any(deprecated))
+    message(paste("Some raw files were detected with updated timestamps.\n",
+                  "Using only most updated file to avoid duplicates."))
+  ## FIXME Maybe we should verify if the hash of said file(s) has changed.
+  ## maybe we should provide more information on how to check these?
+  
+  out
+}
+
+
+

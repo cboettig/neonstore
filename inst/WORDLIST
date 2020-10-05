@@ -9,11 +9,13 @@ Codecov
 crc
 csv
 datetime
+dbConnect
 DESC
 dir
 DOM
 DomainID
 DPL
+duckdb
 easting
 EEEEEE
 et
@@ -52,6 +54,7 @@ Ratnakumar
 Renviron
 reproducibility
 reproduciblity
+RStudio
 sharded
 SiteID
 subdir

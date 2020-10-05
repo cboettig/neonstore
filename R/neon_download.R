@@ -87,6 +87,35 @@
 #' 
 #' }
 neon_download <- function(product, 
+                           start_date = NA,
+                           end_date = NA,
+                           site = NA,
+                           type = "expanded",
+                           file_regex =  "[.]zip",
+                           quiet = FALSE,
+                           verify = TRUE,
+                           dir = neon_dir(), 
+                           unzip = TRUE,
+                           api = "https://data.neonscience.org/api/v0",
+                           .token =  Sys.getenv("NEON_TOKEN")){
+  
+  x <- lapply(product, neon_download_, 
+              start_date = start_date,
+              end_date = end_date,
+              site = site,
+              type = type,
+              file_regex =  file_regex,
+              quiet = quiet,
+              verify = verify,
+              dir = dir, 
+              unzip = unzip,
+              api = api,
+              .token =  .token)
+  invisible(do.call(rbind, x))
+      
+}
+
+neon_download_ <- function(product, 
                           start_date = NA,
                           end_date = NA,
                           site = NA,
@@ -110,6 +139,9 @@ neon_download <- function(product,
                      api = api, 
                      .token = .token)
   
+  ## confirm product has expanded type, if requested
+  type <- type_check(product, type)
+  
   ## additional filters on already_have, type and file_regex:
   files <- download_filters(files, file_regex, type, quiet, dir)
   if(is.null(files)){
@@ -127,13 +159,26 @@ neon_download <- function(product,
   algo <- hash_type(files)
   verify_hash(files$path, files[algo], verify, algo)
   
-  if(unzip) unzip_all(files$path, dir)
+  if(unzip) 
+    unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
   ## file metadata (url, path, md5sum)  
   invisible(files)
 }
 
-
+type_check <- function(product, type){
+  if(type == "basic"){
+    return("basic")
+  }
+  
+  p <- neon_products()
+  x <- p[p$productCode %in% product,]
+  if(!x$productHasExpanded){
+    message("product has no expanded format, using basic")
+    return("basic")
+  }
+  "expanded"
+}
 
 
 download_filters <- function(files, file_regex, 
@@ -151,14 +196,7 @@ download_filters <- function(files, file_regex,
   ## Filter for only files matching the file regex
   files <- files[grepl(file_regex, files$name), ]
   
-  
   ## Filter to have only expanded or basic (not both)
-  ## Note: this may not make sense if product is a vector!
-  
-  if(type == "expanded" & !any(grepl("expanded", files))){
-    type <- "basic"
-    if(!quiet) message("no expanded product, using basic product")
-  }
   if(type == "expanded")
     files <- files[!grepl("basic", files$name), ]
   if(type == "basic")
@@ -201,9 +239,9 @@ hash_type <- function(df){
 download_all <- function(addr, dest, quiet){
   
   pb <- progress::progress_bar$new(
-    format = "  downloading [:bar] :percent eta: :eta",
+    format = "  downloading [:bar] :percent in :elapsed, eta: :eta",
     total = length(addr), 
-    clear = FALSE, width= 60)
+    clear = FALSE, width= 80)
   
   for(i in seq_along(addr)){
     if(!quiet) pb$tick()
@@ -217,9 +255,19 @@ download_all <- function(addr, dest, quiet){
   }  
 }
 
-unzip_all <- function(path, dir, keep_zips = TRUE){
+unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
+  
   zips <- path[grepl("[.]zip", path)]
-  lapply(zips, function(x) zip::unzip(x, exdir = dirname(x)))
+  
+  pb <- progress::progress_bar$new(
+    format = "  unzipping [:bar] :percent in :elapsed, eta: :eta",
+    total = length(zips), 
+    clear = FALSE, width= 80)
+  
+  lapply(zips, function(x){
+    if(!quiet) pb$tick()
+    zip::unzip(x, exdir = dirname(x))
+    })
   if(!keep_zips) {
     unlink(zips)
   }

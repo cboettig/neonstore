@@ -1,6 +1,6 @@
 Package: neonstore
 Title: NEON Data Store
-Version: 0.2.4
+Version: 0.3.0
 Authors@R: c(person(
               "Carl", "Boettiger", 
               email = "cboettig@gmail.com", 
@@ -11,7 +11,9 @@ Authors@R: c(person(
             person("Christine", "Laney", role = "aut", 
                    comment = c("ORCID" = "0000-0002-4944-2083")),
             person("Claire", "Lunch", role = "aut",
-                   comment = c("ORCID" = "0000-0001-8753-6593"))
+                   comment = c("ORCID" = "0000-0001-8753-6593")),
+            person("Noam", "Ross", role = c("ctb"), 
+                   comment = c(ORCID = "0000-0002-2136-0000"))
             )
 Description: The National Ecological Observatory Network (NEON) provides access
   to its numerous data products through its REST API, 
@@ -26,24 +28,27 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports: 
-    httr,
-    jsonlite,
-    rappdirs,
-    progress,
+    DBI,
+    duckdb,
     vroom,
-    utils,
+    rappdirs,
+    httr,
+    R.utils,
+    zip,
+    jsonlite,
     curl,
     openssl,
     tibble,
-    stats,
-    zip,
     digest,
-    R.utils,
-    tools
+    progress,
+    stats,
+    tools,
+    utils
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,
     covr,
     xml2,
-    spelling
+    spelling,
+    rstudioapi
 Language: en-US

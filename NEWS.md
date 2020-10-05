@@ -1,3 +1,5 @@
+# v0.3.0
+
 # v0.2.3
 
 - Use subdir structure (product/site/month) inside the neon directory [#17]

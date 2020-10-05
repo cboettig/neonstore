@@ -49,9 +49,14 @@ neon_download_s3 <- function(product,
   ## These two checks overlap with neon_download() steps
   ## only files matching regex
   files <- files[grepl(file_regex, files)]
+  
   ## only files we don't already have in the store
-  already_have <- list.files(dir)
-  files <- files[!(files %in% already_have)]
+  already_have <- files %in% basename(list.files(dir, recursive = TRUE))
+  if(sum(already_have) > 0 && !quiet){
+    message(paste("omitting", sum(already_have), "files previously downloaded"))
+  }
+  files <- files[!already_have]
+  
   if(length(files) == 0){
     message("No new files found")
     return(invisible(NULL))
@@ -76,7 +81,7 @@ neon_download_s3 <- function(product,
   
   ## URL and destination
   addr <- paste0(api, meta$path)
-  dest <- neon_subdir(meta$path, dir)
+  dest <- neon_subdir(basename(meta$path), dir)
   
   download_all(addr, dest, quiet)
   # verify_hash(dest, files$crc32, verify)
@@ -94,17 +99,13 @@ neon_download_s3 <- function(product,
 # In particular, this uses `marker` instead of `continuation-token`
 
 s3_index_public <- function(
-  bucket = "https://minio.jetstream.carlboettiger.info/neonstore/"){
+  bucket = "https://minio.thelio.carlboettiger.info/neonstore/"){
   
   ## use xml2 conditionally
   if(!requireNamespace("xml2", quietly = TRUE)){
     stop("install xml2 to access data from S3 buckets")
   }
-  xml_find_all <- getExportedValue("xml2", "xml_find_all")
-  xml_find_first <- getExportedValue("xml2", "xml_find_first")
-  xml_ns <- getExportedValue("xml2", "xml_ns")
-  xml_text <- getExportedValue("xml2", "xml_text")
-  
+ 
   isTruncated <- TRUE
   startAfter <- NULL
   files <- ""
@@ -113,11 +114,11 @@ s3_index_public <- function(
     resp <- httr::GET(bucket,
                       query = list("marker" = startAfter))
     xml <- httr::content(resp, encoding = "UTF-8")
-    ns <- xml_ns(xml)
-    isTruncated <- xml_find_first(xml, "//d1:IsTruncated", ns)
-    isTruncated <-as.logical( xml_text(isTruncated) )
-    startAfter <- xml_text(xml_find_first(xml, "//d1:NextMarker", ns))
-    set <- xml_text(xml_find_all(xml, "//d1:Key", ns))
+    ns <- xml2::xml_ns(xml)
+    isTruncated <- xml2::xml_find_first(xml, "//d1:IsTruncated", ns)
+    isTruncated <-as.logical( xml2::xml_text(isTruncated) )
+    startAfter <- xml2::xml_text(xml2::xml_find_first(xml, "//d1:NextMarker", ns))
+    set <- xml2::xml_text(xml2::xml_find_all(xml, "//d1:Key", ns))
     files <- c(files,set)
   }
   files

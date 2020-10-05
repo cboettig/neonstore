@@ -1,4 +1,4 @@
-context("s3")
+context("additional")
 
 
 
@@ -11,9 +11,37 @@ test_that("neon_download_s3()", {
   x <- neon_download_s3(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-01-01",
-                     end_date = "2019-01-01")
+                     end_date = "2019-01-01",
+                     dir = tempfile())
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
+  
+  
+})
+
+
+test_that("bigger neon_store() import", {
+  
+  
+  skip_on_cran()
+  skip_if_offline()
+  
+  x <- neon_download_s3(product = "DP1.10003.001",
+                        start_date = "2018-01-01",
+                        end_date = "2019-01-01")
+  
+  db <- neon_store(table = "brd_countdata-expanded")
+  expect_is(db, "DBIConnection")
+  x <- DBI::dbListTables(db)
+  expect_true("brd_countdata-expanded" %in% x)
+  
+  expect_true("provenance" %in% x)
+  
+  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) > 0)
+  expect_true(any(grepl("observerDistance", colnames(tbl))))
+  
   
   
 })
@@ -82,9 +110,5 @@ test_that("ECdata", {
   
   expect_equal(length(path_gz), 0)
   expect_gt(length(path_h5), 0)
-  
-  
-  
-  
 
 })
