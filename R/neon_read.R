@@ -100,7 +100,7 @@ neon_read <- function(table = NA,
     return(NULL)
   }
   
-  
+  ## don't attempt to stack things we don't understand
   files <- files[grepl("[.]h5", files) | grepl("[.]csv", files)]
   
 
@@ -118,19 +118,36 @@ neon_stack <- function(files,
                        keep_filename = FALSE,
                        sensor_metadata = TRUE, 
                        altrep = FALSE, 
+                       progress = TRUE,
+                       vroom_progress = FALSE,
                        ...){
   
   if(any(grepl("[.]h5$", files))){
-    stack_eddy(files, ...)
+    stack_eddy(files, progress = progress, ...)
+    
   } else if(is_sensor_data(files) && sensor_metadata){
-    df <- vroom_each(files, altrep = altrep, ...)
+    df <- vroom_each(files, 
+                     progress = progress,
+                     altrep = altrep, 
+                     vroom_progress = vroom_progress,
+                     ...)
     add_sensor_columns(df)
+    
   } else if(keep_filename) {
     ## Just keeps files names as an additional column in stacked data
-    vroom_each(files, altrep = altrep, ...)
+    vroom_each(files, 
+               progress = progress,
+               altrep = altrep,
+               vroom_progress = vroom_progress,
+               ...)
+    
   } else {
     ## Usually much much faster if we can do this one
-    vroom_many(files,  altrep = altrep, ...)
+    vroom_many(files, 
+               progress = progress,
+               altrep = altrep, 
+               vroom_progress = vroom_progress,
+               ...)
   }
 }
 
@@ -152,12 +169,29 @@ add_sensor_columns <- function(df){
 
 ## read each file in separately and then stack them.
 ## include file name as additional id column
-vroom_each <- function(files, altrep = FALSE, ...){
+vroom_each <- function(files,
+                       progress = TRUE,
+                       altrep = FALSE, 
+                       vroom_progress = FALSE,
+                       ...){
+  
+  if(progress){
+  pb <- progress::progress_bar$new(
+    format = paste("  reading files",
+                   "[:bar] :percent in :elapsed, eta: :eta"),
+    total = length(files), 
+    clear = FALSE, 
+    width = 80)
+  }
+  
   suppress_msg({
     groups <-  lapply(files,
                       function(x){
+                        if(progress) pb$tick()
                         out <- vroom::vroom(x, guess_max = 5e4,
-                                            altrep = altrep, ...)
+                                            altrep = altrep,
+                                            progress = vroom_progress,
+                                            ...)
                         out$file <- basename(x)
                         out
                       })
@@ -172,11 +206,22 @@ vroom_each <- function(files, altrep = FALSE, ...){
 
 ## vroom can read in a list of files, but only if columns are consistent
 ## So this attempts vroom over a list of files, but falls back on vroom_ragged
-vroom_many <- function(files, altrep = FALSE, ...){
+vroom_many <- function(files, 
+                       altrep = FALSE, 
+                       progress = FALSE,
+                       vroom_progress = FALSE,
+                       ...){
   suppress_msg({ ## We don't need vroom telling us every table spec!
-  df <- tryCatch(vroom::vroom(files, guess_max = 5e4, altrep = altrep,  ...),
-           error = function(e) vroom_ragged(files, guess_max = 5e4,
-                                            altrep = altrep, ...),
+  df <- tryCatch(vroom::vroom(files, 
+                              guess_max = 5e4, 
+                              altrep = altrep,
+                              progress = vroom_progress,
+                              ...),
+           error = function(e) vroom_ragged(files, 
+                                            guess_max = 5e4,
+                                            altrep = altrep,
+                                            progress = vroom_progress,
+                                            ...),
            finally = NULL)
   })
   na_bool_to_char(df)
@@ -184,11 +229,16 @@ vroom_many <- function(files, altrep = FALSE, ...){
 
 
 ## Apply vroom over files that share a common schema.
-vroom_ragged <- function(files, altrep = FALSE, ...){
+vroom_ragged <- function(files, altrep = FALSE, vroom_progress = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
   suppress_msg(
-    schema <- lapply(files, vroom::vroom, n_max = 1, altrep = altrep, ...)
+    schema <- lapply(files, 
+                     vroom::vroom, 
+                     n_max = 1, 
+                     altrep = altrep, 
+                     progress = FALSE,
+                     ...)
   )
   ## Now, we read in tables in groups of matching schema,
   ## filling in additional columns as in bind_rows.
@@ -207,7 +257,10 @@ vroom_ragged <- function(files, altrep = FALSE, ...){
     col_types <- vroom::spec(schema[index][[1]])
     
     ## Read in all those tables
-    tbl <- vroom::vroom(files[index], col_types = col_types)
+    tbl <- vroom::vroom(files[index], 
+                        altrep = altrep,
+                        progress = vroom_progress,
+                        col_types = col_types)
     
     ## append any columns missing from all_cols set
     missing <- all_cols[ !(all_cols %in% colnames(tbl)) ]

@@ -10,6 +10,7 @@
 #' 
 neon_store <- function(table = NA,
                        product = NA,
+                       type = NA,
                        dir = neon_dir(),
                        n = 100L,
                        quiet = FALSE, 
@@ -18,6 +19,7 @@ neon_store <- function(table = NA,
   
   index <- neon_index(table = table,
                       product = product,
+                      type = type,
                       dir = dir,
                       deprecated = FALSE)
   
@@ -79,8 +81,12 @@ stackable_tables <- function(tables){
 }
 
 
-db_chunks <- function(con, files, table, 
-                       n = 200L, quiet = FALSE, ...){
+db_chunks <- function(con, 
+                      files, 
+                      table, 
+                       n = 100L, 
+                      quiet = FALSE,
+                      ...){
   
   if(length(files)==0) return(NULL)
   
@@ -88,19 +94,26 @@ db_chunks <- function(con, files, table,
   if(length(files) %% n > 0)  ## and the remainder
     total <- total + 1
   
+  
+  progress <- !quiet
   ## all files in one go
   if(total == 1){
     df <- neon_stack(files = files,
                      keep_filename = TRUE,
                      sensor_metadata = TRUE,
                      altrep = FALSE,
-                     progress = FALSE,
+                     progress = progress,
                      ...)
-    DBI::dbWriteTable(con, table, df, append = TRUE)
+    if(!is.null(df)){
+      DBI::dbWriteTable(con, table, df, append = TRUE)
+    }
     return(invisible(con))
   }
   
-  ## Otherwise do chinks
+  if(total > 4){
+    progress <- FALSE
+  }
+  ## Otherwise do chunks
   pb <- progress::progress_bar$new(
     format = paste("  importing", table,
                    "[:bar] :percent in :elapsed, eta: :eta"),
@@ -109,15 +122,17 @@ db_chunks <- function(con, files, table,
     show_after = 0,
     width = 80)
   
-
+  if(!quiet && progress) 
+    message(paste("processing files in", total, "chunks."))
   for(i in 0:(total-1)){
-    if(!quiet) pb$tick()
+    if(!quiet && progress) message(paste("chunk", i+1, ":"))
+    if(!quiet && !progress) pb$tick()
     chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])
     df <- neon_stack(files = chunk,
                      keep_filename = TRUE,
                      sensor_metadata = TRUE, 
                      altrep = FALSE,
-                     progress = FALSE)
+                     progress = progress)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
   }
   return(invisible(con))

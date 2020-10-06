@@ -1,5 +1,6 @@
 
-read_eddy <- function(x, progress = FALSE, ...){
+read_eddy <- function(x, pb = NULL, eddy_progress = FALSE, ...){
+  if(!is.null(pb)) pb$tick()
   progress_sink <- tempfile()
   suppressMessages({
     sink(progress_sink) ## ugh, neonUtilities uses print()
@@ -13,9 +14,21 @@ read_eddy <- function(x, progress = FALSE, ...){
   df
 }  
 
-stack_eddy <- function(files, ...){
+stack_eddy <- function(files, progress = TRUE, ...){
   requireNamespace("neonUtilities", quietly = TRUE)
-  groups <-  lapply(files, read_eddy, ...)
+  
+  pb <- NULL
+  if(progress){
+    pb <- progress::progress_bar$new(
+      format = paste("  stacking h5 files",
+                     "[:bar] :percent in :elapsed, eta: :eta"),
+      total = length(files), 
+      clear = FALSE, 
+      width = 80)
+  }
+  
+  
+  groups <-  lapply(files, read_eddy, pb = pb, ...)
   df <- ragged_bind(groups)
   suppressWarnings(sink()) # make sure sink is off!
 }

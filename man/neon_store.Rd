@@ -7,6 +7,7 @@
 neon_store(
   table = NA,
   product = NA,
+  type = NA,
   dir = neon_dir(),
   n = 100L,
   quiet = FALSE,
@@ -18,6 +19,9 @@ neon_store(
 (optional).}
 
 \item{product}{Include only files matching this NEON productCode(s)}
+
+\item{type}{Should we prefer the basic or expanded version of this product?
+See details.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
