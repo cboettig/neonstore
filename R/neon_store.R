@@ -18,11 +18,10 @@ neon_store <- function(table = NA,
   
   index <- neon_index(table = table,
                       product = product,
-                      hash = "md5",
                       dir = dir,
-                      ext = "csv",
                       deprecated = FALSE)
   
+  index <- index[index$ext == "h5" | index$ext == "csv",]
   
   if(is.null(index)) index <- data.frame()
   if(nrow(index) == 0){

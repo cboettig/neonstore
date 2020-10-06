@@ -110,6 +110,10 @@ neon_stack <- function(files,
                        altrep = FALSE, 
                        ...){
   
+  if(all(grepl("[.]h5$", files))){
+    stack_eddy(files, ...)
+  }
+  
   if(is_sensor_data(files) && sensor_metadata){
     df <- vroom_each(files, altrep = altrep, ...)
     add_sensor_columns(df)
@@ -129,11 +133,32 @@ add_sensor_columns <- function(df){
   df$siteID <- filename_meta$SITE
   df$horizontalPosition <- filename_meta$HOR
   df$verticalPosition <- filename_meta$VER
-  df$publicationDate <- as.POSIXct(filename_meta$GENTIME, format = "%Y%m%dT%H%M%OS")
+  df$publicationDate <- as.POSIXct(filename_meta$GENTIME, 
+                                   format = "%Y%m%dT%H%M%OS")
   
   df
 }
 
+
+read_eddy <- function(x, ...){
+  progress_sink <- tempfile()
+  suppressMessages({
+    sink(progress_sink)
+    out <- neonUtilities::stackEddy(x, ...)
+    sink()
+  })
+  ## FIXME extract data from the other tables too
+  df <- out[[1]]
+  df$siteID <- names(out[1])
+  df$file <- basename(x)
+  df
+}  
+  
+stack_eddy <- function(files, ...){
+  requireNamespace("neonUtilities", quietly = TRUE)
+  groups <-  lapply(files, read_eddy, ...)
+  df <- ragged_bind(groups)
+}
 
 
 ## read each file in separately and then stack them.

@@ -50,5 +50,6 @@ Suggests:
     covr,
     xml2,
     spelling,
-    rstudioapi
+    rstudioapi,
+    neonUtilities
 Language: en-US
