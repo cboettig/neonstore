@@ -15,7 +15,8 @@ neon_data <- function(product,
   data_api <- data_api_queries(product = product, 
                                start_date = start_date, 
                                end_date = end_date, 
-                               site = site, 
+                               site = site,
+                               quiet = quiet,
                                api = api,
                                .token = .token)
   
@@ -77,6 +78,7 @@ data_api_queries <- function(product,
                             start_date = NA,
                             end_date = NA,
                             site = NA,
+                            quiet = FALSE,
                             api = "https://data.neonscience.org/api/v0", 
                             .token = Sys.getenv("NEON_TOKEN")){
   
