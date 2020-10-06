@@ -71,6 +71,12 @@ neon_read <- function(table = NA,
                       ...){
   
   if(is.null(files)){
+    
+    if(is.na(table)) {
+      stop(paste("please specify a table name."),
+           call. = FALSE)
+    }
+    
     meta <- neon_index(product = product,
                        table = table, 
                        site = site,
@@ -93,6 +99,10 @@ neon_read <- function(table = NA,
                   "perhaps you need to download them first?"))
     return(NULL)
   }
+  
+  
+  files <- files[grepl("[.]h5", files) | grepl("[.]csv", files)]
+  
 
   neon_stack(files, 
              keep_filename = FALSE,
@@ -138,25 +148,6 @@ add_sensor_columns <- function(df){
 }
 
 
-read_eddy <- function(x, progress = FALSE, ...){
-  progress_sink <- tempfile()
-  suppressMessages({
-    sink(progress_sink)
-    out <- neonUtilities::stackEddy(x, ...)
-    sink()
-  })
-  ## FIXME extract data from the other tables too
-  df <- out[[1]]
-  df$siteID <- names(out[1])
-  df$file <- basename(x)
-  df
-}  
-  
-stack_eddy <- function(files, ...){
-  requireNamespace("neonUtilities", quietly = TRUE)
-  groups <-  lapply(files, read_eddy, ...)
-  df <- ragged_bind(groups)
-}
 
 
 ## read each file in separately and then stack them.
