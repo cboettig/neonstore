@@ -35,7 +35,7 @@ neon_db <- function (dir = neon_dir(), ...) {
 #' @inheritParams neon_db
 #' @export
 #' @importFrom DBI dbDisconnect
-neon_disconnect <- function (dir) {
+neon_disconnect <- function (dir = neon_dir()) {
   
   db <- neon_db(dir)
   if (inherits(db, "DBIConnection")) {

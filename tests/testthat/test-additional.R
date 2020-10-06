@@ -27,10 +27,9 @@ test_that("bigger neon_store() import", {
   skip_if_offline()
   
   x <- neon_download_s3(product = "DP1.10003.001",
-                        start_date = "2018-01-01",
                         end_date = "2019-01-01")
   
-  db <- neon_store(table = "brd_countdata-expanded")
+  db <- neon_store(table = "brd_countdata-expanded", n = 50)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)

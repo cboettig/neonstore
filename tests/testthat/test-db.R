@@ -9,9 +9,22 @@ test_that("neon_db", {
   
   db <- neon_db()
   expect_is(db, "DBIConnection")
+
+  neon_delete_db(ask = FALSE)
   
 })
 
+
+test_that("neon_store error handling", {
+  
+  
+  db <- neon_store(table = "brd_countdata-expanded",
+                   dir = tempdir())
+  
+  db <- neon_store(product = "not-a-product",
+                   dir = tempdir())
+})
+  
 
 test_that("neon_store", {
 
@@ -71,6 +84,17 @@ test_that("neon_table", {
   tbl1 <- tbl[!colnames(tbl) == "file"]
   expect_identical(colnames(tbl1), colnames(tbl2))
   expect_identical(dim(tbl1), dim(tbl2))
+  
+  
+  
+  tbl <- neon_table("brd_countdata-expanded", site="YELL")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) > 0)
+
+  tbl <- neon_table("brd_countdata-expanded", site="not-a-site")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) == 0)
+  
   
 })
 

@@ -4,7 +4,7 @@
 \alias{neon_disconnect}
 \title{Disconnect from the neon database}
 \usage{
-neon_disconnect(dir)
+neon_disconnect(dir = neon_dir())
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will

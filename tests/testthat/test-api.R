@@ -87,3 +87,12 @@ test_that("neon_download()", {
 
 
 
+test_that("download_filters", {
+  
+  x <- download_filters(NULL, "", "", FALSE, tempdir())
+  expect_null(x)
+  
+  x <- download_filters(data.frame(), "", "", FALSE, tempdir())
+  expect_null(x)
+  
+})
