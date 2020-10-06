@@ -64,13 +64,13 @@ neon_download("DP1.10003.001")
 ```
 
 
-Now, view your store of NEON products:
+View your store of NEON products:
 
 ```{r }
 neon_index()
 ```
 
-These will persist between sessions, so you only need to download once
+These files will persist between sessions, so you only need to download once
 or to retrieve updates. `neon_index()` can take arguments to filter by product
 or pattern (regular expression) in table name, e.g. `neon_index(table = "brd")`.
 
@@ -81,152 +81,46 @@ read in all the component tables into a single `data.frame`
 neon_read("brd_countdata-expanded")
 ```
 
-Two other functions access additional API endpoints 
-that may also be of interest. `neon_sites()` returns a `data.frame`
-of site information, including site descriptions and 
-the ecological domain that each site falls into:
 
 
-```{r}
-neon_sites()
-```
+## Database backend
 
-Lastly, `neon_products()` returns a table with a list of all neon products,
-which may be useful for data discovery or additional metadata about any
-given product:  
-
+`neonstore` now supports a backend relation database as well. Import data from
+the raw downloaded files using `neon_store()`:
 
 ```{r}
-neon_products()
+neon_store(table = "brd_countdata-expanded")
 ```
 
-
-## Design Details / comparison to `neonUtilities`
-
-`neonstore` is not meant as a replacement to the `neonUtilities` package
-developed by NEON staff.  `neonUtilities` performs a range of product-specific
-data querying, parsing, and data manipulation beyond what is provided by NEON's
-API or web interface. `neonUtilities` also provides other utilities for working 
-with NEON data beyond the scope of the NEON API or the data download/ingest 
-process. While this processing is undoubtedly useful, it may make
-it difficult to compare results or analyses based on data downloaded and accessed
-using `neonUtilities` R package with analyses based on data accessed directly
-from the web interface, the API, or another tool (or even a different release
-of the `neonUtilities`).
-
-By contrast, `neonstore` aims to do far less.  `neonstore` merely automates the
-download of individual NEON data files.  In contrast to `neonUtilities` which 
-by default "stacks" these raw files into single tables and discards the raw 
-data, `neonstore` preserves only the raw files in the store, stacking the 
-individual tables "on demand" using `neon_read()`. `neon_read()` is a thin
-wrapper around the `vroom` package, 
-[Hester & Wickham, 2020](https://vroom.r-lib.org), which uses the `altrep` 
-mechanism in R to provide very fast reads of rectangular text data into R,
-and trivially handles the case of a single table being broken across many files.
-Some NEON tables are not entirely consistent in their use of columns across the
-individual site-month files, so `neon_read()` transparently checks for this,
-reading in groups of files sharing all matching columns with `vroom` before
-binding the groups together. This makes it easier to always trace an analysis
-back to the original input data, makes it easier to update input data files 
-without facing the challenge of either downloading & stacking the whole 
-data product from scratch again or having to keep track of some previously
-downloaded data file.
-
-A few other differences are also worth noting.
-
-- `neonstore` aims to provide persistent storage, writing raw data files to
-  the appropriate app directory for your operating system (see `rappdirs`,
-  [Ratnakumar et al 2016](https://CRAN.R-project.org/package=rappdirs)). 
-  More details about this can be found in Provenance, below.
-- `neon_download()` provides  clean and concise progress bars for the two key
-  processes involved: querying the API to obtain download URLs (which involves no 
-  large data transfer but counts against API rate limiting, see below), and the
-  actual file downloads.
-- `neon_download()` will verify the integrity of file downloads against the MD5
-  hashes provided. 
-- `neon_download()` will omit downloads of any existing data files in the local 
-  store.  
-- You can request multiple products at once using vector notation, though API
-  rate limiting may interfere with large requests.
-- `neon_download()` uses `curl::curl_download()` instead of `downloadr` package
-  used in `neonUtilities`, which can be finicky on Windows and older versions of R. 
-- `neonstore` has slightly lighter dependencies: only `vroom` and `httr`, and
-  packages already used by one of those two (`curl`, `openssl`).
-
-
-
-Like `neonUtilities`, You can optionally include site and date filters,
-e.g. to request only records more  recent than a certain date.  Doing so will
-preserve API quota and improve speed (see API limits, below). `neonUtilities`
-is also far more widely tested and has extensive error handling tailored to
-individual data products.  
-
-
-## Provenance
-
-Because `neonstore` only stores raw data products as returned from the NEON API,
-it can easily determine which files have already been downloaded, and only
-download new files without requiring the user to specify specific dates. 
-(It must still query the API for all the metadata in the requested date range).
-This same modular approach also makes it easy to track _data provenance_, an 
-essential element of reproduciblity in comparing results across other analyses
-of the NEON data. 
-
-We can list precisely which component files are being read in by `neon_read()`
-by consulting `neon_index()`:
-
+Alternately, we could import all data tables associated with a given product:
 
 ```{r}
-raw_files <- neon_index(table = "brd_countdata", hash="md5")
-raw_files
+neon_store(product = "DP1.10003.001")
 ```
 
-`neon_read()` is a relatively trivial function that simply passes this file 
-list to `vroom::vroom()`, a fast, vectorized parser that can easily read in 
-a single table that is broken into many separate files.  
-
-
-Imagine instead that we use the common pattern of downloading
-these raw files, stacks and possibly cleans the data, saving only this derived
-product while discarding the individual files.  Now imagine a second researcher,
-at some later date, queries the API over the same reported range of dates and 
-sites, uses the same software package to stack the tables, only to discover the
-resulting table is somehow different from ours (e.g. by comparing file hashes).
-Pinpointing the source of the discrepancy would be challenging and 
-labor-intensive.
-
-In contrast, the same detective-work would be easy with the `neonstore` file
-list.  We can confirm if the API had returned the same number of 
-raw files with the same names; and better, can verify integrity of the contents
-by comparing hashes of files now being returned to those recorded
-by `neon_index()`.  In this way, we could determine if any additional files
-had been included or pinpoint any files that may have changed.
-
-
-As such, users might want to store the `neon_index()` `data.frame` for the
-table(s) they have used as part of their analysis, including the individual
-file hashes.  One can also generate a zip of all the data files for 
-archival purposes. (Note that NEON is an Open Data provider, see
-[LICENCE](https://www.neonscience.org/data/about-data/data-policies).)
-
-```{r message=FALSE}
-# index list alone
-write.csv(raw_files, "index.csv")
-
-# zip archive
-neon_export("my_neondata.zip", product = "DP1.10003.001")
-neon_import("my_neondata.zip")
-```
-
-## Data citation
-
-Always remember to cite your data sources!
-`neonstore` knows how to generate the appropriate citation for the data
-in your local store (or any specific product).
+Access an imported table using `neon_table()` instead of `neon_read()`:
 
 ```{r}
-neon_citation()
+neon_table("brd_countdata-expanded")
 ```
+
+
+
+
+Access the remote database using `neon_db()`.  This is a `DBIConnection` that
+can easily be used with `dplyr` functions like `tbl()` or `filter()`.  
+Remember that `dplyr` translates these into SQL queries that run directly
+on the database.  
+
+```{r}
+library(dplyr)
+
+con <- neon_db()
+brd <- tbl(con, "brd_countdata-expanded")
+brd %>% filter(siteID == "ORNL")
+
+```
+
 
 
 

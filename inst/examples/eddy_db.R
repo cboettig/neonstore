@@ -9,11 +9,15 @@ table <- unique(index$table)
 df <- neonUtilities::stackEddy(path)
 
 import_hd5 <- function(path, con, table){
-   out <- neonUtilities::stackEddy(path)
+   suppressMessages({
+     out <- neonUtilities::stackEddy(path)
+   })
+  
    df <- out[[1]]
    df$siteID <- names(out[1])
    df$file <- basename(path)
    dbWriteTable(con, table, df, append = TRUE)
+
 }
 
 con <- neon_db()

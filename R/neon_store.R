@@ -23,6 +23,8 @@ neon_store <- function(table = NA,
                       ext = "csv",
                       deprecated = FALSE)
   
+  
+  if(is.null(index)) index <- data.frame()
   if(nrow(index) == 0){
     if(!is.na(table))
       message(paste("table", table, 
@@ -51,16 +53,20 @@ neon_store <- function(table = NA,
   
     ## Drop rows from the database which come from deprecated files
     drop_deprecated(table, dir, con)
-    files <- index[index$table == table, ]$path     
+    index <- index[index$table == table, ]
+    
+    if(nrow(index) > 0)
     db_chunks(con = con, 
-              files = files,
+              files = index$path,
               table = table, 
               n = n, 
               quiet = quiet, 
               ...)
   })
   ## update the provenance table
-  DBI::dbWriteTable(con, "provenance", index, append = TRUE)
+  if(!is.null(index)){
+    DBI::dbWriteTable(con, "provenance", index, append = TRUE)
+  }
   
   invisible(con)
 }
@@ -76,6 +82,8 @@ stackable_tables <- function(tables){
 
 db_chunks <- function(con, files, table, 
                        n = 200L, quiet = FALSE, ...){
+  
+  if(length(files)==0) return(NULL)
   
   total <- length(files) %/% n
   if(length(files) %% n > 0)  ## and the remainder
@@ -102,8 +110,7 @@ db_chunks <- function(con, files, table,
     show_after = 0,
     width = 80)
   
-  pb$tick(0)
-  
+
   for(i in 0:(total-1)){
     if(!quiet) pb$tick()
     chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])
@@ -126,7 +133,11 @@ omit_imported <- function(con, index){
   if( !("provenance" %in% DBI::dbListTables(con)) ){
     return(index)
   }
-  
+  if(is.null(index)){
+    return(data.frame())
+  }
+    
+    
   DBI::dbWriteTable(con, "zzzfilter", index,
                     overwrite = TRUE, temporary = TRUE)
   query <- paste0(
@@ -159,8 +170,8 @@ drop_deprecated <- function(table,
    return(invisible(NULL))
   } else {
     message(
-      paste("Updated version of previously imported data found.\n",
-            "Overwriting some previously imported rows with revised data."
+      paste("  Updated version of previously imported data found.\n",
+            "  Overwriting some previously imported rows with revised data."
             ))
   }
   
