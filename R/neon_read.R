@@ -110,11 +110,9 @@ neon_stack <- function(files,
                        altrep = FALSE, 
                        ...){
   
-  if(all(grepl("[.]h5$", files))){
+  if(any(grepl("[.]h5$", files))){
     stack_eddy(files, ...)
-  }
-  
-  if(is_sensor_data(files) && sensor_metadata){
+  } else if(is_sensor_data(files) && sensor_metadata){
     df <- vroom_each(files, altrep = altrep, ...)
     add_sensor_columns(df)
   } else if(keep_filename) {
@@ -140,7 +138,7 @@ add_sensor_columns <- function(df){
 }
 
 
-read_eddy <- function(x, ...){
+read_eddy <- function(x, progress = FALSE, ...){
   progress_sink <- tempfile()
   suppressMessages({
     sink(progress_sink)
