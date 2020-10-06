@@ -61,10 +61,14 @@ test_that("neon_read() args", {
   expect_true(any(grepl("observerDistance", colnames(x))))
   
   
-  x <- neon_read(product = "not-a-product")
+  x <- neon_read(table = "not-a-table")
   expect_null(x)
   
   expect_warning(
     neon_read(files=character())
+  )
+  
+  expect_error(
+    neon_read(product = "not-a-product")
   )
 })
