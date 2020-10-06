@@ -1,5 +1,8 @@
 # v0.3.0
 
+- add support for a relational database storage via `neon_store()`, `neon_table()`, and `neon_db()` (see README and docs for examples) [#23]
+- minor bugfixes
+
 # v0.2.3
 
 - Use subdir structure (product/site/month) inside the neon directory [#17]
