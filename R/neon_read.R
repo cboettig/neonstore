@@ -145,11 +145,12 @@ vroom_each <- function(files, altrep = FALSE, ...){
                         out <- vroom::vroom(x, guess_max = 5e4,
                                             altrep = altrep, ...)
                         out$file <- basename(x)
-                        na_bool_to_char(out)
+                        out
                       })
   })
   suppressWarnings({
     df <- ragged_bind(groups)
+    na_bool_to_char(df)
   }) 
 }
 

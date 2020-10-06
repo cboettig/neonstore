@@ -1,3 +1,7 @@
+# v0.3.1
+
+- improve type inference in neon_store()
+
 # v0.3.0
 
 - add support for a relational database storage via `neon_store()`, `neon_table()`, and `neon_db()` (see README and docs for examples) [#23]
