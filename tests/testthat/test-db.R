@@ -9,9 +9,22 @@ test_that("neon_db", {
   
   db <- neon_db()
   expect_is(db, "DBIConnection")
+
+  neon_delete_db(ask = FALSE)
   
 })
 
+
+test_that("neon_store error handling", {
+  
+  
+  db <- neon_store(table = "brd_countdata-expanded",
+                   dir = tempdir())
+  
+  db <- neon_store(product = "not-a-product",
+                   dir = tempdir())
+})
+  
 
 test_that("neon_store", {
 
