@@ -93,10 +93,6 @@ the raw data files, as is already the case for observational data.
 
 neon_read("brd_countdata-expanded")
 
-## Read in specific files from the neon_index():
-files <- neon_index(table = "brd_countdata-expanded")$path
-neon_read(files = files)
-
 ## Sensor inputs will add metadata columns by default
 neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
 

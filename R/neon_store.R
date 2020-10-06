@@ -12,7 +12,7 @@ neon_store <- function(table = NA,
                        product = NA,
                        type = NA,
                        dir = neon_dir(),
-                       n = 100L,
+                       n = 500L,
                        quiet = FALSE, 
                        ...)
 {
