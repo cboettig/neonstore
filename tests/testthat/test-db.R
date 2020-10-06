@@ -85,6 +85,17 @@ test_that("neon_table", {
   expect_identical(colnames(tbl1), colnames(tbl2))
   expect_identical(dim(tbl1), dim(tbl2))
   
+  
+  
+  tbl <- neon_table("brd_countdata-expanded", site="YELL")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) > 0)
+
+  tbl <- neon_table("brd_countdata-expanded", site="not-a-site")
+  expect_is(tbl, "data.frame")
+  expect_true(nrow(tbl) == 0)
+  
+  
 })
 
 

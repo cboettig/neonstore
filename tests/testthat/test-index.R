@@ -43,6 +43,9 @@ test_that("neon_index options", {
   
   x <- neon_index(dir = tempfile())
   expect_null(x)
+  
+  expect_warning({
+    x <- neon_index(hash="not-a-hash")
+  })
 })
-
 
