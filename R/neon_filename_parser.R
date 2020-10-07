@@ -140,6 +140,9 @@ IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
 ## NOTE! a few OS_DATA are missing YYYY_MM!
 OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
                  PKGTYPE, GENTIME, "csv$", sep = "\\.")
+##
+## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv
+OS_DATA3 <- paste(NEON, DESC, DESC, "csv$", sep = "\\.")
 
 ## Eddy Covariance is a single product, with its own formats:
 EC_ZIP <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", 
@@ -250,6 +253,8 @@ os_is_parser <- function(x){
     name_parse(x, OS_DATA2,
                c("NEON","DOM","SITE","DPL","PRNUM","REV","DESC",
                  "PKGTYPE","GENTIME", "EXT")),
+    name_parse(x, OS_DATA3,
+               c("NEON","MISC","DESC", "EXT")),
     name_parse(x, IS_DATA,
                c("NEON","DOM","SITE","DPL","PRNUM","REV","HOR","VER",
                  "TMI","DESC","YYYY_MM","PKGTYPE","GENTIME", "EXT")),

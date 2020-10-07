@@ -129,7 +129,7 @@ meta_filter <- function(meta,
   
   if(!is.na(start_date)){
     start_date <- as.Date(start_date)
-    month <- as.Date(meta$month, "%Y-%M")  
+    month <- as.Date(paste0(meta$month, "-01"))
     keep <- month >= start_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -138,7 +138,7 @@ meta_filter <- function(meta,
   
   if(!is.na(end_date)){
     end_date <- as.Date(end_date)
-    month <- as.Date(meta$month, "%Y-%M")  
+    month <- as.Date(paste0(meta$month, "-01"))
     keep <- month <= end_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -193,8 +193,9 @@ filename_parser <- function(files){
               "HOR", "VER", "TMI",  "name")]
   out$product <- paste_na(df$DPL, df$PRNUM, df$REV)
   
-  ## append type, historical but maybe dumb?
-  out$DESC <- paste_na(out$DESC, out$PKGTYPE, sep = "-")
+  ## append 'type' to table name
+  i <- !is.na(out$PKGTYPE)
+  out$DESC[i] <- paste_na(out$DESC[i], out$PKGTYPE[i], sep = "-")
   
   ## Apply names used originally -- FIXME maybe stick with NEON terms?
   names(out) <- c("site", "table", "type", "ext",

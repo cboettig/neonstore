@@ -29,6 +29,7 @@ stack_eddy <- function(files, progress = TRUE, ...){
   
   
   groups <-  lapply(files, read_eddy, pb = pb, ...)
-  df <- ragged_bind(groups)
   suppressWarnings(sink()) # make sure sink is off!
+  df <- ragged_bind(groups)
+  df
 }
