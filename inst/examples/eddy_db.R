@@ -7,10 +7,21 @@ df <- as_tibble(neonstore:::read_eddy(index$path[[1]]))
 out <- neonstore:::stack_eddy(index$path[1:4])
 df <- neonstore:::neon_stack(index$path)
 
-## Manual extraction
+## Manual extraction  ugh! Consider the more modern hdf5r package
 ex <- index$path[[1]]
 level <- "dp04"
 
+library(hdf5r)
+h5 <- H5File$new(ex)
+h5
+h5[["BART"]]
+h5[["BART"]][["dp04"]]
+nsae <- h5[["BART"]][["dp04"]][["data"]][["fluxCo2"]][["nsae"]] 
+df <- nsae$read()
+
+
+
+## rhdf5, like neonUtilities
 meta <- tibble::as_tibble(rhdf5::h5ls(ex))
 data <- meta[meta$otype == "H5I_DATASET",]
 series <- unique(base::paste(data$group, data$name, sep = "/"))
