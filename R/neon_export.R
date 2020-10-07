@@ -73,8 +73,12 @@ neon_export <-  function(archive = paste(Sys.Date(), "neonstore.zip", sep="-"),
 #' @export
 #' @examples 
 #' 
+#' ## tempfiles for example purposes only!
 #' archive <- tempfile()
-#' neon_export(archive)
+#' neondir <- tempdir() 
+#' 
+#' 
+#' neon_export(archive, dir = neondir)
 #' neon_import(archive)
 #' 
 neon_import <- function(archive, overwrite = TRUE, dir = neon_dir()){

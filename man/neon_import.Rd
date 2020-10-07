@@ -24,8 +24,12 @@ see \code{\link[=neon_download]{neon_download()}} to download data directly from
 }
 \examples{
 
+## tempfiles for example purposes only!
 archive <- tempfile()
-neon_export(archive)
+neondir <- tempdir() 
+
+
+neon_export(archive, dir = neondir)
 neon_import(archive)
 
 }
