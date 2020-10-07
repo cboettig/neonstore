@@ -51,5 +51,6 @@ Suggests:
     xml2,
     spelling,
     rstudioapi,
-    neonUtilities
+    neonUtilities,
+    rhdf5
 Language: en-US
