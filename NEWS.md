@@ -1,6 +1,7 @@
 # v0.3.1
 
-- improve type inference in neon_store()
+- improve type inference in `neon_store()`
+- support eddy covariance (.h5) imports (experimental)
 
 # v0.3.0
 
