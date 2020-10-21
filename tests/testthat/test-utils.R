@@ -87,7 +87,8 @@ test_that("neon_citation()", {
 })
 
 test_that("na_bool_to_char", {
-  df <- data.frame(A = 1:2, B = NA, C = "text", D = c(NA, TRUE), E = NA)
+  df <- data.frame(A = 1:2, B = NA, C = "text", D = c(NA, TRUE), E = NA,
+                   stringsAsFactors = FALSE)
   df2 <- na_bool_to_char(df)
   type <- vapply(df2, class, "", USE.NAMES = FALSE)
   expect_identical(type, c("integer", "character", "character",

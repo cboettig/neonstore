@@ -23,15 +23,17 @@ neon_store <- function(table = NA,
                       dir = dir,
                       deprecated = FALSE)
   
+  ## only h5 or csv data can be imported currently
   index <- index[index$ext == "h5" | index$ext == "csv",]
   
+  ## Error conditions
   if(is.null(index)) index <- data.frame()
   if(nrow(index) == 0){
     if(!is.na(table))
       message(paste("table", table, 
                     "not found, do you need to download first?"))
     if(!is.na(product))
-      message(paste("No csv files for product", product,
+      message(paste("No csv/h5 files for product", product,
               "found. do you need to download first?"))
     return(invisible(NULL))
   }
@@ -45,7 +47,7 @@ neon_store <- function(table = NA,
   ## Omit already imported files
   index <- omit_imported(con, index)
   if(nrow(index) == 0){
-    message("all files for this table have been imported")
+    message("all files have been imported")
     return(invisible(con))
   }
   
@@ -123,9 +125,10 @@ db_chunks <- function(con,
     width = 80)
   
   if(!quiet && progress) 
-    message(paste("processing files in", total, "chunks."))
+    message(paste("  processing", table, "files in", total, "chunks:"))
   for(i in 0:(total-1)){
-    if(!quiet && progress) message(paste("chunk", i+1, ":"))
+    if(!quiet && progress) 
+      message(paste0("  chunk ", i+1, ":"), appendLF=FALSE)
     if(!quiet && !progress) pb$tick()
     chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])
     df <- neon_stack(files = chunk,

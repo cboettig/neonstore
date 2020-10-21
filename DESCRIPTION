@@ -41,7 +41,6 @@ Imports:
     tibble,
     digest,
     progress,
-    stats,
     tools,
     utils
 RoxygenNote: 7.1.1
