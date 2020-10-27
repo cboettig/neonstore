@@ -94,7 +94,7 @@ neon_status <- function () {
 
 
 .onAttach <- function(libname, pkgname) {  #nolint
-  duckdb::duckdb_shutdown(duckdb::duckdb())
+  neon_disconnect()
   if (interactive() && Sys.getenv("RSTUDIO") == "1"  && !in_chk()) {
     neon_pane()
   }

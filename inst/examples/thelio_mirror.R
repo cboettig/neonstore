@@ -26,3 +26,4 @@ neon_store(product = "DP1.10093.001")
 neon_store(product ="DP1.20288.001")
 neon_store(product ="DP1.20053.001")
 neon_store(product="DP4.00200.001", type = "basic") # hdf5
+

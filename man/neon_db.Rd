@@ -4,7 +4,7 @@
 \alias{neon_db}
 \title{Cache-able duckdb database connection}
 \usage{
-neon_db(dir = neon_dir(), ...)
+neon_db(dir = neon_dir(), read_only = TRUE, ...)
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will
@@ -12,6 +12,9 @@ use the appropriate applications directory for your system
 (see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
+
+\item{read_only}{allow concurrent connections by enforcing read_only.
+See details.}
 
 \item{...}{additional arguments to dbConnect}
 }
@@ -22,7 +25,13 @@ Cache-able duckdb database connection
 Creates a connection to a permanent duckdb database
 instance in the provided directory (see \code{\link[=neon_dir]{neon_dir()}}).  This
 connection is also cached, so that code which repeatedly calls
-\verb{[neon_db]} will not stall or hang.
+\verb{[neon_db]} will not stall or hang.  Only \code{read_only} connections
+will be cached.
+
+NOTE: \verb{[duckdb::duckdb()]} can only support a single read-write connection
+at a time.  The default option of \code{read_only = TRUE} allows
+multiple connections. \verb{[neon_store()]} will automatically set this to
+\code{FALSE} to allow data import.
 }
 \examples{
 

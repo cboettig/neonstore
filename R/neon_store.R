@@ -41,7 +41,7 @@ neon_store <- function(table = NA,
   ## standardize table name
   
   tables <- stackable_tables(index$table)
-  con <- neon_db(dir)
+  con <- neon_db(dir, read_only = FALSE)
   
   
   ## Omit already imported files
@@ -112,7 +112,8 @@ db_chunks <- function(con,
     return(invisible(con))
   }
   
-  if(total > 4){
+  if (total > 4){
+    if (!quiet) message(paste("  importing", table))
     progress <- FALSE
   }
   ## Otherwise do chunks
@@ -124,10 +125,10 @@ db_chunks <- function(con,
     show_after = 0,
     width = 80)
   
-  if(!quiet && progress) 
+  if (!quiet && progress) 
     message(paste("  processing", table, "files in", total, "chunks:"))
-  for(i in 0:(total-1)){
-    if(!quiet && progress) 
+  for (i in 0:(total-1)){
+    if (!quiet && progress) 
       message(paste0("  chunk ", i+1, ":"), appendLF=FALSE)
     if(!quiet && !progress) pb$tick()
     chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])
