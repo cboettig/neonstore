@@ -71,8 +71,7 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   }
   
-  DBI::dbDisconnect(con, shutdown = TRUE)
-  
+  neon_disconnect(dir, con)
   invisible(index)
 }
 

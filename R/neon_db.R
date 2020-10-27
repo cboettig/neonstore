@@ -67,11 +67,11 @@ neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
 
 #' Disconnect from the neon database
 #' @inheritParams neon_db
+#' @param db link to an existing database connection
 #' @export
 #' @importFrom DBI dbDisconnect
-neon_disconnect <- function (dir = neon_dir()) {
+neon_disconnect <- function (dir = neon_dir(), db = neon_db(dir)) {
   
-  db <- neon_db(dir)
   if (inherits(db, "DBIConnection")) {
     suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
   }
