@@ -115,8 +115,9 @@ db_chunks <- function(con,
   }
   
   if (total > 4){
-    if (!quiet) message(paste("  importing", table))
     progress <- FALSE
+  } else {
+    if (!quiet) message(paste0("  importing ", table, "..."))
   }
   ## Otherwise do chunks
   pb <- progress::progress_bar$new(
