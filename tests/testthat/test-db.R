@@ -57,8 +57,7 @@ test_that("neon_table", {
   
   skip_if_offline()
   skip_on_cran()
-  neon_disconnect()
-  
+
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",

@@ -4,7 +4,7 @@
 #' @param quiet show progress?
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
-#' @return the connection object (invisibly)
+#' @return the index of files read in (invisibly)
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
@@ -71,7 +71,9 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   }
   
-  invisible(con)
+  DBI::dbDisconnect(con, shutdown = TRUE)
+  
+  invisible(index)
 }
 
 stackable_tables <- function(tables){
