@@ -1,3 +1,7 @@
+# v0.3.3
+
+- Allow concurrent connections for reading from database.  
+
 # v0.3.2
 
 - improving type inference in `neon_store()` (some more)
