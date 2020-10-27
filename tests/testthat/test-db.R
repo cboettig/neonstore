@@ -36,7 +36,8 @@ test_that("neon_store", {
                      start_date = "2018-05-01",
                      end_date = "2018-08-01")
   
-  db <- neon_store(table = "brd_countdata-expanded")
+  neon_store(table = "brd_countdata-expanded")
+  db <- neon_db()
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)
@@ -64,7 +65,8 @@ test_that("neon_table", {
                      end_date = "2018-08-01")
   
   
-  db <- neon_store(table = "brd_countdata-expanded")
+  neon_store(table = "brd_countdata-expanded")
+  db <- neon_db()
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)

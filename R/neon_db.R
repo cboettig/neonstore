@@ -52,7 +52,6 @@ neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
     }
   }
 
-  
   db <- DBI::dbConnect(duckdb::duckdb(), 
                        dbdir = dbname,
                        read_only = read_only,
