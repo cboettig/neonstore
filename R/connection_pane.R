@@ -48,7 +48,7 @@ neon_pane <- function() {
       actions = list(
         Status = list(
           icon = system.file("img", "neon.png", package = "neonstore"),
-          callback = neon_status
+          callback = neon_db_status
         ),
         SQL = list(
           icon = system.file("img", "edit-sql.png", package = "neonstore"),
@@ -86,7 +86,7 @@ sql_action <- function() {
   }
 }
 
-neon_status <- function () {
+neon_db_status <- function () {
   con <- neon_db()
   inherits(con, "DBIConnection")
 }
@@ -94,11 +94,10 @@ neon_status <- function () {
 
 
 .onAttach <- function(libname, pkgname) {  #nolint
-  duckdb::duckdb_shutdown(duckdb::duckdb())
   if (interactive() && Sys.getenv("RSTUDIO") == "1"  && !in_chk()) {
-    neon_pane()
+    tryCatch({neon_pane()}, error = function(e) NULL, finally = NULL)
   }
-  if (interactive()) neon_status()
+  if (interactive()) neon_db_status()
 }
 
 

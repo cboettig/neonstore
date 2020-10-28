@@ -4,7 +4,7 @@
 #' @param quiet show progress?
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
-#' @return the connection object (invisibly)
+#' @return the index of files read in (invisibly)
 #' @importFrom DBI dbWriteTable dbSendQuery dbGetQuery
 #' @export
 #' 
@@ -41,7 +41,7 @@ neon_store <- function(table = NA,
   ## standardize table name
   
   tables <- stackable_tables(index$table)
-  con <- neon_db(dir)
+  con <- neon_db(dir, read_only = FALSE)
   
   
   ## Omit already imported files
@@ -71,7 +71,8 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   }
   
-  invisible(con)
+  neon_disconnect(dir, con)
+  invisible(index)
 }
 
 stackable_tables <- function(tables){
@@ -112,8 +113,10 @@ db_chunks <- function(con,
     return(invisible(con))
   }
   
-  if(total > 4){
+  if (total > 4){
     progress <- FALSE
+  } else {
+    if (!quiet) message(paste0("  importing ", table, "..."))
   }
   ## Otherwise do chunks
   pb <- progress::progress_bar$new(
@@ -124,10 +127,10 @@ db_chunks <- function(con,
     show_after = 0,
     width = 80)
   
-  if(!quiet && progress) 
+  if (!quiet && progress) 
     message(paste("  processing", table, "files in", total, "chunks:"))
-  for(i in 0:(total-1)){
-    if(!quiet && progress) 
+  for (i in 0:(total-1)){
+    if (!quiet && progress) 
       message(paste0("  chunk ", i+1, ":"), appendLF=FALSE)
     if(!quiet && !progress) pb$tick()
     chunk <- na_omit(files[ (i*n+1):((i+1)*n) ])

@@ -29,8 +29,8 @@ test_that("bigger neon_store() import", {
   x <- neon_download_s3(product = "DP1.10003.001",
                         end_date = "2019-01-01")
   
-  db <- neon_store(table = "brd_countdata-expanded", n = 50)
-  expect_is(db, "DBIConnection")
+  neon_store(table = "brd_countdata-expanded", n = 50)
+  db <- neon_db()
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)
   
@@ -52,15 +52,16 @@ test_that("beetles", {
   
   skip_on_cran()
   skip_if_offline()
-  
+  dir <- tempfile()
   x <- neon_download("DP1.10022.001",
                       site = "ORNL",
                       start_date = "2018-01-01",
-                      end_date = "2019-01-01")
+                      end_date = "2019-01-01",
+                      dir = dir)
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
   
-  df <- neon_read("bet_sorting")
+  df <- neon_read("bet_sorting", dir = dir)
   expect_is(df, "data.frame")
   
   
@@ -88,19 +89,21 @@ test_that("ECdata", {
   
   skip_on_cran()
   skip_if_offline()
-  
+  dir = tempfile()
 
   x <- neon_download(product = "DP4.00200.001",
                      site = "BART",
                      start_date = "2020-06-01",
                      end_date = "2020-07-01",
-                     type = "basic")
+                     type = "basic",
+                     dir = dir)
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
   
   df <- neon_index(product = "DP4.00200.001",
-                                      start_date = "2020-06-01",
-                                      ext = "h5")
+                   start_date = "2020-06-01",
+                   ext = "h5",
+                   dir = dir)
   expect_is(df, "data.frame")
   expect_gt(nrow(df), 0)
   

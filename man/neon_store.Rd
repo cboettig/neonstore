@@ -56,7 +56,7 @@ Should be a datetime POSIXct object (or coerce-able string)}
   }}
 }
 \value{
-the connection object (invisibly)
+the index of files read in (invisibly)
 }
 \description{
 import neon data into a local database

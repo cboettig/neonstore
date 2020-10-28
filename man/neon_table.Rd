@@ -4,7 +4,7 @@
 \alias{neon_table}
 \title{Return a neon table from the database}
 \usage{
-neon_table(table, site = NA, con = neon_db())
+neon_table(table, site = NA, dir = dir)
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
@@ -12,7 +12,11 @@ see \link{neon_index}}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
-\item{con}{a connection to the neon database}
+\item{dir}{Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
+setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
+\link{Renviron}.}
 }
 \description{
 Return a neon table from the database

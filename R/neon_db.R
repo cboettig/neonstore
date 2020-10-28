@@ -4,9 +4,18 @@
 #' @details Creates a connection to a permanent duckdb database
 #' instance in the provided directory (see [neon_dir()]).  This 
 #' connection is also cached, so that code which repeatedly calls 
-#' `[neon_db]` will not stall or hang.  
+#' `[neon_db]` will not stall or hang.  Only `read_only` connections
+#' will be cached.
+#' 
+#' NOTE: `[duckdb::duckdb()]` can only support a single read-write connection
+#' at a time.  The default option of `read_only = TRUE` allows
+#' multiple connections. `[neon_store()]` will automatically set this to
+#' `FALSE` to allow data import.
+#' 
 #' @export
 #' @inheritParams neon_download
+#' @param read_only allow concurrent connections by enforcing read_only.
+#'   See details. 
 #' @param ... additional arguments to dbConnect
 #' @importFrom DBI dbConnect
 #' @importFrom duckdb duckdb
@@ -15,29 +24,54 @@
 #' # tempfile used for illustration only
 #' neon_db(tempfile())
 #' 
-neon_db <- function (dir = neon_dir(), ...) {
+neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
+  
   dir.create(dir, FALSE, TRUE)
   dbname <- file.path(dir, "database")
+
+  ## Cannot open read-only on a database that does not exist
+  if (!file.exists(dbname) && read_only) {
+    db <- DBI::dbConnect(duckdb::duckdb(), 
+                         dbdir = dbname, read_only = FALSE)
+    dbWriteTable(db, "init", data.frame(NEON="NEON"))
+    dbDisconnect(db, shutdown=TRUE)
+  }
+    
+    
+
   db <- mget("neon_db", envir = neonstore_cache, ifnotfound = NA)[[1]]
   if (inherits(db, "DBIConnection")) {
     if (DBI::dbIsValid(db)) {
-      return(db)
+      if (read_only) {
+        return(db)
+      } else {
+        ## shut down the cached (read_only) connection first 
+        ## so we can make a new connection with write privileges
+        dbDisconnect(db, shutdown = TRUE)
+      }
     }
   }
-  db <- DBI::dbConnect(duckdb::duckdb(), dbdir = dbname, ...)
 
-  assign("neon_db", db, envir = neonstore_cache)
+  db <- DBI::dbConnect(duckdb::duckdb(), 
+                       dbdir = dbname,
+                       read_only = read_only,
+                       ...)
+
+  if (read_only) {
+    assign("neon_db", db, envir = neonstore_cache)
+  }
+  
   db
 }
 
 
 #' Disconnect from the neon database
 #' @inheritParams neon_db
+#' @param db link to an existing database connection
 #' @export
 #' @importFrom DBI dbDisconnect
-neon_disconnect <- function (dir = neon_dir()) {
+neon_disconnect <- function (dir = neon_dir(), db = neon_db(dir)) {
   
-  db <- neon_db(dir)
   if (inherits(db, "DBIConnection")) {
     suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
   }
