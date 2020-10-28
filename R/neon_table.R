@@ -12,8 +12,8 @@
 #' 
 neon_table <- function(table,
                        site = NA,
-                       dir = dir){
-  
+                       dir = neon_dir()){
+
   con <- neon_db(dir = dir)
   tables <- DBI::dbListTables(con)
   table <- check_tablename(table, tables)

@@ -25,8 +25,10 @@
 #' neon_db(tempfile())
 #' 
 neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
-  
-  dir.create(dir, FALSE, TRUE)
+
+  if (!dir.exists(dir)){
+    dir.create(dir, FALSE, TRUE)
+  }
   dbname <- file.path(dir, "database")
 
   ## Cannot open read-only on a database that does not exist
