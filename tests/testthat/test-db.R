@@ -85,7 +85,7 @@ test_that("neon_table", {
   expect_identical(tbl, unique(tbl))
   
   ## Compare to neon_read
-  tbl2 <- neon_read("brd_countdata-expanded")
+  tbl2 <- neon_read("brd_countdata-expanded", dir = dir)
   
   ## neon_read won't have the "file" column on obs data
   tbl1 <- tbl[!colnames(tbl) == "file"]
