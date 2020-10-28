@@ -4,7 +4,7 @@
 \alias{neon_table}
 \title{Return a neon table from the database}
 \usage{
-neon_table(table, site = NA, dir = dir)
+neon_table(table, site = NA, dir = neon_dir())
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
