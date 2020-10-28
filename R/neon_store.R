@@ -17,12 +17,12 @@ neon_store <- function(table = NA,
                        ...)
 {
   
+  ## Determine which files will be imported:
   index <- neon_index(table = table,
                       product = product,
                       type = type,
                       dir = dir,
                       deprecated = FALSE)
-  
   ## only h5 or csv data can be imported currently
   index <- index[index$ext == "h5" | index$ext == "csv",]
   
@@ -39,8 +39,10 @@ neon_store <- function(table = NA,
   }
   
   ## standardize table name
-  
   tables <- stackable_tables(index$table)
+
+  
+  ## Establish a write-able database connection
   con <- neon_db(dir, read_only = FALSE)
   
   
@@ -48,6 +50,7 @@ neon_store <- function(table = NA,
   index <- omit_imported(con, index)
   if(nrow(index) == 0){
     message("all files have been imported")
+    neon_disconnect(db = con)
     return(invisible(con))
   }
   
@@ -71,9 +74,12 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   }
   
-  neon_disconnect(dir, con)
+  neon_disconnect(db = con)
   invisible(index)
 }
+
+
+
 
 stackable_tables <- function(tables){
   tables <- unique(tables)
@@ -91,7 +97,9 @@ db_chunks <- function(con,
                       quiet = FALSE,
                       ...){
   
-  if(length(files)==0) return(NULL)
+  if(length(files)==0){ 
+    return(NULL)
+  }
   
   total <- length(files) %/% n
   if(length(files) %% n > 0)  ## and the remainder

@@ -4,7 +4,7 @@
 \alias{neon_disconnect}
 \title{Disconnect from the neon database}
 \usage{
-neon_disconnect(dir = neon_dir(), db = neon_db(dir))
+neon_disconnect(dir = neon_dir(), db = neon_db(dir), quiet = FALSE)
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will
@@ -14,6 +14,8 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 \link{Renviron}.}
 
 \item{db}{link to an existing database connection}
+
+\item{quiet}{show messages?}
 }
 \description{
 Disconnect from the neon database
