@@ -101,6 +101,7 @@ db_chunks <- function(con,
   progress <- !quiet
   ## all files in one go
   if(total == 1){
+    if (!quiet) message(paste0("  importing ", table, "..."))
     df <- neon_stack(files = files,
                      keep_filename = TRUE,
                      sensor_metadata = TRUE,
@@ -113,10 +114,8 @@ db_chunks <- function(con,
     return(invisible(con))
   }
   
-  if (total > 4){
+  if (total > 4) {
     progress <- FALSE
-  } else {
-    if (!quiet) message(paste0("  importing ", table, "..."))
   }
   ## Otherwise do chunks
   pb <- progress::progress_bar$new(
