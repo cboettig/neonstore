@@ -45,7 +45,6 @@ neon_store <- function(table = NA,
   ## Establish a write-able database connection
   con <- neon_db(dir, read_only = FALSE)
   
-  
   ## Omit already imported files
   index <- omit_imported(con, index)
   if(nrow(index) == 0){
@@ -54,27 +53,25 @@ neon_store <- function(table = NA,
     return(invisible(con))
   }
   
-  lapply(tables, 
-         function(table){
-  
+  for (table in tables) {
     ## Drop rows from the database which come from deprecated files
     drop_deprecated(table, dir, con)
-    index <- index[index$table == table, ]
-    
-    if(nrow(index) > 0)
-    con <- 
-      db_chunks(con = con, 
-                files = index$path,
-                table = table, 
-                n = n, 
-                quiet = quiet, 
-                ...)
-  })
+    meta <- index[index$table == table, ]
+    if(nrow(meta) > 0){
+      con <- db_chunks(con = con, 
+                       files = meta$path,
+                       table = table, 
+                       n = n, 
+                       quiet = quiet, 
+                       ...)
+    }
+  }
+  
   ## update the provenance table
+  con <- duckdb_memory_manager(con)
   if(!is.null(index)){
     DBI::dbWriteTable(con, "provenance", index, append = TRUE)
   }
-  
   neon_disconnect(db = con)
   invisible(index)
 }
@@ -151,7 +148,6 @@ db_chunks <- function(con,
                      altrep = FALSE,
                      progress = progress)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
-
     con <- duckdb_memory_manager(con)
 
   }
@@ -167,7 +163,7 @@ duckdb_memory_manager <- function(con){
     # shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
     neon_disconnect(db = con)
-    con = neon_db(dir, read_only = FALSE)
+    con <- neon_db(dir, read_only = FALSE)
   }
   con
 }
