@@ -62,12 +62,13 @@ neon_store <- function(table = NA,
     index <- index[index$table == table, ]
     
     if(nrow(index) > 0)
-    db_chunks(con = con, 
-              files = index$path,
-              table = table, 
-              n = n, 
-              quiet = quiet, 
-              ...)
+    con <- 
+      db_chunks(con = con, 
+                files = index$path,
+                table = table, 
+                n = n, 
+                quiet = quiet, 
+                ...)
   })
   ## update the provenance table
   if(!is.null(index)){
