@@ -166,7 +166,7 @@ duckdb_memory_manager <- function(con){
     # shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
     neon_disconnect(db = con)
-    con = neon_db(dir)
+    con = neon_db(dir, read_only = FALSE)
   }
   con
 }
