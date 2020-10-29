@@ -119,13 +119,16 @@ db_chunks <- function(con,
     if(!is.null(df)){
       DBI::dbWriteTable(con, table, df, append = TRUE)
     }
+    
+    con <- duckdb_memory_manager(con)
     return(invisible(con))
   }
   
   if (total > 4) {
     progress <- FALSE
   }
-  ## Otherwise do chunks
+  
+  ## Otherwise do in chunks
   pb <- progress::progress_bar$new(
     format = paste("  importing", table,
                    "[:bar] :percent in :elapsed, eta: :eta"),
@@ -133,7 +136,7 @@ db_chunks <- function(con,
     clear = FALSE, 
     show_after = 0,
     width = 80)
-  
+
   if (!quiet && progress) 
     message(paste("  processing", table, "files in", total, "chunks:"))
   for (i in 0:(total-1)){
@@ -148,18 +151,25 @@ db_chunks <- function(con,
                      progress = progress)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
 
-    if(Sys.getenv("duckdb_restart", FALSE)){
-      # shouldn't be necessary when memory management improves in duckdb...
-      dir <- con@driver@dbdir
-      neon_disconnect(db = con)
-      con = neon_db(dir)
-    }
+    con <- duckdb_memory_manager(con)
+
   }
   
+  con <- duckdb_memory_manager(con)
   return(invisible(con))
   
 }
 
+
+duckdb_memory_manager <- function(con){
+  if(Sys.getenv("duckdb_restart", TRUE)){
+    # shouldn't be necessary when memory management improves in duckdb...
+    dir <- con@driver@dbdir
+    neon_disconnect(db = con)
+    con = neon_db(dir)
+  }
+  con
+}
 
 #' @importFrom DBI dbWriteTable dbListTables dbGetQuery
 omit_imported <- function(con, index){
