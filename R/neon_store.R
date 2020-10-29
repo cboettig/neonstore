@@ -164,7 +164,7 @@ db_chunks <- function(con,
 duckdb_memory_manager <- function(con){
   if(Sys.getenv("duckdb_restart", TRUE)){
     # shouldn't be necessary when memory management improves in duckdb...
-    dir <- con@driver@dbdir
+    dir <- dirname(con@driver@dbdir)
     neon_disconnect(db = con)
     con = neon_db(dir)
   }
