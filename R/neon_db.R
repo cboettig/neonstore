@@ -77,6 +77,7 @@ neon_disconnect <- function (db = neon_db()) {
     suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
 
     suppressWarnings({
+      if(!dir.exists(dir)) dir.create(dir, FALSE, TRUE)
       db <- neon_db(dir, read_only = FALSE)
       DBI::dbDisconnect(db, shutdown = TRUE)
     })
@@ -123,8 +124,13 @@ neon_delete_db <- function(db = neon_db(), ask = interactive()){
   }
   if(continue){
     dir <- db@driver@dbdir
-    neon_disconnect(db)
+    DBI::dbDisconnect(db, shutdown = TRUE)
     unlink(file.path(dir, "database"), TRUE)
+  }
+  if (exists("neon_db", envir = neonstore_cache)) {
+    suppressWarnings(
+      rm("neon_db", envir = neonstore_cache)
+    )
   }
   return(invisible(continue))
 }
