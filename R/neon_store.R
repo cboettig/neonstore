@@ -159,10 +159,12 @@ db_chunks <- function(con,
 
 
 duckdb_memory_manager <- function(con){
-  if(Sys.getenv("duckdb_restart", TRUE)){
+  if(Sys.getenv("duckdb_restart", FALSE)){
     # shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
-    neon_disconnect(db = con)
+    ## power cycle to force import
+    db <- neon_db(dir, read_only = FALSE)
+    DBI::dbDisconnect(db, shutdown = TRUE)
     con <- neon_db(dir, read_only = FALSE)
   }
   con

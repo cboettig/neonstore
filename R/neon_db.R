@@ -73,13 +73,7 @@ neon_disconnect <- function (db = neon_db()) {
   
   dir <- dirname(db@driver@dbdir)
   if (inherits(db, "DBIConnection")) {
-
       DBI::dbDisconnect(db, shutdown = TRUE)
-      
-      ## power cycle to force import
-      db <- neon_db(dir, read_only = FALSE)
-      DBI::dbDisconnect(db, shutdown = TRUE)
-
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(
