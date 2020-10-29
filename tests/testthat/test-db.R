@@ -18,10 +18,10 @@ test_that("neon_db", {
 test_that("neon_store error handling", {
   
   
-  db <- neon_store(table = "brd_countdata-expanded",
-                   dir = tempdir())
+  neon_store(table = "brd_countdata-expanded",
+            dir = tempdir())
   
-  db <- neon_store(product = "not-a-product",
+  neon_store(product = "not-a-product",
                    dir = tempdir())
 })
   

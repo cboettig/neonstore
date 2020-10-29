@@ -72,16 +72,15 @@ neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
 #' @importFrom DBI dbDisconnect
 neon_disconnect <- function (db = neon_db()) {
   
-  dir <- db@driver@dbdir
+  dir <- dirname(db@driver@dbdir)
   if (inherits(db, "DBIConnection")) {
-    suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
 
-    suppressWarnings({
-      if(!dir.exists(dir)) dir.create(dir, FALSE, TRUE)
+      DBI::dbDisconnect(db, shutdown = TRUE)
+      
+      ## power cycle to force import
       db <- neon_db(dir, read_only = FALSE)
       DBI::dbDisconnect(db, shutdown = TRUE)
-    })
-  
+
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(
@@ -123,9 +122,10 @@ neon_delete_db <- function(db = neon_db(), ask = interactive()){
              "(downloaded files will be kept)"))
   }
   if(continue){
-    dir <- db@driver@dbdir
+    dir <- dirname(db@driver@dbdir)
     DBI::dbDisconnect(db, shutdown = TRUE)
-    unlink(file.path(dir, "database"), TRUE)
+    db_files <- list.files(dir, "^database.*", full.names = TRUE)
+    lapply(db_files, unlink, TRUE)
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(
