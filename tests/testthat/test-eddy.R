@@ -4,6 +4,7 @@ test_that("read_eddy",{
 
   skip_if_offline()
   skip_on_cran()
+  skip_if_not_installed("neonUtilities")
   skip_if_not_installed("rhdf5")
   
   x <- neonstore::neon_download(product="DP4.00200.001", 
