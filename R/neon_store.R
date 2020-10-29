@@ -147,7 +147,15 @@ db_chunks <- function(con,
                      altrep = FALSE,
                      progress = progress)
     DBI::dbWriteTable(con, table, df, append = TRUE)  
+
+    if(Sys.getenv("duckdb_restart", FALSE)){
+      # shouldn't be necessary when memory management improves in duckdb...
+      dir <- con@driver@dbdir
+      neon_disconnect(db = con)
+      con = neon_db(dir)
+    }
   }
+  
   return(invisible(con))
   
 }

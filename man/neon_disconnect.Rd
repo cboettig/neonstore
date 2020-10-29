@@ -4,18 +4,10 @@
 \alias{neon_disconnect}
 \title{Disconnect from the neon database}
 \usage{
-neon_disconnect(dir = neon_dir(), db = neon_db(dir), quiet = FALSE)
+neon_disconnect(db = neon_db())
 }
 \arguments{
-\item{dir}{Location where files should be downloaded. By default will
-use the appropriate applications directory for your system
-(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
-setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
-\link{Renviron}.}
-
 \item{db}{link to an existing database connection}
-
-\item{quiet}{show messages?}
 }
 \description{
 Disconnect from the neon database

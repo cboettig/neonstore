@@ -68,25 +68,14 @@ neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
 #' Disconnect from the neon database
 #' @inheritParams neon_db
 #' @param db link to an existing database connection
-#' @param quiet show messages?
 #' @export
 #' @importFrom DBI dbDisconnect
-neon_disconnect <- function (dir = neon_dir(),
-                             db = neon_db(dir), 
-                             quiet = FALSE) {
+neon_disconnect <- function (db = neon_db()) {
   
+  dir <- db@driver@dbdir
   if (inherits(db, "DBIConnection")) {
     suppressWarnings(DBI::dbDisconnect(db, shutdown = TRUE))
-    
-    ## duckdb lazy evaluation
-    if (!quiet) {
-      pb <- progress::progress_bar$new(
-        format = 
-          paste("  forcing any deferred evaluation data import in duckdb..."),
-        total = 1,
-        show_after = 1)
-      pb$tick()
-    }
+
     suppressWarnings({
       db <- neon_db(dir, read_only = FALSE)
       DBI::dbDisconnect(db, shutdown = TRUE)
