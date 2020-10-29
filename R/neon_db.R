@@ -109,20 +109,21 @@ neonstore_cache <- new.env()
 #' 
 #' # Create a db
 #' dir <- tempfile()
-#' neon_db(dir)
+#' db <- neon_db(dir)
 #' 
 #' # Delete it
-#' neon_delete_db(dir, ask = FALSE)
+#' neon_delete_db(db, ask = FALSE)
 #' 
 #' 
-neon_delete_db <- function(dir = neon_dir(), ask = interactive()){
+neon_delete_db <- function(db = neon_db(), ask = interactive()){
   continue <- TRUE
   if(ask){
     continue <- utils::askYesNo(paste("Delete the local duckdb database?", 
              "(downloaded files will be kept)"))
   }
   if(continue){
-    neon_disconnect(dir)
+    dir <- db@driver@dbdir
+    neon_disconnect(db)
     unlink(file.path(dir, "database"), TRUE)
   }
   return(invisible(continue))

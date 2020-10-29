@@ -4,15 +4,9 @@
 \alias{neon_delete_db}
 \title{delete the local NEON database}
 \usage{
-neon_delete_db(dir = neon_dir(), ask = interactive())
+neon_delete_db(db = neon_db(), ask = interactive())
 }
 \arguments{
-\item{dir}{Location where files should be downloaded. By default will
-use the appropriate applications directory for your system
-(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
-setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
-\link{Renviron}.}
-
 \item{ask}{Ask for confirmation first?}
 }
 \description{
@@ -32,10 +26,10 @@ as well, simply delete the entire directory given by \code{\link[=neon_dir]{neon
 
 # Create a db
 dir <- tempfile()
-neon_db(dir)
+db <- neon_db(dir)
 
 # Delete it
-neon_delete_db(dir, ask = FALSE)
+neon_delete_db(db, ask = FALSE)
 
 
 }

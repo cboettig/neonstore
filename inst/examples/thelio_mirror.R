@@ -26,7 +26,7 @@ neon_store(product="DP1.20264.001", table = "TSD_30_min-basic")
 neon_store(product = "DP1.10003.001")
 neon_store(product = "DP1.10022.001")
 neon_store(product = "DP1.10093.001")
-neon_store(product ="DP1.20288.001", table = "waq_instantaneous-basic")
+neon_store(product ="DP1.20288.001", table = "waq_instantaneous-basic", n = 10)
 neon_store(product ="DP1.20288.001", table = "sensor_positions")
 neon_store(product="DP4.00200.001", type = "basic") # hdf5
 
