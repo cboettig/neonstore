@@ -99,7 +99,7 @@ db_chunks <- function(con,
                       ...){
   
   if(length(files)==0){ 
-    return(NULL)
+    return(con)
   }
   
   total <- length(files) %/% n
