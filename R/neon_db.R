@@ -66,7 +66,6 @@ neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
 
 
 #' Disconnect from the neon database
-#' @inheritParams neon_db
 #' @param db link to an existing database connection
 #' @export
 #' @importFrom DBI dbDisconnect
@@ -93,7 +92,7 @@ neonstore_cache <- new.env()
 
 #' delete the local NEON database
 #' 
-#' @inheritParams neon_db
+#' @param db neon database connection from `[neon_db()]`
 #' @param ask Ask for confirmation first?
 #' @details Just a helper function that deletes the NEON database
 #' files, which are found under `file.path(neon_dir(), "database")`.

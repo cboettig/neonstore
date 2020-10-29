@@ -7,6 +7,8 @@
 neon_delete_db(db = neon_db(), ask = interactive())
 }
 \arguments{
+\item{db}{neon database connection from \verb{[neon_db()]}}
+
 \item{ask}{Ask for confirmation first?}
 }
 \description{
