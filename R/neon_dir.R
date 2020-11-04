@@ -26,3 +26,30 @@ neon_dir <- function(){
   Sys.getenv("NEONSTORE_HOME", 
              rappdirs::user_data_dir("neonstore"))
 }
+
+
+#' Default directory for persistent NEON database
+#' 
+#' Use `neon_db_dir()` to view or access the currently active database 
+#' directory. By default, this uses the appropriate application directory
+#' for your operating system, see [rappdirs::user_data_dir()].
+#' This location can be overridden by setting
+#' the environmental variable `NEONSTORE_DB`. 
+#'
+#' @return the active `neonstore` directory.
+#' @export
+#' @examples 
+#' 
+#' neon_db_dir()
+#' 
+#' ## Override with an environmental variable:
+#' Sys.setenv(NEONSTORE_DB = tempdir())
+#' neon_db_dir()
+#' ## Unset
+#' Sys.unsetenv("NEONSTORE_DB")
+#' 
+neon_db_dir <- function(){
+  Sys.getenv("NEONSTORE_DB", 
+             rappdirs::user_data_dir("neonstore"))
+}
+

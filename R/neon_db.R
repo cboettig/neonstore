@@ -24,7 +24,7 @@
 #' # tempfile used for illustration only
 #' neon_db(tempfile())
 #' 
-neon_db <- function (dir = neon_dir(), read_only = TRUE,  ...) {
+neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
 
   if (!dir.exists(dir)){
     dir.create(dir, FALSE, TRUE)

@@ -2,6 +2,7 @@
 
 export(neon_citation)
 export(neon_db)
+export(neon_db_dir)
 export(neon_delete_db)
 export(neon_dir)
 export(neon_disconnect)

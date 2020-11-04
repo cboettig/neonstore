@@ -9,6 +9,7 @@ neon_store(
   product = NA,
   type = NA,
   dir = neon_dir(),
+  db_dir = neon_db_dir(),
   n = 500L,
   quiet = FALSE,
   ...
@@ -29,6 +30,8 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
+\item{db_dir}{location of the database directory}
+
 \item{n}{number of files that should be read per iteration}
 
 \item{quiet}{show progress?}
@@ -40,6 +43,10 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 metadata fields from file names of sensor data into the table?  Adds
 DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
 Results in slower parsing.}
+    \item{\code{keep_filename}}{Should we include a column indicating the original
+file name for each row?  Can be a useful source of additional metadata that
+NEON may omit from the raw files (i.e. \code{siteID}), but will also result in
+slower parsing.  Default \code{FALSE}.}
     \item{\code{altrep}}{enable or disable altrep.  Logical, default \code{FALSE}. Setting to
 \code{TRUE} can speed up reading, but may cause \link[vroom:vroom]{vroom::vroom} to throw
 \verb{mapping error: Too many open files}.}

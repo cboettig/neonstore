@@ -35,6 +35,10 @@
 #' metadata fields from file names of sensor data into the table?  Adds
 #' DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
 #' Results in slower parsing.  
+#' @param keep_filename Should we include a column indicating the original 
+#'  file name for each row?  Can be a useful source of additional metadata that
+#'  NEON may omit from the raw files (i.e. `siteID`), but will also result in
+#'  slower parsing.  Default `FALSE`.
 #' @param ... additional arguments to [vroom::vroom], can usually be omitted.
 #' @param altrep enable or disable altrep.  Logical, default `FALSE`. Setting to 
 #' `TRUE` can speed up reading, but may cause [vroom::vroom] to throw
@@ -63,6 +67,7 @@ neon_read <- function(table = NA,
                       dir = neon_dir(),
                       files = NULL,
                       sensor_metadata = TRUE,
+                      keep_filename = FALSE,
                       altrep = FALSE,
                       ...){
   
@@ -101,7 +106,7 @@ neon_read <- function(table = NA,
   
 
   neon_stack(files, 
-             keep_filename = FALSE,
+             keep_filename = keep_filename,
              sensor_metadata = sensor_metadata, 
              altrep = altrep, 
              ...)

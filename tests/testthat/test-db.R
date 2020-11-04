@@ -31,14 +31,15 @@ test_that("neon_store", {
   skip_if_offline()
   skip_on_cran()
   dir <- tempfile()
+  db_dir <- tempfile()
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",
                      end_date = "2018-08-01", 
                      dir = dir)
   
-  neon_store(table = "brd_countdata-expanded", dir = dir)
-  db <- neon_db(dir = dir)
+  neon_store(table = "brd_countdata-expanded", dir = dir, db_dir = db_dir)
+  db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)
@@ -60,6 +61,7 @@ test_that("neon_table", {
   skip_if_offline()
   skip_on_cran()
   dir <- tempfile()
+  db_dir <- tempfile()
   
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
@@ -69,14 +71,14 @@ test_that("neon_table", {
   
   
   neon_store(table = "brd_countdata-expanded",
-             dir = dir)
-  db <- neon_db(dir = dir)
+             dir = dir, db_dir = db_dir)
+  db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded" %in% x)
 
   
-  tbl <- neon_table("brd_countdata-expanded", dir = dir)
+  tbl <- neon_table("brd_countdata-expanded", db = db)
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))
@@ -94,11 +96,11 @@ test_that("neon_table", {
   
   
   
-  tbl <- neon_table("brd_countdata-expanded", site="YELL", dir = dir)
+  tbl <- neon_table("brd_countdata-expanded", site="YELL", db = db)
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
 
-  tbl <- neon_table("brd_countdata-expanded", site="not-a-site", dir = dir)
+  tbl <- neon_table("brd_countdata-expanded", site="not-a-site", db = db)
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) == 0)
   

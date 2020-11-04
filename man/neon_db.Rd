@@ -4,7 +4,7 @@
 \alias{neon_db}
 \title{Cache-able duckdb database connection}
 \usage{
-neon_db(dir = neon_dir(), read_only = TRUE, ...)
+neon_db(dir = neon_db_dir(), read_only = TRUE, ...)
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will

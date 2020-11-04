@@ -2,6 +2,7 @@
 #' 
 #' @param n number of files that should be read per iteration
 #' @param quiet show progress?
+#' @param db_dir location of the database directory
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
 #' @return the index of files read in (invisibly)
@@ -12,8 +13,9 @@ neon_store <- function(table = NA,
                        product = NA,
                        type = NA,
                        dir = neon_dir(),
+                       db_dir = neon_db_dir(),
                        n = 500L,
-                       quiet = FALSE, 
+                       quiet = FALSE,
                        ...)
 {
   
@@ -43,7 +45,7 @@ neon_store <- function(table = NA,
 
   
   ## Establish a write-able database connection
-  con <- neon_db(dir, read_only = FALSE)
+  con <- neon_db(db_dir, read_only = FALSE)
   
   ## Omit already imported files
   index <- omit_imported(con, index)
@@ -196,7 +198,7 @@ omit_imported <- function(con, index){
 
 drop_deprecated <- function(table, 
                             dir = neon_dir(),
-                            con = neon_db(dir)){
+                            con = neon_db()){
   
   if( !(table %in% DBI::dbListTables(con)) ){
     return(invisible(NULL))
