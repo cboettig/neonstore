@@ -21,8 +21,9 @@ Description: The National Ecological Observatory Network (NEON) provides access
   high-level user interface for downloading and storing NEON data products.
   While each of NEON data products consist of hundreds or thousands of individual
   files.  Unlike 'neonUtilities', this package will avoid repeated downloading,
-  provides persistent storage, and improves performance.  This package does not 
-  provide expose interactions with the individual low-level NEON API endpoints.
+  provides persistent storage, and improves performance.  'neonstore' can also
+  construct a local 'duckdb' database of stacked tables, making it possible
+  to work with tables that are far to big to fit into memory.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
