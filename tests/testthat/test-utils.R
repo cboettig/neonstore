@@ -3,6 +3,9 @@ context("utilities")
 
 test_that("neon_export()/neon_import()", {
   
+  skip_on_cran()
+  skip_if_offline()
+  skip_on_os("solaris")
   neondir1 <-  tempfile()
   
   x <- neon_download(product = "DP1.10003.001",

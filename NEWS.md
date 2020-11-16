@@ -3,8 +3,8 @@
 - Allow concurrent connections for reading from database.  
 - Allow users to specify an alternative location for the database, see `neon_db_dir()`.  Note that in multi-user environments,
   users may prefer to share a file store but utilize separate databases that they can write to independently. 
-- `neon_read()` gains the argument `keep_filename`, to always add a column with the filename of the original source data.
-  Filenames may contain important metadata (such as `siteID`) that is not always included in the tables themselves.
+- `neon_read()` gains the argument `keep_filename`, to always add a column with the filename of the original source data. Filenames may contain important metadata (such as `siteID`) that is not always included in the tables themselves.
+- bugfix for solaris test
 
 # v0.3.2
 
