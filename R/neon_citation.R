@@ -5,7 +5,7 @@
 #' @param  download_date Date of download to be included in citation.
 #'  default is today's date, see details. 
 #' 
-#' @references <https://www.neonscience.org/data/about-data/data-policies>
+#' @references https://www.neonscience.org/data-samples/data-policies-citation
 #' @return returns a [utils::bibentry] object, which can be used as text
 #' or formatted for bibtex.
 #' @details

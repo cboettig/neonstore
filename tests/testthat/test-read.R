@@ -18,8 +18,7 @@ test_that("vroom_ragged()", {
   A <- data.frame(A = 1:5, B = 1:5)
   B <- data.frame(A = 1:5, B = 1:5, C = 1:5)
   
-  files <- c(file.path(neon_dir(), "A.txt"),
-             file.path(neon_dir(), "B.txt"))
+  files <- c(tempfile(), tempfile())
   vroom::vroom_write(A, files[[1]])
   vroom::vroom_write(B, files[[2]])
   

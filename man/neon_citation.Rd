@@ -44,5 +44,5 @@ format(neon_citation("DP1.10003.001"), "bibtex")
 
 }
 \references{
-\url{https://www.neonscience.org/data/about-data/data-policies}
+https://www.neonscience.org/data-samples/data-policies-citation
 }
