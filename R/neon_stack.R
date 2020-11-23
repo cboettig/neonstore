@@ -1,4 +1,4 @@
-# Internal stackking method used by both neon_read and neon_store
+# Internal stacking method used by both neon_read and neon_store
 
 
 
@@ -112,7 +112,7 @@ vroom_many <- function(files,
                    error = function(e) vroom_ragged(files, 
                                                     guess_max = 5e4,
                                                     altrep = altrep,
-                                                    progress = vroom_progress,
+                                                    vroom_progress = FALSE,
                                                     ...),
                    finally = NULL)
   })
