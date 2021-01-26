@@ -217,13 +217,13 @@ filename_parser <- function(files){
 }
 
 
-#' @importFrom openssl md5 sha1 sha256
+# openssl md5 sha1 sha256
 file_hash <- function(x, hash = "md5"){
   
   
   if(is.null(hash)) return(NULL)
   if(length(x) == 0)  return(NULL)
-  
+  requireNamespace("openssl", quietly = TRUE)
   hash_fn <- switch(hash, 
                     "md5" = openssl::md5,
                     "sha1" = openssl::sha1,

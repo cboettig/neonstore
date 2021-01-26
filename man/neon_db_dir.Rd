@@ -12,7 +12,7 @@ the active \code{neonstore} directory.
 \description{
 Use \code{neon_db_dir()} to view or access the currently active database
 directory. By default, this uses the appropriate application directory
-for your operating system, see \code{\link[rappdirs:user_data_dir]{rappdirs::user_data_dir()}}.
+for your operating system, see \code{\link[tools:userdir]{tools::R_user_dir()}}.
 This location can be overridden by setting
 the environmental variable \code{NEONSTORE_DB}.
 }

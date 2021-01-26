@@ -55,7 +55,7 @@
 #' files are preserved in the store to avoid repeated downloads. 
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
-#' (see [rappdirs::user_data_dir]).  This default also be configured by
+#' (see [tools::R_user_dir()]).  This default also be configured by
 #' setting the environmental variable `NEONSTORE_HOME`, see [Sys.setenv] or
 #' [Renviron].
 #' @param api the URL to the NEON API, leave as default.
@@ -67,7 +67,6 @@
 #' access to them without further interaction required with the API.
 #'
 #' @export
-#' @importFrom curl curl_download
 #' @importFrom R.utils gunzip
 #' @importFrom tools file_path_sans_ext
 #' @examples 
@@ -241,7 +240,6 @@ hash_type <- function(df){
 
 
 download_all <- function(addr, dest, quiet){
-  
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent in :elapsed, eta: :eta",
     total = length(addr), 
@@ -249,20 +247,24 @@ download_all <- function(addr, dest, quiet){
   
   for(i in seq_along(addr)){
     if(!quiet) pb$tick()
-    tryCatch( ## treat errors as warnings
-      curl::curl_download(addr[i], dest[i]),
-      error = function(e) 
-        warning(paste(e$message, "on", addr[i]),
-                call. = FALSE),
-      finally = NULL
-    )
+    safe_download(addr[i], dest[i])
   }  
+}
+
+safe_download <- function(url, dest){
+  requireNamespace("curl", quietly = FALSE)
+  tryCatch( ## treat errors as warnings
+    curl::curl_download(url, dest),
+    error = function(e) 
+      warning(paste(e$message, "on", url),
+              call. = FALSE),
+    finally = NULL
+  )  
 }
 
 unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   
   zips <- path[grepl("[.]zip", path)]
-  
   pb <- progress::progress_bar$new(
     format = "  unzipping [:bar] :percent in :elapsed, eta: :eta",
     total = length(zips), 
@@ -284,17 +286,14 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   
 }
 
-#' @importFrom digest digest
-#' @importFrom openssl md5
+
 verify_hash <- function(path, hash, verify, algo = "md5"){
   if(any(is.na(hash))){
     return(NULL)
   }
   
   
-  hashfn <- switch(algo,
-                   md5 = function(x) as.character(openssl::md5(file(x))),
-                   crc32 =  function(x) digest::digest(x, "crc32", file=TRUE))
+  hashfn <- switch(algo, md5 = md5, crc32 =  crc32)
   
   if(verify){
     md5 <- vapply(path, hashfn,
@@ -308,8 +307,15 @@ verify_hash <- function(path, hash, verify, algo = "md5"){
   }
 }
 
+md5 <- function(x) {
+  requireNamespace("openssl", quietly = TRUE)
+  as.character(openssl::md5(file(x)))
+}
 
-
+crc32 <- function(x) {
+  requireNamespace("digest", quietly = TRUE)
+  digest::digest(x, "crc32", file=TRUE)
+}
 
 
 ## helper method for filtering out duplicate tables

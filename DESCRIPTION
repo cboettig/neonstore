@@ -32,15 +32,11 @@ Imports:
     DBI,
     duckdb,
     vroom,
-    rappdirs,
     httr,
     R.utils,
     zip,
     jsonlite,
-    curl,
-    openssl,
     tibble,
-    digest,
     progress,
     tools,
     utils
@@ -52,5 +48,8 @@ Suggests:
     spelling,
     rstudioapi,
     neonUtilities,
-    rhdf5
+    rhdf5,
+    curl,
+    openssl,
+    digest
 Language: en-US
