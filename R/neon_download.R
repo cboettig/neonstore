@@ -286,7 +286,7 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
 
 gunzip_all <- function(filenames, dir, quiet = FALSE){
 
-  gzips <- path[grepl("[.]gz", filenames)]
+  gzips <- filenames[grepl("[.]gz", filenames)]
   
   pb <- progress::progress_bar$new(
     format = "  gunzipping gz's [:bar] :percent in :elapsed, eta: :eta",
