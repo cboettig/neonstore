@@ -277,23 +277,31 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   if(!keep_zips) {
     unlink(zips)
   }
-  path <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
   
-  filename <- path[grepl("[.]gz", path)]
+  ## find all gzips inside zip dirs
+  gzips <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
+  gunzip_all(gzips, dir = dir, quiet = quiet)
+  
+}
+
+gunzip_all <- function(filenames, dir, quiet = FALSE){
+
+  gzips <- filenames[grepl("[.]gz", filenames)]
+  
   pb <- progress::progress_bar$new(
     format = "  gunzipping gz's [:bar] :percent in :elapsed, eta: :eta",
-    total = length(filename), 
+    total = length(gzips), 
     clear = FALSE, width= 80)
+  
   gunzip_ <- function(file, ...){
     if(!quiet) pb$tick()
     R.utils::gunzip(file, ...)
   }
   
-  if(length(filename) > 0){
-    destname <- tools::file_path_sans_ext(filename)
-    mapply(gunzip_, filename, destname, remove = TRUE)
+  if(length(gzips) > 0){
+    destname <- tools::file_path_sans_ext(gzips)
+    mapply(gunzip_, gzips, destname, remove = TRUE, overwrite = TRUE)
   }
-  
 }
 
 
