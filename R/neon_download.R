@@ -298,7 +298,7 @@ gunzip_all <- function(filenames, dir, quiet = FALSE){
     R.utils::gunzip(file, ...)
   }
   
-  if(length(filename) > 0){
+  if(length(gzips) > 0){
     destname <- tools::file_path_sans_ext(gzips)
     mapply(gunzip_, gzips, destname, remove = TRUE, overwrite = TRUE)
   }
