@@ -13,7 +13,7 @@ the active \code{neonstore} directory.
 Use \code{neon_dir()} to view or access the currently active local store.
 By default, \code{\link[=neon_download]{neon_download()}} downloads files into the \code{neon_dir()},
 which uses an appropriate application directory for your operating system,
-see \code{\link[rappdirs:user_data_dir]{rappdirs::user_data_dir()}}.  This location can be overridden by setting
+see \code{\link[tools:userdir]{tools::R_user_dir()}}.  This location can be overridden by setting
 the environmental variable \code{NEONSTORE_HOME}.  \code{neonstore} functions
 (e.g. \code{\link[=neon_index]{neon_index()}}, and \code{\link[=neon_read]{neon_read()}}) look for files in
 the \code{neon_dir()} directory by default.  (All functions can also take

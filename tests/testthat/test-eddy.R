@@ -23,14 +23,14 @@ test_that("read_eddy",{
   
   df <- neonstore:::read_eddy(h5[[1]])
   expect_is(df, "data.frame")
-  expect_equal(dim(df), c(1392, 36))
+  expect_gt(dim(df)[[1]], 10)
   
   df <- neonstore:::stack_eddy(h5)
   expect_is(df, "data.frame")
-  expect_equal(dim(df), c(5760, 36))
+  expect_equal(dim(df)[[2]],  36)
   df <- neonstore:::neon_stack(h5)
   expect_is(df, "data.frame")
-  expect_equal(dim(df), c(5760, 36))
+  expect_equal(dim(df)[[2]],  36)
   
   
   

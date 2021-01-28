@@ -3,7 +3,7 @@
 #' Use `neon_dir()` to view or access the currently active local store.
 #' By default, [neon_download()] downloads files into the `neon_dir()`,
 #' which uses an appropriate application directory for your operating system,
-#' see [rappdirs::user_data_dir()].  This location can be overridden by setting
+#' see [tools::R_user_dir()].  This location can be overridden by setting
 #' the environmental variable `NEONSTORE_HOME`.  `neonstore` functions 
 #' (e.g. [neon_index()], and [neon_read()]) look for files in
 #' the `neon_dir()` directory by default.  (All functions can also take
@@ -24,7 +24,7 @@
 #' 
 neon_dir <- function(){
   Sys.getenv("NEONSTORE_HOME", 
-             rappdirs::user_data_dir("neonstore"))
+             tools::R_user_dir("neonstore"))
 }
 
 
@@ -32,7 +32,7 @@ neon_dir <- function(){
 #' 
 #' Use `neon_db_dir()` to view or access the currently active database 
 #' directory. By default, this uses the appropriate application directory
-#' for your operating system, see [rappdirs::user_data_dir()].
+#' for your operating system, see [tools::R_user_dir()].
 #' This location can be overridden by setting
 #' the environmental variable `NEONSTORE_DB`. 
 #'
@@ -50,6 +50,6 @@ neon_dir <- function(){
 #' 
 neon_db_dir <- function(){
   Sys.getenv("NEONSTORE_DB", 
-             rappdirs::user_data_dir("neonstore"))
+             tools::R_user_dir("neonstore"))
 }
 

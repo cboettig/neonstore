@@ -42,7 +42,7 @@ reported by the NEON API to verify integrity? (default \code{TRUE})}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
-(see \link[rappdirs:user_data_dir]{rappdirs::user_data_dir}).  This default also be configured by
+(see \code{\link[tools:userdir]{tools::R_user_dir()}}).  This default also be configured by
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
