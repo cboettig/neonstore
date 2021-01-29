@@ -102,6 +102,7 @@ data_api_queries <- function(product,
   dates <- as.Date(gsub(regex, "\\2-01", data_api))
   if(!is.na(start_date)){
     data_api <- data_api[dates >= start_date]
+    dates <- as.Date(gsub(regex, "\\2-01", data_api))
   }
   if(!is.na(end_date)){
     data_api <- data_api[dates <= end_date]

@@ -6,7 +6,7 @@ test_that("neon_export()/neon_import()", {
   skip_on_cran()
   skip_if_offline()
   skip_on_os("solaris")
-  neondir1 <-  tempfile()
+  neondir1 <-  tempfile("meta1")
   
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
@@ -25,7 +25,7 @@ test_that("neon_export()/neon_import()", {
   expect_is(meta, "data.frame")
   
   ## now restore from archive to new store
-  neondir <-  tempfile()
+  neondir <-  tempfile("meta2")
   
   expect_null( neon_index(dir = neondir) )
   

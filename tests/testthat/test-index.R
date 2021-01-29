@@ -7,8 +7,8 @@ test_that("neon_index()", {
   skip_on_cran()
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
-                     start_date = "2018-05-01",
-                     end_date = "2018-08-01")  
+                     start_date = "2018-06-01",
+                     end_date = "2018-07-01")  
   
   x <- neon_index()
   expect_is(x, "data.frame")

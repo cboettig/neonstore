@@ -83,8 +83,8 @@ neon_download_s3 <- function(product,
   addr <- paste0(api, meta$path)
   dest <- neon_subdir(basename(meta$path), dir)
   
-  download_all(addr, dest, quiet)
-  # verify_hash(dest, files$crc32, verify)
+  # crc32/md5 sums not recorded
+  download_all(addr, dest, quiet = quiet, verify = FALSE)
   if(unzip) unzip_all(dest, dir)
 
   invisible(meta)

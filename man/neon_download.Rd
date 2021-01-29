@@ -10,11 +10,12 @@ neon_download(
   end_date = NA,
   site = NA,
   type = "expanded",
-  file_regex = "[.]zip",
+  file_regex = ".",
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  unzip = TRUE,
+  release = "prerelease",
+  unzip = FALSE,
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
 )
@@ -46,6 +47,9 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
+\item{release}{Download only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}.}
+
 \item{unzip}{should we extract .zip files? (default \code{TRUE}). Note: .zip
 files are preserved in the store to avoid repeated downloads.}
 
@@ -75,21 +79,15 @@ product has expanded, and the columns \code{productHasBasicDescription} and
 differences between the \code{"expanded"} and \code{"basic"} versions of that
 particular product.
 
-The API provides access to a \code{.zip} file containing all the component objects
-(e.g. tables) for that product at that site and sampling month. Additionally,
-the API allows users to request component files directly (e.g. as \code{.csv}
-files).  Requesting component files directly avoids the additional overhead
-of downloading other components that are not needed.  Both the \code{.zip} and
-relevant \code{.csv} and \code{zip} files in products that have expanded will include
-both a \code{"basic"} and \code{"expanded"} name in the filename.  Setting \code{type}
-argument of \code{neon_download()} to the preferred one will make it filter out
-the other one.
-
-By default, \code{neon_download()} will request the \code{.zip} packet for the product,
-matching the requested type.  \code{neon_download()} will extract the component
-files into the store, removing the \code{.zip} file.  Specific files within a
-product can be identified by altering the \code{file_regex} argument
+The API allows users to request component files directly.
+By default, \code{neon-download()} will download all available
+extensions.  Users can request only products of a certain format
+(e.g. \code{.csv} or \code{.h5}) by altering the \code{file_regex} argument
 (see examples).
+
+Prior to 2021, the API provided
+access to a \code{.zip} file containing all the component objects
+(e.g. tables) for that product at that site and sampling month.
 
 \code{neon_download()} will avoid downloading metadata files which are bitwise
 identical to other files in the same download request, as indicated by the

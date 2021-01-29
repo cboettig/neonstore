@@ -15,21 +15,17 @@
 #' differences between the `"expanded"` and `"basic"` versions of that
 #' particular product.
 #' 
-#' The API provides access to a `.zip` file containing all the component objects
-#' (e.g. tables) for that product at that site and sampling month. Additionally,
-#' the API allows users to request component files directly (e.g. as `.csv` 
-#' files).  Requesting component files directly avoids the additional overhead 
-#' of downloading other components that are not needed.  Both the `.zip` and 
-#' relevant `.csv` and `zip` files in products that have expanded will include
-#' both a `"basic"` and `"expanded"` name in the filename.  Setting `type`
-#' argument of `neon_download()` to the preferred one will make it filter out
-#' the other one.
-#' 
-#' By default, `neon_download()` will request the `.zip` packet for the product,
-#' matching the requested type.  `neon_download()` will extract the component 
-#' files into the store, removing the `.zip` file.  Specific files within a
-#' product can be identified by altering the `file_regex` argument
+
+#' The API allows users to request component files directly.
+#' By default, `neon-download()` will download all available
+#' extensions.  Users can request only products of a certain format 
+#' (e.g. `.csv` or `.h5`) by altering the `file_regex` argument
 #' (see examples).  
+#'
+#' Prior to 2021, the API provided
+#' access to a `.zip` file containing all the component objects
+#' (e.g. tables) for that product at that site and sampling month. 
+#' 
 #' 
 #' `neon_download()` will avoid downloading metadata files which are bitwise
 #' identical to other files in the same download request, as indicated by the
@@ -58,6 +54,8 @@
 #' (see [tools::R_user_dir()]).  This default also be configured by
 #' setting the environmental variable `NEONSTORE_HOME`, see [Sys.setenv] or
 #' [Renviron].
+#' @param release Download only data files associated with a particular release tag,
+#' see <https://www.neonscience.org/data-samples/data-management/data-revisions-releases>.
 #' @param api the URL to the NEON API, leave as default.
 #' @param .token an authentication token from NEON. A token is not
 #' required but will allow access to a higher number of requests before
@@ -90,11 +88,12 @@ neon_download <- function(product,
                            end_date = NA,
                            site = NA,
                            type = "expanded",
-                           file_regex =  "[.]zip",
+                           file_regex =  ".",
                            quiet = FALSE,
                            verify = TRUE,
-                           dir = neon_dir(), 
-                           unzip = TRUE,
+                           dir = neon_dir(),
+                           release = "prerelease",
+                           unzip = FALSE,
                            api = "https://data.neonscience.org/api/v0",
                            .token =  Sys.getenv("NEON_TOKEN")){
   
@@ -119,11 +118,11 @@ neon_download_ <- function(product,
                           end_date = NA,
                           site = NA,
                           type = "expanded",
-                          file_regex =  "[.]zip",
+                          file_regex =  ".",
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
-                          unzip = TRUE,
+                          unzip = FALSE,
                           api = "https://data.neonscience.org/api/v0",
                           .token =  Sys.getenv("NEON_TOKEN")){
   
@@ -149,16 +148,26 @@ neon_download_ <- function(product,
   if(length(files) == 0) {
     return(invisible(NULL)) # nothing to download
   }
+
+  # hash algo used (md5 or crc32)
+  algo <- hash_type(files)
   
   ## Time to download, verify, and unzip
-  download_all(files$url, files$path, quiet)
-  
-  algo <- hash_type(files)
-  verify_hash(files$path, files[algo], verify, algo)
+  ## NOTE: file$path destination is not guaranteed to be unique!
+  download_all(files$url, 
+               files$path,
+               hash = files[[algo]],
+               algo = algo,
+               verify = verify,
+               quiet = quiet)
   
   if(unzip) 
     unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
+  ## Always gunzip (e.g., .h5.gz files)
+  gzips <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
+  gunzip_all(gzips, dir = dir, quiet = quiet)
+  
   ## file metadata (url, path, md5sum)  
   invisible(files)
 }
@@ -210,6 +219,7 @@ download_filters <- function(files, file_regex,
   files <- take_first_match(files, hash_type(files))
 
   ## create path column for dest
+  ## NOTE: file$name not guaranteed to be unique.  
   files$path <- neon_subdir(files$name, dir = dir)
   
   
@@ -219,11 +229,22 @@ download_filters <- function(files, file_regex,
 
 ## Generate subdir paths and ensure they exist
 neon_subdir <- function(path, dir){
-  df <- neon_filename_parser(basename(path))
-  product <- paste_na(df$DPL, df$PRNUM, df$REV)
-  dirs <- file.path(dir, paste(product, df$SITE, df$YYYY_MM, sep = "/"))
-  lapply(unique(dirs), dir.create, FALSE, TRUE)
-  paste(dirs, path, sep="/")
+    vapply(path, function(path){
+    n <- basename(path)
+    df <- neon_filename_parser(n)
+    if(nrow(df) == 0){ # not parsable string
+      return(file.path(dir, n))
+    }
+    product <- paste_na(df$DPL, df$PRNUM, df$REV)
+    dirs <- file.path(dir, paste(product, 
+                                 na_to_char(df$SITE), 
+                                 na_to_char(df$YYYY_MM), sep = "/"))
+    
+    
+    lapply(unique(dirs), dir.create, FALSE, TRUE)
+    dirs <- normalizePath(dirs) # path must exist for this to work...
+    paste(dirs, n, sep="/")
+    }, character(1L), USE.NAMES = FALSE)
 }
 
 
@@ -239,7 +260,16 @@ hash_type <- function(df){
 }
 
 
-download_all <- function(addr, dest, quiet){
+download_all <- function(addr, 
+                         dest, 
+                         hash = character(length(dest)),
+                         algo = "md5",
+                         verify = TRUE,
+                         quiet = FALSE){
+  
+  # recycle
+  if(length(algo) == 1) algo <- rep(algo, length(dest))
+  
   pb <- progress::progress_bar$new(
     format = "  downloading [:bar] :percent in :elapsed, eta: :eta",
     total = length(addr), 
@@ -247,20 +277,52 @@ download_all <- function(addr, dest, quiet){
   
   for(i in seq_along(addr)){
     if(!quiet) pb$tick()
-    safe_download(addr[i], dest[i])
+    safe_download(addr[i], dest[i], hash = hash[i], 
+                  algo = algo[i], verify = verify)
   }  
 }
 
-safe_download <- function(url, dest){
+safe_download <- function(url, dest, hash = NULL, algo = "md5", verify = TRUE){
   requireNamespace("curl", quietly = FALSE)
-  tryCatch( ## treat errors as warnings
-    curl::curl_download(url, dest),
+  tryCatch({ ## treat errors as warnings
+    curl::curl_download(url, dest)
+    verify_hash(dest, hash, verify, algo)
+    },
     error = function(e) 
       warning(paste(e$message, "on", url),
               call. = FALSE),
     finally = NULL
-  )  
+  )
+  
 }
+
+verify_hash <- function(path, hash, verify, algo = "md5"){
+  if(any(is.na(hash)) | any(is.na(path))  ){
+    return(NULL)
+  }
+  hashfn <- switch(algo, md5 = md5, crc32 =  crc32)
+  if(verify){
+    md5 <- vapply(path, hashfn,
+                  character(1L), USE.NAMES = FALSE)
+    i <- which(md5 != hash)
+    if(length(i) > 0) {
+      warning(paste(algo, "missmatch:\n",
+                    paste(path[i], sep="\n"), "\n"), call. = FALSE)
+    }
+  }
+}
+
+md5 <- function(x) {
+  requireNamespace("openssl", quietly = TRUE)
+  as.character(openssl::md5(file(x, "rb")))
+}
+
+crc32 <- function(x) {
+  requireNamespace("digest", quietly = TRUE)
+  digest::digest(x, "crc32", file=TRUE)
+}
+
+
 
 unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   
@@ -273,19 +335,15 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   lapply(zips, function(x){
     if(!quiet) pb$tick()
     zip::unzip(x, exdir = dirname(x))
-    })
+  })
   if(!keep_zips) {
     unlink(zips)
   }
   
-  ## find all gzips inside zip dirs
-  gzips <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
-  gunzip_all(gzips, dir = dir, quiet = quiet)
-  
 }
 
 gunzip_all <- function(filenames, dir, quiet = FALSE){
-
+  
   gzips <- filenames[grepl("[.]gz", filenames)]
   
   pb <- progress::progress_bar$new(
@@ -304,36 +362,6 @@ gunzip_all <- function(filenames, dir, quiet = FALSE){
   }
 }
 
-
-verify_hash <- function(path, hash, verify, algo = "md5"){
-  if(any(is.na(hash))){
-    return(NULL)
-  }
-  
-  
-  hashfn <- switch(algo, md5 = md5, crc32 =  crc32)
-  
-  if(verify){
-    md5 <- vapply(path, hashfn,
-                  character(1L), USE.NAMES = FALSE)
-    i <- which(md5 != hash)
-    if(length(i) > 0) {
-      warning(paste("Some downloaded files which", 
-                    "did not match the expected hash:",
-                    path[i]), call. = FALSE)
-    }
-  }
-}
-
-md5 <- function(x) {
-  requireNamespace("openssl", quietly = TRUE)
-  as.character(openssl::md5(file(x)))
-}
-
-crc32 <- function(x) {
-  requireNamespace("digest", quietly = TRUE)
-  digest::digest(x, "crc32", file=TRUE)
-}
 
 
 ## helper method for filtering out duplicate tables
