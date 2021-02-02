@@ -314,7 +314,8 @@ verify_hash <- function(path, hash, verify, algo = "md5"){
 
 md5 <- function(x) {
   requireNamespace("openssl", quietly = TRUE)
-  as.character(openssl::md5(file(x, "rb")))
+  digest::digest(x, "md5", file = TRUE)
+  #as.character(openssl::md5(file(x, "rb")))
 }
 
 crc32 <- function(x) {
