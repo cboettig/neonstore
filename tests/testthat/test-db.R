@@ -19,10 +19,10 @@ test_that("neon_store error handling", {
   
   
   neon_store(table = "brd_countdata-expanded",
-            dir = tempdir())
+            dir = tempfile("no_files"))
   
   neon_store(product = "not-a-product",
-                   dir = tempdir())
+                   dir = tempfile("no_products"))
 })
   
 
