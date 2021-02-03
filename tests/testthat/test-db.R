@@ -30,8 +30,9 @@ test_that("neon_store", {
 
   skip_if_offline()
   skip_on_cran()
+  
   dir <- tempfile()
-  db_dir <- tempfile()
+  db_dir <- tempfile("database")
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",

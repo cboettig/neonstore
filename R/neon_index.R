@@ -170,15 +170,7 @@ meta_filter <- function(meta,
 
 na_omit <- function(x) x[!is.na(x)]
 
-na_to_char <- function(x, char = ""){
-  x <- as.character(x)
-  x[is.na(x)] <- char
-  x
-}
 
-paste_na <- function(..., sep = "."){
-  do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
-}
 
 
 filename_parser <- function(files){

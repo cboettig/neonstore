@@ -97,7 +97,8 @@ neon_db_status <- function () {
   if (interactive() && Sys.getenv("RSTUDIO") == "1"  && !in_chk()) {
     tryCatch({neon_pane()}, error = function(e) NULL, finally = NULL)
   }
-  if (interactive()) neon_db_status()
+  if (interactive()) 
+    tryCatch(neon_db_status(),  error = function(e) NULL, finally = NULL)
 }
 
 

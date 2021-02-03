@@ -1,2 +1,2 @@
-Sys.setenv("NEONSTORE_HOME" = tempfile())
-Sys.setenv("NEONSTORE_DB" = tempfile())
+Sys.setenv("NEONSTORE_HOME" = tempfile("filestore"))
+Sys.setenv("NEONSTORE_DB" = tempfile("database"))

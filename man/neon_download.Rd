@@ -14,7 +14,7 @@ neon_download(
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  release = "prerelease",
+  release = NA,
   unzip = FALSE,
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")

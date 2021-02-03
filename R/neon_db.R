@@ -35,14 +35,16 @@ neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
   if (!file.exists(dbname) && read_only) {
     db <- DBI::dbConnect(duckdb::duckdb(), 
                          dbdir = dbname, read_only = FALSE)
-    dbWriteTable(db, "init", data.frame(NEON="NEON"))
-    dbDisconnect(db, shutdown=TRUE)
+    DBI::dbWriteTable(db, "init", data.frame(NEON="NEON"))
+    DBI::dbDisconnect(db, shutdown=TRUE)
   }
 
   db <- mget("neon_db", envir = neonstore_cache, ifnotfound = NA)[[1]]
+  
   if (inherits(db, "DBIConnection")) {
     if (DBI::dbIsValid(db)) {
-      if (read_only) {
+      dir_matches <- db@driver@dbdir == dir
+      if (read_only & dir_matches) {
         return(db)
       } else {
         ## shut down the cached (read_only) connection first 
@@ -86,7 +88,8 @@ neonstore_cache <- new.env()
 
 #' delete the local NEON database
 #' 
-#' @param db neon database connection from `[neon_db()]`
+#' @param db_dir neon database location (configurable with the NEONSTORE_DB
+#'  environmental variable)
 #' @param ask Ask for confirmation first?
 #' @details Just a helper function that deletes the NEON database
 #' files, which are found under `file.path(neon_dir(), "database")`.
@@ -105,20 +108,19 @@ neonstore_cache <- new.env()
 #' db <- neon_db(dir)
 #' 
 #' # Delete it
-#' neon_delete_db(db, ask = FALSE)
+#' neon_delete_db(dir, ask = FALSE)
 #' 
 #' 
-neon_delete_db <- function(db = neon_db(), ask = interactive()){
+neon_delete_db <- function(db_dir = neon_db_dir(), ask = interactive()){
   continue <- TRUE
   if(ask){
     continue <- utils::askYesNo(paste("Delete the local duckdb database?", 
-             "(downloaded files will be kept)"))
+             "(downloaded files will be kept by default)"))
   }
   if(continue){
-    dir <- dirname(db@driver@dbdir)
-    DBI::dbDisconnect(db, shutdown = TRUE)
-    db_files <- list.files(dir, "^database.*", full.names = TRUE)
+    db_files <- list.files(db_dir, "^database.*", full.names = TRUE)
     lapply(db_files, unlink, TRUE)
+    unlink(db_dir, recursive = TRUE)
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(

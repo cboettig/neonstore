@@ -92,7 +92,7 @@ neon_download <- function(product,
                            quiet = FALSE,
                            verify = TRUE,
                            dir = neon_dir(),
-                           release = "prerelease",
+                           release = NA,
                            unzip = FALSE,
                            api = "https://data.neonscience.org/api/v0",
                            .token =  Sys.getenv("NEON_TOKEN")){
@@ -119,6 +119,7 @@ neon_download_ <- function(product,
                           site = NA,
                           type = "expanded",
                           file_regex =  ".",
+                          release = NA,
                           quiet = FALSE,
                           verify = TRUE,
                           dir = neon_dir(), 
@@ -131,11 +132,20 @@ neon_download_ <- function(product,
   
   ## Query the API for a list of all files associated with this data product.
   files <- neon_data(product = product, 
-                     start_date = start_date, 
-                     end_date = end_date, 
-                     site = site,  
-                     api = api, 
+                     start_date = start_date,
+                     end_date = end_date,
+                     site = site,
+                     type = type,
+                     release = release,
+                     api = api,
                      .token = .token)
+  
+  
+  
+  ## Update release manifest
+  ## Run before filters? slower but will ensure manifest of existing files
+  update_release_manifest(x = files, dir = dir)
+  
   
   ## confirm product has expanded type, if requested
   type <- type_check(product, type)
@@ -148,7 +158,7 @@ neon_download_ <- function(product,
   if(length(files) == 0) {
     return(invisible(NULL)) # nothing to download
   }
-
+  
   # hash algo used (md5 or crc32)
   algo <- hash_type(files)
   
@@ -247,27 +257,13 @@ neon_subdir <- function(path, dir){
     }, character(1L), USE.NAMES = FALSE)
 }
 
-
-
-
-
-hash_type <- function(df){
-  type <- "md5"
-  if(is.null(df[[type]]) | any(is.na(df[[type]]))){
-    type <- "crc32"
-  }
-  type
-}
-
-
 download_all <- function(addr, 
                          dest, 
                          hash = character(length(dest)),
                          algo = "md5",
                          verify = TRUE,
                          quiet = FALSE){
-  
-  # recycle
+  # recycle algo choice if length 1
   if(length(algo) == 1) algo <- rep(algo, length(dest))
   
   pb <- progress::progress_bar$new(
@@ -296,98 +292,32 @@ safe_download <- function(url, dest, hash = NULL, algo = "md5", verify = TRUE){
   
 }
 
-verify_hash <- function(path, hash, verify, algo = "md5"){
-  if(any(is.na(hash)) | any(is.na(path))  ){
-    return(NULL)
-  }
-  hashfn <- switch(algo, md5 = md5, crc32 =  crc32)
-  if(verify){
-    md5 <- vapply(path, hashfn,
-                  character(1L), USE.NAMES = FALSE)
-    i <- which(md5 != hash)
-    if(length(i) > 0) {
-      warning(paste(algo, "missmatch:\n",
-                    paste(path[i], sep="\n"), "\n"), call. = FALSE)
-    }
-  }
+
+
+update_release_manifest <- function(x, dir = neon_dir()){
+  
+  current <- data.frame("name" = character(),
+                        "md5" = character(),
+                        "crc32"=character(),
+                        "size"=integer(),
+                        "release" = character())
+  x <- x[names(current)]
+  x$md5 <- as.character(x$md5)
+  x$crc32 <- as.character(x$crc32)
+  
+  # path to manifest
+  manifest <- file.path(dir, "release_manifest.csv")
+  
+  # load current manifest, if it exists
+  if(file.exists(manifest))
+    current <- vroom::vroom(manifest, col_types = "cccic")
+  
+  # combine rows and determine distinct.
+  updated <- merge(x, current, by = names(current), all = TRUE)
+  
+  vroom::vroom_write(updated, manifest)
+  invisible(updated)
 }
 
-md5 <- function(x) {
-  requireNamespace("openssl", quietly = TRUE)
-  con <- file(x, "rb")
-  on.exit(close(con))
-  as.character(openssl::md5(con))
-}
-
-crc32 <- function(x) {
-  requireNamespace("digest", quietly = TRUE)
-  digest::digest(x, "crc32", file=TRUE)
-}
-
-
-
-unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
-  
-  zips <- path[grepl("[.]zip", path)]
-  pb <- progress::progress_bar$new(
-    format = "  unzipping [:bar] :percent in :elapsed, eta: :eta",
-    total = length(zips), 
-    clear = FALSE, width= 80)
-  
-  lapply(zips, function(x){
-    if(!quiet) pb$tick()
-    zip::unzip(x, exdir = dirname(x))
-  })
-  if(!keep_zips) {
-    unlink(zips)
-  }
-  
-}
-
-gunzip_all <- function(filenames, dir, quiet = FALSE){
-  
-  gzips <- filenames[grepl("[.]gz", filenames)]
-  
-  pb <- progress::progress_bar$new(
-    format = "  gunzipping gz's [:bar] :percent in :elapsed, eta: :eta",
-    total = length(gzips), 
-    clear = FALSE, width= 80)
-  
-  gunzip_ <- function(file, ...){
-    if(!quiet) pb$tick()
-    R.utils::gunzip(file, ...)
-  }
-  
-  if(length(gzips) > 0){
-    destname <- tools::file_path_sans_ext(gzips)
-    mapply(gunzip_, gzips, destname, remove = TRUE, overwrite = TRUE)
-  }
-}
-
-
-
-## helper method for filtering out duplicate tables
-## NEON API loves returning metadata files with identical content but 
-## different names associated with each site and sampling month.
-take_first_match <- function(df, col){
-  
-  if(nrow(df) < 2) return(df)
-  
-  uid <- unique(df[[col]])
-  na <- df[1,]
-  na[1,] <- NA
-  rownames(na) <- NULL
-  out <- data.frame(uid, na)
-  
-  ## Should really figure out vectorized implementation here...
-  ## but in any event download step will be far more rate-limiting.
-  for(i in seq_along(uid)){
-    match <- df[[col]] == uid[i]
-    first <- which(match)[[1]]
-    out[i,-1] <- df[first, ]
-  }
-  rownames(out) <- NULL
-  out[,-1]
-}
 
 

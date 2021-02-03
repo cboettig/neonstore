@@ -72,7 +72,7 @@ neon_store <- function(table = NA,
   ## update the provenance table
   con <- duckdb_memory_manager(con)
   if(!is.null(index)){
-    DBI::dbWriteTable(con, "provenance", index, append = TRUE)
+    DBI::dbWriteTable(con, "provenance", as.data.frame(index), append = TRUE)
   }
   neon_disconnect(db = con)
   invisible(index)
@@ -117,7 +117,7 @@ db_chunks <- function(con,
                      progress = progress,
                      ...)
     if(!is.null(df)){
-      DBI::dbWriteTable(con, table, df, append = TRUE)
+      DBI::dbWriteTable(con, table, as.data.frame(df), append = TRUE)
     }
     
     con <- duckdb_memory_manager(con)
@@ -149,7 +149,7 @@ db_chunks <- function(con,
                      sensor_metadata = TRUE, 
                      altrep = FALSE,
                      progress = progress)
-    DBI::dbWriteTable(con, table, df, append = TRUE)  
+    DBI::dbWriteTable(con, table, as.data.frame(df), append = TRUE)  
     con <- duckdb_memory_manager(con)
 
   }
@@ -184,7 +184,7 @@ omit_imported <- function(con, index){
   }
     
     
-  DBI::dbWriteTable(con, "zzzfilter", index,
+  DBI::dbWriteTable(con, "zzzfilter", as.data.frame(index),
                     overwrite = TRUE, temporary = TRUE)
   query <- paste0(
     'SELECT * FROM zzzfilter ', 

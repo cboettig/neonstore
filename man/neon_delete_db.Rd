@@ -4,10 +4,11 @@
 \alias{neon_delete_db}
 \title{delete the local NEON database}
 \usage{
-neon_delete_db(db = neon_db(), ask = interactive())
+neon_delete_db(db_dir = neon_db_dir(), ask = interactive())
 }
 \arguments{
-\item{db}{neon database connection from \verb{[neon_db()]}}
+\item{db_dir}{neon database location (configurable with the NEONSTORE_DB
+environmental variable)}
 
 \item{ask}{Ask for confirmation first?}
 }
@@ -31,7 +32,7 @@ dir <- tempfile()
 db <- neon_db(dir)
 
 # Delete it
-neon_delete_db(db, ask = FALSE)
+neon_delete_db(dir, ask = FALSE)
 
 
 }
