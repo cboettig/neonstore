@@ -307,6 +307,7 @@ update_release_manifest <- function(x, dir = neon_dir()){
   
   # path to manifest
   manifest <- file.path(dir, "release_manifest.csv")
+  if(!dir.exists(dir)) dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   
   # load current manifest, if it exists
   if(file.exists(manifest))
