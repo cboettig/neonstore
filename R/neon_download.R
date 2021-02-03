@@ -70,17 +70,20 @@
 #' @examples 
 #' \donttest{
 #'  
+#'  ## Omit dir=tempfile() to use persistent storage
 #'  neon_download("DP1.10003.001", 
 #'                start_date = "2018-01-01", 
 #'                end_date = "2019-01-01",
-#'                site = "YELL")
+#'                site = "YELL",
+#'                dir = tempfile())
 #'                
 #'  ## Advanced use: filter for a particular table in the product
 #'  neon_download(product = "DP1.10003.001",
 #'                start_date = "2018-01-01",
 #'                end_date = "2019-01-01",
 #'                site = "YELL",
-#'                file_regex = ".*brd_countdata.*\\.csv")
+#'                file_regex = "countdata",
+#'                dir = tempfile())
 #' 
 #' }
 neon_download <- function(product, 
