@@ -321,7 +321,9 @@ update_release_manifest <- function(x, dir = neon_dir()){
   # combine rows and determine distinct.
   updated <- merge(x, current, by = names(current), all = TRUE)
   
-  vroom::vroom_write(updated, manifest)
+  con <- file(manifest, "wb")
+  on.exit(close(con), add = TRUE)
+  vroom::vroom_write(updated, con)
   #utils::write.csv(updated, manifest, row.names = FALSE)
   invisible(updated)
 }

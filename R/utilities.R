@@ -58,7 +58,7 @@ verify_hash <- function(path, hash, verify, algo = "md5"){
 md5 <- function(x) {
   requireNamespace("openssl", quietly = TRUE)
   con <- file(x, "rb")
-  on.exit(close(con))
+  on.exit(close(con), add=TRUE)
   as.character(openssl::md5(con))
 }
 
