@@ -314,17 +314,14 @@ update_release_manifest <- function(x, dir = neon_dir()){
   
   # load current manifest, if it exists
   if(file.exists(manifest)){
-    #current <- utils::read.csv(manifest, colClasses = 
-    #  c("character", "character", "character", "integer", "character"))
-    current <- vroom::vroom(manifest, col_types = "cccic")
+    current <- utils::read.csv(manifest, colClasses = 
+      c("character", "character", "character", "integer", "character"))
+    #current <- vroom::vroom(manifest, col_types = "cccic")
   }
   # combine rows and determine distinct.
   updated <- merge(x, current, by = names(current), all = TRUE)
   
-  con <- file(manifest, "wb")
-  on.exit(close(con), add = TRUE)
-  vroom::vroom_write(updated, con)
-  #utils::write.csv(updated, manifest, row.names = FALSE)
+  utils::write.csv(updated, manifest, row.names = FALSE)
   invisible(updated)
 }
 
