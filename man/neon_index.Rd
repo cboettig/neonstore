@@ -14,6 +14,7 @@ neon_index(
   ext = NA,
   timestamp = NA,
   hash = NULL,
+  release = NA,
   dir = neon_dir(),
   deprecated = TRUE
 )
@@ -43,6 +44,11 @@ Should be a datetime POSIXct object (or coerce-able string)}
 \item{hash}{name of a hashing algorithm to check file integrity. Can be
 \code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)
 to skip hash computation.}
+
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

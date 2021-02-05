@@ -47,8 +47,10 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{release}{Download only data files associated with a particular release tag,
-see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases}.}
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
 
 \item{unzip}{should we extract .zip files? (default \code{TRUE}). Note: .zip
 files are preserved in the store to avoid repeated downloads.}

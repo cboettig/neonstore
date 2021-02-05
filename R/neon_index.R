@@ -67,10 +67,13 @@ neon_index <- function(product = NA,
                        ext = NA,
                        timestamp = NA,
                        hash = NULL,
+                       release = NA,
                        dir = neon_dir(),
                        deprecated = TRUE){
   
   files <- list.files(dir, recursive = TRUE, full.names = TRUE)
+  
+ 
   
   ## Turn file names into a metadata table
   meta <- filename_parser(files)
@@ -78,6 +81,17 @@ neon_index <- function(product = NA,
   ## Paths should not have NAs
   meta <- meta[!is.na(meta$path),]
   
+  ## Add release information
+  manifest <- read_release_manifest(dir)
+  if(nrow(manifest) > 0){
+    meta$name <- basename(meta$path)
+    # strip .gz extensions from manifest, as these files have been expanded
+    manifest$name <- gsub("\\.gz$", "", manifest$name)
+    ## merge tables
+    meta <- tibble::as_tibble(merge(meta, manifest, by = "name", all = TRUE))
+    ## Paths should not have NAs
+    meta <- meta[!is.na(meta$path),]
+  }
   
   if(is.null(meta)) return(NULL)
   
@@ -91,7 +105,8 @@ neon_index <- function(product = NA,
                       end_date = end_date,
                       type = type,
                       timestamp = timestamp,
-                      ext = ext)
+                      ext = ext,
+                      release = release)
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
@@ -111,7 +126,8 @@ meta_filter <- function(meta,
                         end_date = NA, 
                         type = NA,
                         timestamp = NA,
-                        ext = NA){
+                        ext = NA,
+                        release = NA){
   
   ## Arguably, filtering could be done on file names
   ## rather than table of parsed file names?
@@ -162,6 +178,10 @@ meta_filter <- function(meta,
   
   if(any(is.na(meta$path))){
     meta <- meta[!is.na(meta$path), ]
+  }
+  
+  if(!is.na(release)){
+    meta <- meta[meta$release == release,]
   }
   
   tibble::as_tibble(meta)
@@ -231,7 +251,11 @@ file_hash <- function(x, hash = "md5"){
   ## httr imports openssl already
   hashes <- paste0("hash://", hash, "/",
                    vapply(x, 
-                          function(y) as.character(hash_fn(file(y))),
+                          function(y) {
+                            con <- file(y, "rb")
+                            on.exit(close(con), add = TRUE)
+                            as.character(hash_fn(con))
+                          },
                           character(1L)))
   
   hashes

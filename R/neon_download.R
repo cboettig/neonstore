@@ -54,8 +54,10 @@
 #' (see [tools::R_user_dir()]).  This default also be configured by
 #' setting the environmental variable `NEONSTORE_HOME`, see [Sys.setenv] or
 #' [Renviron].
-#' @param release Download only data files associated with a particular release tag,
-#' see <https://www.neonscience.org/data-samples/data-management/data-revisions-releases>.
+#' @param release Select only data files associated with a particular release tag,
+#' see <https://www.neonscience.org/data-samples/data-management/data-revisions-releases>,
+#' e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+#' files associated with a particular release will not change.
 #' @param api the URL to the NEON API, leave as default.
 #' @param .token an authentication token from NEON. A token is not
 #' required but will allow access to a higher number of requests before
@@ -207,7 +209,8 @@ download_filters <- function(files, file_regex,
   if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
   
   ## Omit those file names we already have
-  already_have <- files$name %in% basename(list.files(dir, recursive = TRUE))
+  requested <- gsub("\\.gz$", "", files$name)
+  already_have <- requested %in% basename(list.files(dir, recursive = TRUE))
   if(sum(already_have) > 0 && !quiet){
     message(paste("  omitting", 
                   sum(already_have), 
@@ -293,36 +296,6 @@ safe_download <- function(url, dest, hash = NULL, algo = "md5", verify = TRUE){
     finally = NULL
   )
   
-}
-
-
-
-update_release_manifest <- function(x, dir = neon_dir()){
-  
-  current <- data.frame("name" = character(),
-                        "md5" = character(),
-                        "crc32"=character(),
-                        "size"=integer(),
-                        "release" = character())
-  x <- x[names(current)]
-  x$md5 <- as.character(x$md5)
-  x$crc32 <- as.character(x$crc32)
-  
-  # path to manifest
-  manifest <- file.path(dir, "release_manifest.csv")
-  if(!dir.exists(dir)) dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  
-  # load current manifest, if it exists
-  if(file.exists(manifest)){
-    current <- utils::read.csv(manifest, colClasses = 
-      c("character", "character", "character", "integer", "character"))
-    #current <- vroom::vroom(manifest, col_types = "cccic")
-  }
-  # combine rows and determine distinct.
-  updated <- merge(x, current, by = names(current), all = TRUE)
-  
-  utils::write.csv(updated, manifest, row.names = FALSE)
-  invisible(updated)
 }
 
 
