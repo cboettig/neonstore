@@ -37,7 +37,8 @@ test_that("neon_store", {
                      site = "YELL",
                      start_date = "2018-05-01",
                      end_date = "2018-08-01", 
-                     dir = dir)
+                     dir = dir,
+                     type = "expanded")
   
   neon_store(table = "brd_countdata-expanded", dir = dir, db_dir = db_dir)
   db <- neon_db(dir = db_dir)
@@ -68,6 +69,7 @@ test_that("neon_table", {
                      site = "YELL",
                      start_date = "2018-05-01",
                      end_date = "2018-08-01",
+                     type = "expanded",
                      dir = dir)
   
   

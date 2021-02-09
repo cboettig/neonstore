@@ -1,7 +1,7 @@
 # Tools for managing NEON release data
 
 
-release_manifest <- function(dir){
+release_manifest <- function(dir = neon_dir()){
   file.path(dir, "release_manifest.csv")
 }
 
@@ -25,6 +25,7 @@ read_release_manifest <- function(dir = neon_dir()){
 
 update_release_manifest <- function(x, dir = neon_dir()){
   
+  if(nrow(x) < 1) return(invisible(read_release_manifest(dir)))
   x <- x[c("name", "md5", "crc32", "size", "release")]
   x$md5 <- as.character(x$md5)
   x$crc32 <- as.character(x$crc32)

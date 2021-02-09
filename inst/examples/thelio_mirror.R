@@ -3,7 +3,9 @@ Sys.setenv(NEONSTORE_HOME = "/minio/neonstore")
 library(neonstore)
 
 ## birds, beetles, ticks (all sites)
-neon_download(c("DP1.10003.001", "DP1.10022.001", "DP1.10093.001"))
+neon_download("DP1.10003.001")
+neon_download("DP1.10093.001")
+neon_download("DP1.10022.001")
 
 # Ticks
 tick_sites <- c("BLAN", "ORNL", "SCBI", "SERC", "KONZ", "TALL", "UKFS")

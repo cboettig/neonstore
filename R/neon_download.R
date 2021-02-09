@@ -42,7 +42,7 @@
 #' `NA` to download all prior data.
 #' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
 #' @param type Should we prefer the basic or expanded version of this product? 
-#' See details. 
+#' Note that not all products have expanded formats.  
 #' @param file_regex Download only files matching this pattern.  See details.
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
@@ -92,7 +92,7 @@ neon_download <- function(product,
                            start_date = NA,
                            end_date = NA,
                            site = NA,
-                           type = "expanded",
+                           type = "basic",
                            file_regex =  ".",
                            quiet = FALSE,
                            verify = TRUE,
@@ -122,7 +122,7 @@ neon_download_ <- function(product,
                           start_date = NA,
                           end_date = NA,
                           site = NA,
-                          type = "expanded",
+                          type = "basic",
                           file_regex =  ".",
                           release = NA,
                           quiet = FALSE,

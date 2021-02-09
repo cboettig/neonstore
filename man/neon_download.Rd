@@ -9,7 +9,7 @@ neon_download(
   start_date = NA,
   end_date = NA,
   site = NA,
-  type = "expanded",
+  type = "basic",
   file_regex = ".",
   quiet = FALSE,
   verify = TRUE,
@@ -32,7 +32,7 @@ as \code{NA} to download up to the most recent available data.}
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
-See details.}
+Note that not all products have expanded formats.}
 
 \item{file_regex}{Download only files matching this pattern.  See details.}
 

@@ -35,7 +35,7 @@ as \code{NA} to download up to the most recent available data.}
 \code{NA} to download all prior data.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
-See details.}
+Note that not all products have expanded formats.}
 
 \item{ext}{only match files with this file extension(s)}
 

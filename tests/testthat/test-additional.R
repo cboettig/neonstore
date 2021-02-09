@@ -27,8 +27,9 @@ test_that("bigger neon_store() import", {
   skip_if_offline()
   
   x <- neon_download(product = "DP1.10003.001",
-                        start_date="2014-01-01",
-                        end_date = "2017-01-01")
+                     start_date="2014-01-01",
+                     end_date = "2017-01-01",
+                     type = "expanded")
   
   neon_store(table = "brd_countdata-expanded", n = 50)
   db <- neon_db()

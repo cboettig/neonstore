@@ -22,7 +22,7 @@ neon_store(
 \item{product}{Include only files matching this NEON productCode(s)}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
-See details.}
+Note that not all products have expanded formats.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
