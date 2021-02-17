@@ -52,7 +52,7 @@ neon_store <- function(table = NA,
   if(nrow(index) == 0){
     message("all files have been imported")
     neon_disconnect(db = con)
-    return(invisible(con))
+    return(invisible(NULL))
   }
   
   for (table in tables) {
@@ -162,6 +162,7 @@ db_chunks <- function(con,
 
 duckdb_memory_manager <- function(con){
   if(Sys.getenv("duckdb_restart", FALSE)){
+    
     # shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
     ## power cycle to force import
