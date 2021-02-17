@@ -102,7 +102,7 @@ gunzip_all <- function(filenames, dir, quiet = FALSE){
   }
   
   if(length(gzips) > 0){
-    destname <- tools::file_path_sans_ext(gzips)
+    destname <- neon_subdir(tools::file_path_sans_ext(gzips), dir = dir)
     mapply(gunzip_, gzips, destname, remove = TRUE, overwrite = TRUE)
   }
 }
