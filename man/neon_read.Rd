@@ -24,7 +24,7 @@ neon_read(
 \item{table}{the name of a downloaded NEON table in the store,
 see \link{neon_index}}
 
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 

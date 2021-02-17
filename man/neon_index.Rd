@@ -13,14 +13,14 @@ neon_index(
   type = NA,
   ext = NA,
   timestamp = NA,
-  hash = NULL,
   release = NA,
+  hash = NULL,
   dir = neon_dir(),
   deprecated = TRUE
 )
 }
 \arguments{
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
@@ -41,14 +41,14 @@ Note that not all products have expanded formats.}
 \item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
 Should be a datetime POSIXct object (or coerce-able string)}
 
-\item{hash}{name of a hashing algorithm to check file integrity. Can be
-\code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)
-to skip hash computation.}
-
 \item{release}{Select only data files associated with a particular release tag,
 see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
 e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
 files associated with a particular release will not change.}
+
+\item{hash}{name of a hashing algorithm to check file integrity. Can be
+\code{"md5"}, \code{"sha1"}, or \code{"sha256"} currently; or set to \link{NULL} (default)
+to skip hash computation.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

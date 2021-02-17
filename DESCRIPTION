@@ -39,7 +39,8 @@ Imports:
     tibble,
     progress,
     tools,
-    utils
+    utils,
+    thor
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,

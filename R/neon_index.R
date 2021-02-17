@@ -27,9 +27,6 @@
 #' 
 #' @seealso  [neon_download()]
 #' 
-#' @param product Include only files matching this NEON productCode(s)
-#' @param table Include only files matching this table name (or regex pattern). 
-#' (optional).
 #' @param ext only match files with this file extension(s)
 #' @param timestamp only match timestamps prior this. See details in [neon_index()].
 #'        Should be a datetime POSIXct object (or coerce-able string)
@@ -66,8 +63,8 @@ neon_index <- function(product = NA,
                        type = NA,
                        ext = NA,
                        timestamp = NA,
-                       hash = NULL,
                        release = NA,
+                       hash = NULL,
                        dir = neon_dir(),
                        deprecated = TRUE){
   
@@ -81,19 +78,11 @@ neon_index <- function(product = NA,
   ## Paths should not have NAs
   meta <- meta[!is.na(meta$path),]
   
-  ## Add release information
-  manifest <- read_release_manifest(dir)
-  if(nrow(manifest) > 0){
-    meta$name <- basename(meta$path)
-    # strip .gz extensions from manifest, as these files have been expanded
-    manifest$name <- gsub("\\.gz$", "", manifest$name)
-    ## merge tables
-    meta <- tibble::as_tibble(merge(meta, manifest, by = "name", all = TRUE))
-    ## Paths should not have NAs
-    meta <- meta[!is.na(meta$path),]
-  }
   
   if(is.null(meta)) return(NULL)
+  
+  ## Add release information
+  meta$release <- read_release_manifest(basename(meta$path), dir = dir)
   
   
   ## Apply filters

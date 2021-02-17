@@ -32,15 +32,17 @@
 #' }
 #' 
 neon_download_s3 <- function(product, 
+                             table =  NA,
+                             site = NA,
                              start_date = NA,
                              end_date = NA,
-                             site = NA,
-                             type = "expanded",
-                             file_regex =  "[.]zip",
+                             type = "basic",
+                             release = NA,
                              quiet = FALSE,
                              verify = TRUE,
-                             dir = neon_dir(), 
-                             unzip = TRUE,
+                             dir = neon_dir(),
+                             get_zip = FALSE,
+                             unzip = FALSE,
   api = "https://minio.thelio.carlboettiger.info/neonstore/"){
   
   if(!quiet) message("querying S3 API...")
@@ -48,8 +50,15 @@ neon_download_s3 <- function(product,
   
   ## These two checks overlap with neon_download() steps
   ## only files matching regex
-  files <- files[grepl(file_regex, files)]
-  
+  if(!is.na(table)){
+    files <- files[grepl(table, files)]
+  }
+  if(get_zip){
+    files <- files[grepl("[.]zip", files)]
+  } else {
+    files <- files[!grepl("[.]zip", files)]
+  }
+    
   ## only files we don't already have in the store
   already_have <- files %in% basename(list.files(dir, recursive = TRUE))
   if(sum(already_have) > 0 && !quiet){

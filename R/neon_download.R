@@ -35,7 +35,7 @@
 #' These duplicates are also packaged within the `.zip` downloads where it
 #' is not possible to exclude them from the download. 
 #' 
-#' @param product A NEON `productCode`. See [neon_download].
+#' @param product A NEON `productCode` or list of product codes, see examples.
 #' @param start_date Download only files as recent as (`YYYY-MM-DD`). Leave
 #' as `NA` to download up to the most recent available data.
 #' @param end_date Download only files up to end_date (`YYYY-MM-DD`). Leave as 
@@ -43,12 +43,17 @@
 #' @param site 4-letter site code(s) to filter on. Leave as `NA` to search all.
 #' @param type Should we prefer the basic or expanded version of this product? 
 #' Note that not all products have expanded formats.  
-#' @param file_regex Download only files matching this pattern.  See details.
+#' @param table Include only files matching this table name (or regex pattern). 
+#' (optional).
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
 #' reported by the NEON API to verify integrity? (default `TRUE`)
+#' @param get_zip should we attempt to download .zip archive versions of files?
+#' default `FALSE`, as zip archives are being deprecated from NEON API starting
+#' in early 2021.
 #' @param unzip should we extract .zip files? (default `TRUE`). Note: .zip
-#' files are preserved in the store to avoid repeated downloads. 
+#' files are preserved in the store to avoid repeated downloads. Use of .zip
+#' files in NEON API is now deprecated in favor of requesting individual files.
 #' @param dir Location where files should be downloaded. By default will
 #' use the appropriate applications directory for your system 
 #' (see [tools::R_user_dir()]).  This default also be configured by
@@ -84,33 +89,36 @@
 #'                start_date = "2018-01-01",
 #'                end_date = "2019-01-01",
 #'                site = "YELL",
-#'                file_regex = "countdata",
+#'                table = "countdata",
 #'                dir = tempfile())
 #' 
 #' }
 neon_download <- function(product, 
-                           start_date = NA,
-                           end_date = NA,
-                           site = NA,
-                           type = "basic",
-                           file_regex =  ".",
-                           quiet = FALSE,
-                           verify = TRUE,
-                           dir = neon_dir(),
-                           release = NA,
-                           unzip = FALSE,
-                           api = "https://data.neonscience.org/api/v0",
-                           .token =  Sys.getenv("NEON_TOKEN")){
-  
-  x <- lapply(product, neon_download_, 
+                          table =  NA,
+                          site = NA,
+                          start_date = NA,
+                          end_date = NA,
+                          type = "basic",
+                          release = NA,
+                          quiet = FALSE,
+                          verify = TRUE,
+                          dir = neon_dir(),
+                          get_zip = FALSE,
+                          unzip = FALSE,
+                          api = "https://data.neonscience.org/api/v0",
+                          .token =  Sys.getenv("NEON_TOKEN")){
+
+  x <- lapply(product, neon_download_,
+              table = table,
+              site = site,
               start_date = start_date,
               end_date = end_date,
-              site = site,
               type = type,
-              file_regex =  file_regex,
+              release = release,
               quiet = quiet,
               verify = verify,
               dir = dir, 
+              get_zip = get_zip,
               unzip = unzip,
               api = api,
               .token =  .token)
@@ -119,18 +127,19 @@ neon_download <- function(product,
 }
 
 neon_download_ <- function(product, 
-                          start_date = NA,
-                          end_date = NA,
-                          site = NA,
-                          type = "basic",
-                          file_regex =  ".",
-                          release = NA,
-                          quiet = FALSE,
-                          verify = TRUE,
-                          dir = neon_dir(), 
-                          unzip = FALSE,
-                          api = "https://data.neonscience.org/api/v0",
-                          .token =  Sys.getenv("NEON_TOKEN")){
+                           table = NA,
+                           site = NA,
+                           start_date = NA,
+                           end_date = NA,
+                           type = "basic",
+                           release = NA,
+                           quiet = FALSE,
+                           verify = TRUE,
+                           dir = neon_dir(),
+                           get_zip = FALSE,
+                           unzip = FALSE,
+                           api = "https://data.neonscience.org/api/v0",
+                           .token =  Sys.getenv("NEON_TOKEN")){
   
   ## make sure destination exists
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
@@ -144,19 +153,23 @@ neon_download_ <- function(product,
                      release = release,
                      api = api,
                      .token = .token)
-  
-  
+
   
   ## Update release manifest
   ## Run before filters? slower but will ensure manifest of existing files
-  update_release_manifest(x = files, dir = dir)
-  
+  if(!quiet) message("  updating release manifest...")
+  update_release_manifest(x = files, dir = dir)  
   
   ## confirm product has expanded type, if requested
   type <- type_check(product, type)
   
-  ## additional filters on already_have, type and file_regex:
-  files <- download_filters(files, file_regex, type, quiet, dir)
+  ## additional filters on already_have, type and table:
+  files <- download_filters(files = files, 
+                            table = table, 
+                            type = type, 
+                            get_zip = get_zip,
+                            quiet = quiet, 
+                            dir = dir)
   if(is.null(files)){
     return(invisible(NULL)) # nothing to download
   }
@@ -182,7 +195,9 @@ neon_download_ <- function(product,
   ## Always gunzip (e.g., .h5.gz files)
   gzips <- list.files(path = dir, full.names = TRUE, recursive = TRUE)
   gunzip_all(gzips, dir = dir, quiet = quiet)
+
   
+    
   ## file metadata (url, path, md5sum)  
   invisible(files)
 }
@@ -202,8 +217,12 @@ type_check <- function(product, type){
 }
 
 
-download_filters <- function(files, file_regex, 
-                             type, quiet, dir){
+download_filters <- function(files, 
+                             table, 
+                             type, 
+                             get_zip,
+                             quiet, 
+                             dir){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
@@ -218,9 +237,16 @@ download_filters <- function(files, file_regex,
   }
   files <- files[!already_have, ]
   
-  ## Filter for only files matching the file regex
-  files <- files[grepl(file_regex, files$name), ]
+  if(get_zip){
+    files <- files[grepl("[.]zip", files$name), ]
+  } else {
+    files <- files[!grepl("[.]zip", files$name), ]
+  }
   
+  ## Filter for only files matching the file regex
+  if(!is.na(table)){
+    files <- files[grepl(table, files$name), ]
+  }
   ## Filter to have only expanded or basic (not both)
   if(type == "expanded")
     files <- files[!grepl("basic", files$name), ]

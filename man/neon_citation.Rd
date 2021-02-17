@@ -7,7 +7,7 @@
 neon_citation(product = NULL, download_date = Sys.Date(), dir = neon_dir())
 }
 \arguments{
-\item{product}{A NEON \code{productCode}. See \link{neon_download}.}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{download_date}{Date of download to be included in citation.
 default is today's date, see details.}

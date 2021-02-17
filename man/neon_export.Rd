@@ -21,7 +21,7 @@ neon_export(
 \arguments{
 \item{archive}{path to the zip archive to be created.#'}
 
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}

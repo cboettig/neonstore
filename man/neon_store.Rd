@@ -19,7 +19,7 @@ neon_store(
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
 
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
 Note that not all products have expanded formats.}

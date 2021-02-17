@@ -1,5 +1,4 @@
 
-Sys.setenv(NEONSTORE_HOME = "/minio/neonstore")
 library(neonstore)
 
 ## birds, beetles, ticks (all sites)

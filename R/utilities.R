@@ -79,7 +79,7 @@ unzip_all <- function(path, dir, keep_zips = TRUE, quiet = FALSE){
   
   lapply(zips, function(x){
     if(!quiet) pb$tick()
-    zip::unzip(x, exdir = dirname(x))
+    zip::unzip(x, exdir = neon_subdir(x), junkpaths = TRUE)
   })
   if(!keep_zips) {
     unlink(zips)

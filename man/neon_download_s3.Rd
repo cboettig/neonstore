@@ -6,20 +6,27 @@
 \usage{
 neon_download_s3(
   product,
+  table = NA,
+  site = NA,
   start_date = NA,
   end_date = NA,
-  site = NA,
-  type = "expanded",
-  file_regex = "[.]zip",
+  type = "basic",
+  release = NA,
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  unzip = TRUE,
+  get_zip = FALSE,
+  unzip = FALSE,
   api = "https://minio.thelio.carlboettiger.info/neonstore/"
 )
 }
 \arguments{
-\item{product}{A NEON \code{productCode}. See \link{neon_download}.}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
+
+\item{table}{Include only files matching this table name (or regex pattern).
+(optional).}
+
+\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
 \item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
 as \code{NA} to download up to the most recent available data.}
@@ -27,12 +34,13 @@ as \code{NA} to download up to the most recent available data.}
 \item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
 
-\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
-
 \item{type}{Should we prefer the basic or expanded version of this product?
 Note that not all products have expanded formats.}
 
-\item{file_regex}{Download only files matching this pattern.  See details.}
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
 
 \item{quiet}{Should download progress be displayed?}
 
@@ -45,8 +53,13 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
+\item{get_zip}{should we attempt to download .zip archive versions of files?
+default \code{FALSE}, as zip archives are being deprecated from NEON API starting
+in early 2021.}
+
 \item{unzip}{should we extract .zip files? (default \code{TRUE}). Note: .zip
-files are preserved in the store to avoid repeated downloads.}
+files are preserved in the store to avoid repeated downloads. Use of .zip
+files in NEON API is now deprecated in favor of requesting individual files.}
 
 \item{api}{URL to an S3 bucket containing raw NEON data files (in
 flat file structure like that used by neonstore).}
