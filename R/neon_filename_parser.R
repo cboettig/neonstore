@@ -82,7 +82,7 @@
 #' 
 #' @export
 neon_filename_parser <- function(x){
-  
+  x <- gsub("\\.gz$", "", x) # no .gz!
   df <- ragged_bind(list(
     os_is_parser(x),
     ec_parser(x),
