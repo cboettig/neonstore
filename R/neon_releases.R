@@ -2,7 +2,7 @@
 
 update_release_manifest <- function(x, dir = neon_dir()){
   
-  if(nrow(x) < 1) return(invisible(read_release_manifest(dir)))
+  if(nrow(x) < 1) return(invisible(NULL))
   x <- x[c("name", "release")]
 
   db <- lmdb(dir)

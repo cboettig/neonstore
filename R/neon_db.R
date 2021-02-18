@@ -120,7 +120,6 @@ neon_delete_db <- function(db_dir = neon_db_dir(), ask = interactive()){
   if(continue){
     db_files <- list.files(db_dir, "^database.*", full.names = TRUE)
     lapply(db_files, unlink, TRUE)
-    unlink(db_dir, recursive = TRUE)
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(
