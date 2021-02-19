@@ -2,10 +2,12 @@
 read_eddy <- function(x, pb = NULL, eddy_progress = FALSE, ...){
   if(!is.null(pb)) pb$tick()
   progress_sink <- tempfile()
+  suppressWarnings({
   suppressMessages({
     sink(progress_sink) ## ugh, neonUtilities uses print()
     out <- neonUtilities::stackEddy(x, ...)
     sink()
+  })
   })
   ## FIXME extract data from the other tables too
   df <- out[[1]]
