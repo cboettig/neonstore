@@ -40,8 +40,8 @@ neon_store <- function(table = NA,
     return(invisible(NULL))
   }
   
-  ## standardize table name
-  tables <- stackable_tables(index$table)
+  ## standardize table name with product name:
+  tables <- stackable_tables(paste0(index$table, "-", index$product))
 
   
   ## Establish a write-able database connection
@@ -58,7 +58,8 @@ neon_store <- function(table = NA,
   for (table in tables) {
     ## Drop rows from the database which come from deprecated files
     drop_deprecated(table, dir, con)
-    meta <- index[index$table == table, ]
+    index$id <- paste0(index$table, "-", index$product)
+    meta <- index[index$id == table, ]
     if(nrow(meta) > 0){
       con <- db_chunks(con = con, 
                        files = meta$path,

@@ -60,7 +60,7 @@ neon_download_s3 <- function(product,
   }
     
   ## only files we don't already have in the store
-  already_have <- files %in% basename(list.files(dir, recursive = TRUE))
+  already_have <- basename(files) %in% basename(list.files(dir, recursive = TRUE))
   if(sum(already_have) > 0 && !quiet){
     message(paste("omitting", sum(already_have), "files previously downloaded"))
   }
@@ -72,9 +72,10 @@ neon_download_s3 <- function(product,
   } 
   
   ## Apply filters to filenames
-  meta <- filename_parser(files)
+  meta <- filename_parser(basename(files))
   meta <- meta_filter(meta, 
                       product = product, 
+                      table = table,
                       site = site, 
                       start_date = start_date, 
                       end_date = end_date,

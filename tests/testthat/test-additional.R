@@ -34,11 +34,11 @@ test_that("bigger neon_store() import", {
   neon_store(table = "brd_countdata-expanded", n = 50)
   db <- neon_db()
   x <- DBI::dbListTables(db)
-  expect_true("brd_countdata-expanded" %in% x)
+  expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)
   
   expect_true("provenance" %in% x)
   
-  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded")
+  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded-DP1.10003.001")
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))

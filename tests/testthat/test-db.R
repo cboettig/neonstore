@@ -44,11 +44,11 @@ test_that("neon_store", {
   db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
-  expect_true("brd_countdata-expanded" %in% x)
+  expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)
   
   expect_true("provenance" %in% x)
   
-  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded")
+  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded-DP1.10003.001")
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))
@@ -78,10 +78,10 @@ test_that("neon_table", {
   db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
-  expect_true("brd_countdata-expanded" %in% x)
+  expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)
 
   
-  tbl <- neon_table("brd_countdata-expanded", db = db)
+  tbl <- neon_table("brd_countdata", db = db)
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))
