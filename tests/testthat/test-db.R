@@ -39,8 +39,9 @@ test_that("neon_store", {
                      end_date = "2018-08-01", 
                      dir = dir,
                      type = "expanded")
-  
-  neon_store(table = "brd_countdata-expanded", dir = dir, db_dir = db_dir)
+  db <- neon_db(dir = db_dir, read_only = FALSE)
+  neon_store(table = "brd_countdata-expanded", dir = dir,db=db)
+
   db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)
@@ -64,6 +65,7 @@ test_that("neon_table", {
   skip_on_cran()
   dir <- tempfile()
   db_dir <- tempfile()
+  db <- neon_db(dir = db_dir, read_only = FALSE)
   
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
@@ -74,7 +76,8 @@ test_that("neon_table", {
   
   
   neon_store(table = "brd_countdata-expanded",
-             dir = dir, db_dir = db_dir)
+             dir = dir, db = db)
+  
   db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
   x <- DBI::dbListTables(db)

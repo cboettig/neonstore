@@ -72,8 +72,6 @@ neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
 #' @export
 #' @importFrom DBI dbDisconnect
 neon_disconnect <- function (db = neon_db()) {
-  
-  dir <- dirname(db@driver@dbdir)
   if (inherits(db, "DBIConnection")) {
       DBI::dbDisconnect(db, shutdown = TRUE)
   }

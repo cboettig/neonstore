@@ -9,7 +9,7 @@ neon_store(
   product = NA,
   type = NA,
   dir = neon_dir(),
-  db_dir = neon_db_dir(),
+  db = neon_db(neon_db_dir(), read_only = FALSE),
   n = 500L,
   quiet = FALSE,
   ...
@@ -30,7 +30,8 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{db_dir}{location of the database directory}
+\item{db}{A connection to a write-able relational database backend,
+see \code{\link[=neon_db]{neon_db()}}.}
 
 \item{n}{number of files that should be read per iteration}
 
