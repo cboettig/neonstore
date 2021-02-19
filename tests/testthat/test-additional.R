@@ -31,7 +31,11 @@ test_that("bigger neon_store() import", {
                      end_date = "2017-01-01",
                      type = "expanded")
   
-  neon_store(table = "brd_countdata-expanded", n = 50)
+  y <- neon_store(table = "brd_countdata", n = 50)
+  expect_true(nrow(y)> 0)
+  z <- neon_store(table = "brd_countdata", n = 50)
+  expect_true(is.null(z))
+  
   db <- neon_db()
   x <- DBI::dbListTables(db)
   expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)

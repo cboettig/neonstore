@@ -57,8 +57,8 @@ neon_store <- function(table = NA,
   for (table in tables) {
     ## Drop rows from the database which come from deprecated files
     drop_deprecated(table, dir, db)
-    index$id <- paste0(index$table, "-", index$product)
-    meta <- index[index$id == table, ]
+    index$tablename <- paste0(index$table, "-", index$product)
+    meta <- index[index$tablename == table, ]
     if(nrow(meta) > 0){
       db_chunks(con = db, 
                 files = meta$path,
@@ -224,7 +224,7 @@ drop_deprecated <- function(table,
   }
   
   ## Build SQL query
-  old <- paste(lapply(meta$path[deprecated], 
+  old <- paste(lapply(basename(meta$path[deprecated]), 
                       function(x) paste0("'", x, "'")),
                collapse = ", ")
   query <- paste(paste0("DELETE from \"", table, "\" WHERE "),
