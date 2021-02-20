@@ -6,21 +6,28 @@
 \usage{
 neon_download(
   product,
+  table = NA,
+  site = NA,
   start_date = NA,
   end_date = NA,
-  site = NA,
-  type = "expanded",
-  file_regex = "[.]zip",
+  type = "basic",
+  release = NA,
   quiet = FALSE,
   verify = TRUE,
   dir = neon_dir(),
-  unzip = TRUE,
+  get_zip = FALSE,
+  unzip = FALSE,
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")
 )
 }
 \arguments{
-\item{product}{A NEON \code{productCode}. See \link{neon_download}.}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
+
+\item{table}{Include only files matching this table name (or regex pattern).
+(optional).}
+
+\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
 \item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
 as \code{NA} to download up to the most recent available data.}
@@ -28,12 +35,13 @@ as \code{NA} to download up to the most recent available data.}
 \item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
 
-\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
-
 \item{type}{Should we prefer the basic or expanded version of this product?
-See details.}
+Note that not all products have expanded formats.}
 
-\item{file_regex}{Download only files matching this pattern.  See details.}
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
 
 \item{quiet}{Should download progress be displayed?}
 
@@ -46,8 +54,13 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
+\item{get_zip}{should we attempt to download .zip archive versions of files?
+default \code{FALSE}, as zip archives are being deprecated from NEON API starting
+in early 2021.}
+
 \item{unzip}{should we extract .zip files? (default \code{TRUE}). Note: .zip
-files are preserved in the store to avoid repeated downloads.}
+files are preserved in the store to avoid repeated downloads. Use of .zip
+files in NEON API is now deprecated in favor of requesting individual files.}
 
 \item{api}{the URL to the NEON API, leave as default.}
 
@@ -75,21 +88,15 @@ product has expanded, and the columns \code{productHasBasicDescription} and
 differences between the \code{"expanded"} and \code{"basic"} versions of that
 particular product.
 
-The API provides access to a \code{.zip} file containing all the component objects
-(e.g. tables) for that product at that site and sampling month. Additionally,
-the API allows users to request component files directly (e.g. as \code{.csv}
-files).  Requesting component files directly avoids the additional overhead
-of downloading other components that are not needed.  Both the \code{.zip} and
-relevant \code{.csv} and \code{zip} files in products that have expanded will include
-both a \code{"basic"} and \code{"expanded"} name in the filename.  Setting \code{type}
-argument of \code{neon_download()} to the preferred one will make it filter out
-the other one.
-
-By default, \code{neon_download()} will request the \code{.zip} packet for the product,
-matching the requested type.  \code{neon_download()} will extract the component
-files into the store, removing the \code{.zip} file.  Specific files within a
-product can be identified by altering the \code{file_regex} argument
+The API allows users to request component files directly.
+By default, \code{neon-download()} will download all available
+extensions.  Users can request only products of a certain format
+(e.g. \code{.csv} or \code{.h5}) by altering the \code{file_regex} argument
 (see examples).
+
+Prior to 2021, the API provided
+access to a \code{.zip} file containing all the component objects
+(e.g. tables) for that product at that site and sampling month.
 
 \code{neon_download()} will avoid downloading metadata files which are bitwise
 identical to other files in the same download request, as indicated by the
@@ -102,17 +109,20 @@ is not possible to exclude them from the download.
 \examples{
 \donttest{
  
+ ## Omit dir=tempfile() to use persistent storage
  neon_download("DP1.10003.001", 
                start_date = "2018-01-01", 
                end_date = "2019-01-01",
-               site = "YELL")
+               site = "YELL",
+               dir = tempfile())
                
  ## Advanced use: filter for a particular table in the product
  neon_download(product = "DP1.10003.001",
                start_date = "2018-01-01",
                end_date = "2019-01-01",
                site = "YELL",
-               file_regex = ".*brd_countdata.*\\\\.csv")
+               table = "countdata",
+               dir = tempfile())
 
 }
 }

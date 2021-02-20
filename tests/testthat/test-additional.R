@@ -8,7 +8,7 @@ test_that("neon_download_s3()", {
   skip_on_cran()
   skip_if_offline()
   
-  x <- neon_download_s3(product = "DP1.10003.001",
+  x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-01-01",
                      end_date = "2019-01-01",
@@ -26,17 +26,23 @@ test_that("bigger neon_store() import", {
   skip_on_cran()
   skip_if_offline()
   
-  x <- neon_download_s3(product = "DP1.10003.001",
-                        end_date = "2019-01-01")
+  x <- neon_download(product = "DP1.10003.001",
+                     start_date="2014-01-01",
+                     end_date = "2017-01-01",
+                     type = "expanded")
   
-  neon_store(table = "brd_countdata-expanded", n = 50)
+  y <- neon_store(table = "brd_countdata", n = 50)
+  expect_true(nrow(y)> 0)
+  z <- neon_store(table = "brd_countdata", n = 50)
+  expect_true(is.null(z))
+  
   db <- neon_db()
   x <- DBI::dbListTables(db)
-  expect_true("brd_countdata-expanded" %in% x)
+  expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)
   
   expect_true("provenance" %in% x)
   
-  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded")
+  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded-DP1.10003.001")
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))

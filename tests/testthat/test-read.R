@@ -38,7 +38,8 @@ test_that("neon_read()", {
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",
-                     end_date = "2018-08-01")
+                     end_date = "2018-08-01",
+                     type = "expanded")
     
   x <- neon_read("brd_countdata-expanded")
   expect_is(x, "data.frame")
@@ -53,7 +54,8 @@ test_that("neon_read() args", {
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",
-                     end_date = "2018-08-01")
+                     end_date = "2018-08-01",
+                     type = "expanded")
   
   x <- neon_read("brd_countdata-expanded", altrep=FALSE)
   expect_is(x, "data.frame")

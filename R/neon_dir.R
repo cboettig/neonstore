@@ -50,6 +50,6 @@ neon_dir <- function(){
 #' 
 neon_db_dir <- function(){
   Sys.getenv("NEONSTORE_DB", 
-             tools::R_user_dir("neonstore"))
+             file.path(tools::R_user_dir("neonstore"), "duckdb"))
 }
 

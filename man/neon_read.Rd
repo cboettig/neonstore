@@ -12,6 +12,7 @@ neon_read(
   end_date = NA,
   ext = NA,
   timestamp = NA,
+  release = NA,
   dir = neon_dir(),
   files = NULL,
   sensor_metadata = TRUE,
@@ -24,7 +25,7 @@ neon_read(
 \item{table}{the name of a downloaded NEON table in the store,
 see \link{neon_index}}
 
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
@@ -38,6 +39,11 @@ as \code{NA} to download up to the most recent available data.}
 
 \item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
 Should be a datetime POSIXct object (or coerce-able string)}
+
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

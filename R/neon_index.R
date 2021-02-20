@@ -27,9 +27,6 @@
 #' 
 #' @seealso  [neon_download()]
 #' 
-#' @param product Include only files matching this NEON productCode(s)
-#' @param table Include only files matching this table name (or regex pattern). 
-#' (optional).
 #' @param ext only match files with this file extension(s)
 #' @param timestamp only match timestamps prior this. See details in [neon_index()].
 #'        Should be a datetime POSIXct object (or coerce-able string)
@@ -66,11 +63,14 @@ neon_index <- function(product = NA,
                        type = NA,
                        ext = NA,
                        timestamp = NA,
+                       release = NA,
                        hash = NULL,
                        dir = neon_dir(),
                        deprecated = TRUE){
   
   files <- list.files(dir, recursive = TRUE, full.names = TRUE)
+  
+ 
   
   ## Turn file names into a metadata table
   meta <- filename_parser(files)
@@ -80,6 +80,9 @@ neon_index <- function(product = NA,
   
   
   if(is.null(meta)) return(NULL)
+  
+  ## Add release information
+  meta$release <- read_release_manifest(basename(meta$path), dir = dir)
   
   
   ## Apply filters
@@ -91,7 +94,8 @@ neon_index <- function(product = NA,
                       end_date = end_date,
                       type = type,
                       timestamp = timestamp,
-                      ext = ext)
+                      ext = ext,
+                      release = release)
   
   ## Compute hashes, if requested
   meta$hash <- file_hash(meta$path, hash = hash)
@@ -111,7 +115,8 @@ meta_filter <- function(meta,
                         end_date = NA, 
                         type = NA,
                         timestamp = NA,
-                        ext = NA){
+                        ext = NA,
+                        release = NA){
   
   ## Arguably, filtering could be done on file names
   ## rather than table of parsed file names?
@@ -164,21 +169,17 @@ meta_filter <- function(meta,
     meta <- meta[!is.na(meta$path), ]
   }
   
+  if(!is.na(release)){
+    meta <- meta[meta$release == release,]
+  }
+  
   tibble::as_tibble(meta)
   
 }
 
 na_omit <- function(x) x[!is.na(x)]
 
-na_to_char <- function(x, char = ""){
-  x <- as.character(x)
-  x[is.na(x)] <- char
-  x
-}
 
-paste_na <- function(..., sep = "."){
-  do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
-}
 
 
 filename_parser <- function(files){
@@ -239,7 +240,11 @@ file_hash <- function(x, hash = "md5"){
   ## httr imports openssl already
   hashes <- paste0("hash://", hash, "/",
                    vapply(x, 
-                          function(y) as.character(hash_fn(file(y))),
+                          function(y) {
+                            con <- file(y, "rb")
+                            on.exit(close(con), add = TRUE)
+                            as.character(hash_fn(con))
+                          },
                           character(1L)))
   
   hashes

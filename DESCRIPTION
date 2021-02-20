@@ -30,7 +30,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports: 
     DBI,
-    duckdb,
+    duckdb (>= 0.2.3),
     vroom,
     httr,
     R.utils,
@@ -39,7 +39,8 @@ Imports:
     tibble,
     progress,
     tools,
-    utils
+    utils,
+    thor
 RoxygenNote: 7.1.1
 Suggests: 
     testthat,

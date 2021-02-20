@@ -9,7 +9,7 @@ neon_store(
   product = NA,
   type = NA,
   dir = neon_dir(),
-  db_dir = neon_db_dir(),
+  db = neon_db(neon_db_dir(), read_only = FALSE),
   n = 500L,
   quiet = FALSE,
   ...
@@ -19,10 +19,10 @@ neon_store(
 \item{table}{Include only files matching this table name (or regex pattern).
 (optional).}
 
-\item{product}{Include only files matching this NEON productCode(s)}
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{type}{Should we prefer the basic or expanded version of this product?
-See details.}
+Note that not all products have expanded formats.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system
@@ -30,7 +30,8 @@ use the appropriate applications directory for your system
 setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
 \link{Renviron}.}
 
-\item{db_dir}{location of the database directory}
+\item{db}{A connection to a write-able relational database backend,
+see \code{\link[=neon_db]{neon_db()}}.}
 
 \item{n}{number of files that should be read per iteration}
 
@@ -60,6 +61,10 @@ as \code{NA} to download up to the most recent available data.}
     \item{\code{ext}}{only match files with this file extension(s)}
     \item{\code{timestamp}}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
 Should be a datetime POSIXct object (or coerce-able string)}
+    \item{\code{release}}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
   }}
 }
 \value{

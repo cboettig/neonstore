@@ -1,13 +1,18 @@
-## 
+#
 
 #' @importFrom progress progress_bar
 #' @importFrom httr GET content
 #' @importFrom jsonlite fromJSON
 #' @noRd
+#' @examples
+#' x <- neon_data("DP1.10003.001") 
+#' x <- neon_data("DP1.10003.001", release="RELEASE-2021") 
 neon_data <- function(product, 
                       start_date = NA,
                       end_date = NA,
                       site = NA,
+                      type = NA,
+                      release = NA,
                       quiet = FALSE,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
@@ -16,6 +21,8 @@ neon_data <- function(product,
                                start_date = start_date, 
                                end_date = end_date, 
                                site = site,
+                               type = type,
+                               release = release,
                                quiet = quiet,
                                api = api,
                                .token = .token)
@@ -53,7 +60,9 @@ neon_data <- function(product,
                     dat <- jsonlite::fromJSON(cont)[[1]]
                     if(length(dat) == 0) return(NULL)
                     if(length(dat$files) == 0) return(NULL)
-                    dat$files
+                    out <- dat$files
+                    out$release <- dat$release
+                    out
                   }))
   
   tibble::as_tibble(data)
@@ -63,7 +72,7 @@ neon_data <- function(product,
 neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
-  out <- httr::content(x)
+  out <- httr::content(x, encoding = "UTF-8")
   warning(paste(status, "error:", as.character(out)), call. = FALSE)
   invisible(1L)
 }
@@ -74,10 +83,13 @@ neon_warn_http_errors <- function(x){
 
 
 ## prepare a vector of API queries
+# x <- data_api_queries("DP1.10003.001", release="RELEASE-2021") 
 data_api_queries <- function(product, 
                             start_date = NA,
                             end_date = NA,
                             site = NA,
+                            type = NA,
+                            release = NA,
                             quiet = FALSE,
                             api = "https://data.neonscience.org/api/v0", 
                             .token = Sys.getenv("NEON_TOKEN")){
@@ -102,6 +114,7 @@ data_api_queries <- function(product,
   dates <- as.Date(gsub(regex, "\\2-01", data_api))
   if(!is.na(start_date)){
     data_api <- data_api[dates >= start_date]
+    dates <- as.Date(gsub(regex, "\\2-01", data_api))
   }
   if(!is.na(end_date)){
     data_api <- data_api[dates <= end_date]
@@ -117,6 +130,27 @@ data_api_queries <- function(product,
     if(!quiet) message("  No files to download.")
     return(invisible(NULL))
   }
+  
+  if(!is.na(release)){
+    # check release tag matches known value?
+    data_api <- vapply(data_api, 
+                       httr::modify_url, 
+                       character(1L), 
+                       query = list(release=release),
+                       USE.NAMES = FALSE)
+  }
+  if(!is.na(type)){
+    if( !(type %in% c("basic", "expanded")) ){
+      warning("type must be 'basic', 'expanded', or NA (default)", call. = FALSE)
+      return(data_api)
+    }
+    data_api <- vapply(data_api, 
+                       httr::modify_url, 
+                       character(1L), 
+                       query = list(package=type),
+                       USE.NAMES = FALSE)
+  }
+  
   data_api
 }
 

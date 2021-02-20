@@ -2,7 +2,8 @@
 #' 
 #' @param n number of files that should be read per iteration
 #' @param quiet show progress?
-#' @param db_dir location of the database directory
+#' @param db A connection to a write-able relational database backend,
+#'  see [neon_db()].  
 #' @inheritParams neon_index
 #' @inheritDotParams neon_read
 #' @return the index of files read in (invisibly)
@@ -13,7 +14,7 @@ neon_store <- function(table = NA,
                        product = NA,
                        type = NA,
                        dir = neon_dir(),
-                       db_dir = neon_db_dir(),
+                       db = neon_db(neon_db_dir(), read_only = FALSE),
                        n = 500L,
                        quiet = FALSE,
                        ...)
@@ -40,41 +41,40 @@ neon_store <- function(table = NA,
     return(invisible(NULL))
   }
   
-  ## standardize table name
-  tables <- stackable_tables(index$table)
+  ## standardize table name with product name:
+  tables <- stackable_tables(paste0(index$table, "-", index$product))
 
   
-  ## Establish a write-able database connection
-  con <- neon_db(db_dir, read_only = FALSE)
-  
+
   ## Omit already imported files
-  index <- omit_imported(con, index)
+  index <- omit_imported(db, index)
   if(nrow(index) == 0){
     message("all files have been imported")
-    neon_disconnect(db = con)
-    return(invisible(con))
+    neon_disconnect(db = db)
+    return(invisible(NULL))
   }
   
   for (table in tables) {
     ## Drop rows from the database which come from deprecated files
-    drop_deprecated(table, dir, con)
-    meta <- index[index$table == table, ]
+    drop_deprecated(table, dir, db)
+    index$tablename <- paste0(index$table, "-", index$product)
+    meta <- index[index$tablename == table, ]
     if(nrow(meta) > 0){
-      con <- db_chunks(con = con, 
-                       files = meta$path,
-                       table = table, 
-                       n = n, 
-                       quiet = quiet, 
-                       ...)
+      db_chunks(con = db, 
+                files = meta$path,
+                table = table, 
+                n = n, 
+                quiet = quiet, 
+                ...)
     }
   }
   
   ## update the provenance table
-  con <- duckdb_memory_manager(con)
   if(!is.null(index)){
-    DBI::dbWriteTable(con, "provenance", index, append = TRUE)
+    DBI::dbWriteTable(db, "provenance", as.data.frame(index), append = TRUE)
   }
-  neon_disconnect(db = con)
+  
+  neon_disconnect(db = db)
   invisible(index)
 }
 
@@ -98,7 +98,7 @@ db_chunks <- function(con,
                       ...){
   
   if(length(files)==0){ 
-    return(con)
+    return(invisible(NULL))
   }
   
   total <- length(files) %/% n
@@ -117,11 +117,10 @@ db_chunks <- function(con,
                      progress = progress,
                      ...)
     if(!is.null(df)){
-      DBI::dbWriteTable(con, table, df, append = TRUE)
+      DBI::dbWriteTable(con, table, as.data.frame(df), append = TRUE)
     }
     
-    con <- duckdb_memory_manager(con)
-    return(invisible(con))
+    return(invisible(NULL))
   }
   
   if (total > 4) {
@@ -149,22 +148,20 @@ db_chunks <- function(con,
                      sensor_metadata = TRUE, 
                      altrep = FALSE,
                      progress = progress)
-    DBI::dbWriteTable(con, table, df, append = TRUE)  
-    con <- duckdb_memory_manager(con)
+    DBI::dbWriteTable(con, table, as.data.frame(df), append = TRUE)  
 
   }
   
-  con <- duckdb_memory_manager(con)
-  return(invisible(con))
+  return(invisible(NULL))
   
 }
 
 
 duckdb_memory_manager <- function(con){
   if(Sys.getenv("duckdb_restart", FALSE)){
-    # shouldn't be necessary when memory management improves in duckdb...
-    dir <- dirname(con@driver@dbdir)
     ## power cycle to force import
+    ## shouldn't be necessary when memory management improves in duckdb...
+    dir <- dirname(con@driver@dbdir)
     db <- neon_db(dir, read_only = FALSE)
     DBI::dbDisconnect(db, shutdown = TRUE)
     con <- neon_db(dir, read_only = FALSE)
@@ -184,7 +181,7 @@ omit_imported <- function(con, index){
   }
     
     
-  DBI::dbWriteTable(con, "zzzfilter", index,
+  DBI::dbWriteTable(con, "zzzfilter", as.data.frame(index),
                     overwrite = TRUE, temporary = TRUE)
   query <- paste0(
     'SELECT * FROM zzzfilter ', 
@@ -204,8 +201,13 @@ drop_deprecated <- function(table,
     return(invisible(NULL))
   }
   
+  ## split table and product code
+  prod <- paste(DPL,PRNUM,REV, sep="\\.")
+  product <- gsub(paste0(".*-(",prod, ")$"), "\\1", table)
+  table <- gsub(paste0("-",prod, "$"), "", table)
   ## Detect updated files
   meta <- neon_index(table = table, 
+                     product = product,
                      dir = dir, 
                      deprecated = TRUE)
   key_cols <- c("product", "site", "month", "table", 
@@ -222,7 +224,7 @@ drop_deprecated <- function(table,
   }
   
   ## Build SQL query
-  old <- paste(lapply(meta$path[deprecated], 
+  old <- paste(lapply(basename(meta$path[deprecated]), 
                       function(x) paste0("'", x, "'")),
                collapse = ", ")
   query <- paste(paste0("DELETE from \"", table, "\" WHERE "),
