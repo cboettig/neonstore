@@ -32,13 +32,13 @@ test_that("neon_store", {
   skip_on_cran()
   
   dir <- tempfile()
-  db_dir <- tempfile("database")
   x <- neon_download(product = "DP1.10003.001",
                      site = "YELL",
                      start_date = "2018-05-01",
                      end_date = "2018-08-01", 
                      dir = dir,
                      type = "expanded")
+  db_dir <- tempfile("database")
   db <- neon_db(dir = db_dir, read_only = FALSE)
   neon_store(table = "brd_countdata-expanded", dir = dir,db=db)
 

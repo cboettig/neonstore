@@ -82,8 +82,11 @@ neon_index <- function(product = NA,
   if(is.null(meta)) return(NULL)
   
   ## Add release information
-  meta$release <- read_release_manifest(basename(meta$path), dir = dir)
-  
+  manifest <- read_release_manifest(basename(meta$path), dir = dir)
+  meta$name <- basename(meta$path)
+  meta <- tibble::as_tibble(merge(meta, manifest[c("name", "release")], 
+                                  by = "name", all = TRUE))
+  meta$name <- NULL
   
   ## Apply filters
   meta <- meta_filter(meta, 
@@ -134,7 +137,7 @@ meta_filter <- function(meta,
   
   if(!is.na(start_date)){
     start_date <- as.Date(start_date)
-    month <- as.Date(paste0(meta$month, "-01"))
+    month <- year_month(meta$month)
     keep <- month >= start_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -143,7 +146,7 @@ meta_filter <- function(meta,
   
   if(!is.na(end_date)){
     end_date <- as.Date(end_date)
-    month <- as.Date(paste0(meta$month, "-01"))
+    month <- year_month(meta$month)
     keep <- month <= end_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -170,12 +173,23 @@ meta_filter <- function(meta,
   }
   
   if(!is.na(release)){
-    meta <- meta[meta$release == release,]
+    meta <- meta[meta$release %in% release,]
   }
   
   tibble::as_tibble(meta)
   
 }
+
+year_month <- function(x){
+  
+  ym <- function(x){
+    if(is.na(x)) return(as.Date(NA))
+    as.Date(paste0(x, "-01"))
+  }
+  vapply(x, ym, as.Date("2020-01-01"))
+  
+}
+
 
 na_omit <- function(x) x[!is.na(x)]
 
