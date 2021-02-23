@@ -1,5 +1,4 @@
 
-
 update_release_manifest <- function(x, dir = neon_dir()){
   
   if(nrow(x) < 1) return(invisible(NULL))
@@ -7,6 +6,12 @@ update_release_manifest <- function(x, dir = neon_dir()){
 
   db <- lmdb(dir)
   write_lmdb(db, x$name, x)
+  
+  md5s <- x[!is.na(x$md5),]
+  crc32s <- x[!is.na(x$crc32),]
+  if(nrow(md5s)>0) write_lmdb(db, md5s$md5, md5s)
+  if(nrow(crc32s)>0) write_lmdb(db, crc32s$crc32, crc32s)
+  
 
 }
 
@@ -31,7 +36,7 @@ lmdb_serialize <- function(df){
 
 ## parse text string back into a data.frame
 lmdb_parse <- function(x, ...){
-  read.table(text = paste0(x, collapse="\n"), 
+  utils::read.table(text = paste0(x, collapse="\n"), 
              header = FALSE, sep = "\t",
              quote = "",  ...)
 }

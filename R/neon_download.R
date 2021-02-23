@@ -155,11 +155,6 @@ neon_download_ <- function(product,
                      .token = .token)
 
   
-  ## Update release manifest
-  ## Run before filters? slower but will ensure manifest of existing files
-  if(!quiet) message("  updating release manifest...")
-  update_release_manifest(x = files, dir = dir)  
-  
   ## confirm product has expanded type, if requested
   type <- type_check(product, type)
   
@@ -188,7 +183,10 @@ neon_download_ <- function(product,
                algo = algo,
                verify = verify,
                quiet = quiet)
-  
+
+  if(!quiet) message("  updating release manifest...")
+  update_release_manifest(x = files, dir = dir)
+    
   if(unzip) 
     unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
@@ -217,26 +215,35 @@ type_check <- function(product, type){
 }
 
 
+# filter files out based on hashes we have already seen
+already_have_hash <- function(files, quiet = FALSE, dir = neon_dir()){
+  db <- lmdb(dir = dir)
+  ids <- c(files$md5[!is.na(files$md5)], files$crc32[!is.na(files$crc32)])
+  drop <- db$exists(ids)
+  files <- files[!drop,]
+  if(any(drop) && !quiet){
+    message(paste("  omitting", 
+                  sum(drop), 
+                  "files previously downloaded"))
+  }
+  files
+}
+
 download_filters <- function(files, 
                              table, 
                              type, 
                              get_zip,
                              quiet, 
-                             dir){
+                             dir = neon_dir()){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
   
-  ## Omit those file names we already have
-  requested <- gsub("\\.gz$", "", files$name)
-  already_have <- requested %in% basename(list.files(dir, recursive = TRUE))
-  if(sum(already_have) > 0 && !quiet){
-    message(paste("  omitting", 
-                  sum(already_have), 
-                  "files previously downloaded"))
-  }
-  files <- files[!already_have, ]
+  ## Filter out the ones we already have BEFORE adding hashes to manifest
+  files <- already_have_hash(files, quiet = quiet, dir = dir)
   
+
+    
   if(get_zip){
     files <- files[grepl("[.]zip", files$name), ]
   } else {
