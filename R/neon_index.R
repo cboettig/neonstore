@@ -82,18 +82,8 @@ neon_index <- function(product = NA,
   if(is.null(meta)) return(NULL)
   
   ## Add release information
-  
-  ## First grab the hashes & release-tags of these files
-  manifest <- read_release_manifest(basename(meta$path), dir = dir)
-  ## Now query by hashes instead, to see if this content has been later added to a release
-    
-  ## Use this release tag as the correct one (applies to content, not filename)
-  
-  meta$name <- basename(meta$path)
-  meta <- tibble::as_tibble(merge(meta, manifest[c("name", "release")], 
-                                  by = "name", all = TRUE))
-  meta$name <- NULL
-  
+  meta <- add_release(meta, dir = dir)
+
   ## Apply filters
   meta <- meta_filter(meta, 
                       product = product,
