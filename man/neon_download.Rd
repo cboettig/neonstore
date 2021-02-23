@@ -14,6 +14,7 @@ neon_download(
   release = NA,
   quiet = FALSE,
   verify = TRUE,
+  unique = TRUE,
   dir = neon_dir(),
   get_zip = FALSE,
   unzip = FALSE,
@@ -47,6 +48,10 @@ files associated with a particular release will not change.}
 
 \item{verify}{Should downloaded files be compared against the MD5 hash
 reported by the NEON API to verify integrity? (default \code{TRUE})}
+
+\item{unique}{Should we skip downloads of files we already have?  Note: file
+comparisons are based on file hash, which will omit files that have identical
+content but different names.}
 
 \item{dir}{Location where files should be downloaded. By default will
 use the appropriate applications directory for your system

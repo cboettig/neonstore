@@ -48,6 +48,9 @@
 #' @param quiet Should download progress be displayed?
 #' @param verify Should downloaded files be compared against the MD5 hash
 #' reported by the NEON API to verify integrity? (default `TRUE`)
+#' @param unique Should we skip downloads of files we already have?  Note: file
+#' comparisons are based on file hash, which will omit files that have identical 
+#' content but different names. 
 #' @param get_zip should we attempt to download .zip archive versions of files?
 #' default `FALSE`, as zip archives are being deprecated from NEON API starting
 #' in early 2021.
@@ -102,6 +105,7 @@ neon_download <- function(product,
                           release = NA,
                           quiet = FALSE,
                           verify = TRUE,
+                          unique = TRUE,
                           dir = neon_dir(),
                           get_zip = FALSE,
                           unzip = FALSE,
@@ -117,6 +121,7 @@ neon_download <- function(product,
               release = release,
               quiet = quiet,
               verify = verify,
+              unique = unique,
               dir = dir, 
               get_zip = get_zip,
               unzip = unzip,
@@ -135,6 +140,7 @@ neon_download_ <- function(product,
                            release = NA,
                            quiet = FALSE,
                            verify = TRUE,
+                           unique = TRUE,
                            dir = neon_dir(),
                            get_zip = FALSE,
                            unzip = FALSE,
@@ -158,12 +164,14 @@ neon_download_ <- function(product,
   ## confirm product has expanded type, if requested
   type <- type_check(product, type)
   
-  ## additional filters on already_have, type and table:
+  ## additional filters on already_have, type and table.
+  ## Will also update the release manifest
   files <- download_filters(files = files, 
                             table = table, 
                             type = type, 
                             get_zip = get_zip,
                             quiet = quiet, 
+                            unique = unique,
                             dir = dir)
   if(is.null(files)){
     return(invisible(NULL)) # nothing to download
@@ -184,8 +192,7 @@ neon_download_ <- function(product,
                verify = verify,
                quiet = quiet)
 
-  if(!quiet) message("  updating release manifest...")
-  update_release_manifest(x = files, dir = dir)
+
     
   if(unzip) 
     unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
@@ -216,31 +223,41 @@ type_check <- function(product, type){
 
 
 # filter files out based on hashes we have already seen
-already_have_hash <- function(files, quiet = FALSE, dir = neon_dir()){
+already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_dir()){
   db <- lmdb(dir = dir)
   ids <- c(files$md5[!is.na(files$md5)], files$crc32[!is.na(files$crc32)])
   drop <- db$exists(ids)
+  
+  ## Add all to manifest, even ones to-be-dropped, so release tag updates
+  if(!quiet) message("  updating release manifest...")
+  update_release_manifest(x = files, dir = dir)
+  
+  ## Now drop the duplicates unless opting out.
+  if(!unique) return(files)
+  
   files <- files[!drop,]
   if(any(drop) && !quiet){
     message(paste("  omitting", 
                   sum(drop), 
                   "files previously downloaded"))
   }
+  
   files
 }
 
-download_filters <- function(files, 
-                             table, 
-                             type, 
+download_filters <- function(files,
+                             table,
+                             type,
                              get_zip,
-                             quiet, 
+                             quiet,
+                             unique = TRUE,
                              dir = neon_dir()){
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
   
   ## Filter out the ones we already have BEFORE adding hashes to manifest
-  files <- already_have_hash(files, quiet = quiet, dir = dir)
+  files <- already_have_hash(files, quiet = quiet, unique = unique, dir = dir)
   
 
     
