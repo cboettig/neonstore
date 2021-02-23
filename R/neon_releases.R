@@ -56,8 +56,8 @@ read_lmdb <- function(db, ids, ...){
 
 
 lmdb <- function(dir = neon_db_dir()) {
-  path = file.path(dir, "lmdb")
-  thor::mdb_env(path, mapsize = 1e12) ## ~1 TB
+  path <- file.path(dir, "lmdb")
+  thor::mdb_env(path, mapsize = 1e9)
 }
 
 
