@@ -202,11 +202,11 @@ drop_deprecated <- function(table,
   }
   
   ## split table and product code
-  prod <- paste(DPL,PRNUM,REV, sep="\\.")
-  product <- gsub(paste0(".*-(",prod, ")$"), "\\1", table)
-  table <- gsub(paste0("-",prod, "$"), "", table)
+  product_regex <- paste(DPL,PRNUM,REV, sep="\\.")
+  product <- gsub(paste0(".*-(",product_regex, ")$"), "\\1", table)
+  table_only <- gsub(paste0("-",product_regex, "$"), "", table)
   ## Detect updated files
-  meta <- neon_index(table = table, 
+  meta <- neon_index(table = table_only, 
                      product = product,
                      dir = dir, 
                      deprecated = TRUE)
