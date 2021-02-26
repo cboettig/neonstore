@@ -181,7 +181,7 @@ omit_imported <- function(con, index){
   }
     
     
-  DBI::dbWriteTable(con, "zzzfilter", as.data.frame(index),
+  DBI::dbWriteTable(con, "zzzfilter", as_tibble(index),
                     overwrite = TRUE, temporary = TRUE)
   query <- paste0(
     'SELECT * FROM zzzfilter ', 

@@ -223,6 +223,14 @@ filename_parser <- function(files){
   ## cast timestamp as POSIXct
   out$timestamp <- as.POSIXct(out$timestamp, format = "%Y%m%dT%H%M%OS")
   
+  ## enforce types on possibly-missing columns
+  out$horizontalPosition <- as.numeric(out$horizontalPosition)
+  out$verticalPosition <- as.numeric(out$verticalPosition)
+  out$samplingInterval <- as.numeric(out$samplingInterval)
+  out$site <- as.character(out$site)
+  out$table <- as.character(out$table)
+  out$type <- as.character(out$type)
+  out$month <- as.character(out$month)
   
   out
 }
