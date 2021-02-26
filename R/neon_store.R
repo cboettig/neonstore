@@ -49,7 +49,7 @@ neon_store <- function(table = NA,
   ## Omit already imported files
   index <- omit_imported(db, index)
   if(nrow(index) == 0){
-    message("all files have been imported")
+    message("  all files have been imported")
     neon_disconnect(db = db)
     return(invisible(NULL))
   }
