@@ -47,5 +47,12 @@ test_that("neon_index options", {
   expect_warning({
     x <- neon_index(hash="not-a-hash")
   })
+  
+  
+  
+  y <- show_deprecated_files()
+  expect_is(y, "data.frame")
+  
+  
 })
 

@@ -77,10 +77,7 @@ neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
   out <- httr::content(x, encoding = "UTF-8")
-  warning(paste(status, "error:", 
-                as.character(out), 
-                "pausing for 100 s"), 
-          call. = FALSE)
+  message("  NEON rate limiting enforced, pausing for 100s\n")
   Sys.sleep(101)
   invisible(status)
 }

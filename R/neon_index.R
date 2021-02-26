@@ -201,7 +201,7 @@ filename_parser <- function(files){
   
   ## We may want more columns than this than this.  
   out <- df[c("SITE", "DESC", "PKGTYPE", "EXT","YYYY_MM",  "GENTIME", 
-              "HOR", "VER", "TMI",  "name")]
+              "HOR", "VER", "TMI", "DATE_RANGE", "name")]
   out$product <- paste_na(df$DPL, df$PRNUM, df$REV)
   
   ## append 'type' to table name
@@ -209,16 +209,15 @@ filename_parser <- function(files){
   out$DESC[i] <- paste_na(out$DESC[i], out$PKGTYPE[i], sep = "-")
   
   ## Apply names used originally -- FIXME maybe stick with NEON terms?
-  names(out) <- c("site", "table", "type", "ext",
-                  "month", "timestamp", 
+  names(out) <- c("site", "table", "type", "ext", "month", "timestamp", 
                   "horizontalPosition", "verticalPosition", "samplingInterval",
-                  "path", "product")
+                  "date_range", "path", "product")
   
   ## re-order
   out <- out[, c("product", "site", "table", "type",
                  "ext", "month", "timestamp",
                  "horizontalPosition", "verticalPosition", "samplingInterval",
-                 "path")]
+                 "date_range", "path")]
   
   ## cast timestamp as POSIXct
   out$timestamp <- as.POSIXct(out$timestamp, format = "%Y%m%dT%H%M%OS")
@@ -273,25 +272,25 @@ file_hash <- function(x, hash = "md5"){
 
 
 ## Sometimes a NEON file will have changed
-filter_deprecated <- function(meta){
-
+flag_deprecated <- function(meta){
   ## Sort by most recent timestamp
   meta <- meta[order(meta$timestamp, decreasing = TRUE),] 
-  
-  ## de-duplicate.  always takes first match(?)
-  key_cols <- c("product", "site", "month", "table", 
-    "verticalPosition", "horizontalPosition")
+  ## base-R de-duplicate on key-columns.  always takes first match (most recent)
+  key_cols <- c("product", "site", "month", "table", "type", 
+                "verticalPosition", "horizontalPosition", "date_range")
   deprecated <- duplicated(meta[key_cols])
-  out <- meta[!deprecated,]
-  
-  if(any(deprecated))
-    message(paste("Some raw files were detected with updated timestamps.\n",
-                  "Using only most updated file to avoid duplicates."))
-  ## FIXME Maybe we should verify if the hash of said file(s) has changed.
-  ## maybe we should provide more information on how to check these?
-  
-  out
+  meta$deprecated <- deprecated
+  meta
 }
-
-
-
+filter_deprecated <- function(meta){
+  meta <- flag_deprecated(meta)
+  ## We don't care if metadata is updated, since those are not stacking data.
+  ## We might care if a data file has actually been changed 
+  changed_data <- !is.na(meta[meta$deprecated, "month"][[1]])
+  if(any(changed_data)){
+    message(paste0("  Some raw data files were detected with updated timestamps.\n",
+                   "  Using only most updated file to avoid duplicates."))
+  }
+  meta[!meta$deprecated,]
+  
+}
