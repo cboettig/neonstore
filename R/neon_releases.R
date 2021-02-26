@@ -71,7 +71,7 @@ add_release <- function(meta, dir = neon_dir()){
   manifest <- most_recent_release(manifest, dir)
   ## Use this release tag as the correct one (applies to content, not filename)
   meta$name <- basename(meta$path)
-  meta <- tibble::as_tibble(merge(meta, manifest[c("name", "release")], 
+  meta <- tibble::as_tibble(merge(meta, manifest, 
                                   by = "name", all = TRUE))
   meta$name <- NULL
   meta

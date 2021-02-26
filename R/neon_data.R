@@ -44,6 +44,11 @@ neon_data <- function(product,
     if(!quiet){ pb$tick() }
     resp[[i]] <- httr::GET(data_api[[i]],
                            httr::add_headers("X-API-Token" = .token))
+    status <- neon_warn_http_errors(resp[[i]])
+    if(status == 429){ # retry once
+      resp[[i]] <- httr::GET(data_api[[i]],
+                             httr::add_headers("X-API-Token" = .token))
+    }
     if(i %% batch == 0){
       if(!quiet) message("  NEON rate limiting enforced, pausing for 100s\n")
       Sys.sleep(105)
@@ -53,9 +58,8 @@ neon_data <- function(product,
   ## Format the result as a data.frame
   data <- do.call(rbind,
                   lapply(resp, function(x) {
-                    
-                    status <- neon_warn_http_errors(x)
-                    if(status > 0) return(NULL)
+                    status <- httr::status_code(x)
+                    if(status >= 400) return(NULL)
                     cont <- httr::content(x, as = "text")
                     dat <- jsonlite::fromJSON(cont)[[1]]
                     if(length(dat) == 0) return(NULL)
@@ -73,8 +77,9 @@ neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
   out <- httr::content(x, encoding = "UTF-8")
-  warning(paste(status, "error:", as.character(out)), call. = FALSE)
-  invisible(1L)
+  message("  NEON rate limiting enforced, pausing for 100s\n")
+  Sys.sleep(101)
+  invisible(status)
 }
 
 ## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 

@@ -92,14 +92,14 @@ neon_db_status <- function () {
 }
 
 
-
-.onAttach <- function(libname, pkgname) {  #nolint
-  if (interactive() && Sys.getenv("RSTUDIO") == "1"  && !in_chk()) {
-    tryCatch({neon_pane()}, error = function(e) NULL, finally = NULL)
-  }
-  if (interactive()) 
-    tryCatch(neon_db_status(),  error = function(e) NULL, finally = NULL)
-}
+## Do not open the pane onAttach, wait for user to call neon_pane()
+#.onAttach <- function(libname, pkgname) {  #nolint
+#  if (interactive() && Sys.getenv("RSTUDIO") == "1"  && !in_chk()) {
+#    tryCatch({neon_pane()}, error = function(e) NULL, finally = NULL)
+#  }
+#  if (interactive()) 
+#    tryCatch(neon_db_status(),  error = function(e) NULL, finally = NULL)
+#}
 
 
 in_chk <- function() {

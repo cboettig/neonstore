@@ -44,7 +44,7 @@ test_that("neon_data()", {
   skip_on_cran()
   skip_if_offline()
 
-  x <- neon_data("DP1.10003.001",
+  x <- neon_data(product = "DP1.10003.001",
                  site = "YELL",
                  start_date = "2019-06-01",
                  end_date = "2019-08-01")

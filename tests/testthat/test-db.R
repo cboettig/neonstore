@@ -10,6 +10,13 @@ test_that("neon_db", {
   db <- neon_db()
   expect_is(db, "DBIConnection")
 
+  db2 <- neon_db()
+  
+  ## Confirm cached connection
+  expect_identical(db, db2)
+  
+  neon_disconnect(db)
+  
   neon_delete_db(ask = FALSE)
   
 })
@@ -17,12 +24,14 @@ test_that("neon_db", {
 
 test_that("neon_store error handling", {
   
-  
+  expect_message({
   neon_store(table = "brd_countdata-expanded",
             dir = tempfile("no_files"))
-  
-  neon_store(product = "not-a-product",
+  })
+  expect_message({
+    neon_store(product = "not-a-product",
                    dir = tempfile("no_products"))
+  })
 })
   
 
@@ -40,7 +49,7 @@ test_that("neon_store", {
                      type = "expanded")
   db_dir <- tempfile("database")
   db <- neon_db(dir = db_dir, read_only = FALSE)
-  neon_store(table = "brd_countdata-expanded", dir = dir,db=db)
+  neon_store(table = "brd_countdata-expanded", dir = dir,db = db)
 
   db <- neon_db(dir = db_dir)
   expect_is(db, "DBIConnection")
