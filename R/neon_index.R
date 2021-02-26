@@ -226,7 +226,7 @@ filename_parser <- function(files){
   ## enforce types on possibly-missing columns
   out$horizontalPosition <- as.numeric(out$horizontalPosition)
   out$verticalPosition <- as.numeric(out$verticalPosition)
-  out$samplingInterval <- as.numeric(out$samplingInterval)
+  out$samplingInterval <- as.character(out$samplingInterval)
   out$site <- as.character(out$site)
   out$table <- as.character(out$table)
   out$type <- as.character(out$type)
