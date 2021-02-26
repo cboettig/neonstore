@@ -65,7 +65,7 @@ show_deprecated_data <- function(product = NA,
   if(is.null(meta)) return(NULL)
   if(nrow(meta) == 0) return(NULL)
   meta <- flag_deprecated(meta)
-  changed_data <- !is.na(meta[meta$deprecated, "month"][[1]])
+  changed_data <- meta$deprecated & !is.na(meta$month)
   meta[changed_data,]
   
 }

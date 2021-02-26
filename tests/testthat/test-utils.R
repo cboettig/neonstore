@@ -63,7 +63,7 @@ test_that("filename_parser()", {
   
   meta <- filename_parser(x)
   expect_is(meta, "data.frame")
-  expect_equal(dim(meta), c(7,11))
+  expect_equal(dim(meta), c(7,12))
   
   expect_true(any(grepl("DP1.10003.001", meta$product)))
   expect_true(any(grepl("brd_countdata", meta$table)))

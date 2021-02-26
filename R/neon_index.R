@@ -286,7 +286,7 @@ filter_deprecated <- function(meta){
   meta <- flag_deprecated(meta)
   ## We don't care if metadata is updated, since those are not stacking data.
   ## We might care if a data file has actually been changed 
-  changed_data <- !is.na(meta[meta$deprecated, "month"][[1]])
+  changed_data <- meta$deprecated & !is.na(meta$month)
   if(any(changed_data)){
     message(paste0("  Some raw data files have changed.\n",
                    "  Using only most updated file to avoid duplicates.\n",
