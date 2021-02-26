@@ -82,9 +82,8 @@ neon_index <- function(product = NA,
   if(is.null(meta)) return(NULL)
   
   ## Add release information
-  meta$release <- read_release_manifest(basename(meta$path), dir = dir)
-  
-  
+  meta <- add_release(meta, dir = dir)
+
   ## Apply filters
   meta <- meta_filter(meta, 
                       product = product,
@@ -134,7 +133,7 @@ meta_filter <- function(meta,
   
   if(!is.na(start_date)){
     start_date <- as.Date(start_date)
-    month <- as.Date(paste0(meta$month, "-01"))
+    month <- year_month(meta$month)
     keep <- month >= start_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -143,7 +142,7 @@ meta_filter <- function(meta,
   
   if(!is.na(end_date)){
     end_date <- as.Date(end_date)
-    month <- as.Date(paste0(meta$month, "-01"))
+    month <- year_month(meta$month)
     keep <- month <= end_date
     ## don't filter out tables without a month:
     keep[is.na(keep)] <- TRUE
@@ -170,12 +169,23 @@ meta_filter <- function(meta,
   }
   
   if(!is.na(release)){
-    meta <- meta[meta$release == release,]
+    meta <- meta[meta$release %in% release,]
   }
   
   tibble::as_tibble(meta)
   
 }
+
+year_month <- function(x){
+  
+  ym <- function(x){
+    if(is.na(x)) return(as.Date(NA))
+    as.Date(paste0(x, "-01"))
+  }
+  vapply(x, ym, as.Date("2020-01-01"))
+  
+}
+
 
 na_omit <- function(x) x[!is.na(x)]
 
@@ -213,6 +223,14 @@ filename_parser <- function(files){
   ## cast timestamp as POSIXct
   out$timestamp <- as.POSIXct(out$timestamp, format = "%Y%m%dT%H%M%OS")
   
+  ## enforce types on possibly-missing columns
+  out$horizontalPosition <- as.numeric(out$horizontalPosition)
+  out$verticalPosition <- as.numeric(out$verticalPosition)
+  out$samplingInterval <- as.numeric(out$samplingInterval)
+  out$site <- as.character(out$site)
+  out$table <- as.character(out$table)
+  out$type <- as.character(out$type)
+  out$month <- as.character(out$month)
   
   out
 }
