@@ -50,7 +50,7 @@ test_that("neon_index options", {
   
   
   
-  y <- show_deprecated_files()
+  y <- show_deprecated_data()
   expect_is(y, "data.frame")
   
   

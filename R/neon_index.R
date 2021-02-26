@@ -288,9 +288,11 @@ filter_deprecated <- function(meta){
   ## We might care if a data file has actually been changed 
   changed_data <- !is.na(meta[meta$deprecated, "month"][[1]])
   if(any(changed_data)){
-    message(paste0("  Some raw data files were detected with updated timestamps.\n",
-                   "  Using only most updated file to avoid duplicates."))
+    message(paste0("  Some raw data files have changed.\n",
+                   "  Using only most updated file to avoid duplicates.\n",
+                   "  see ?neonstore::show_deprecated_data() for details."))
   }
-  meta[!meta$deprecated,]
-  
+  out <- meta[!meta$deprecated,]
+  out$deprecated <- NULL # drop flag after filtering
+  out
 }
