@@ -25,7 +25,7 @@
 #' ones, and the presence of old files is no cause for concern. This function will
 #' only show data files that have changed, and not metadata files.  This can
 #' help pinpoint specific altered data.
-#' 
+#' @inheritParams neon_index
 #' @seealso neon_index, neon_read
 #' @examples 
 #' \dontshow{
@@ -62,6 +62,8 @@ show_deprecated_data <- function(product = NA,
                      timestamp = timestamp,
                      release = release,
                      dir = dir)
+  if(is.null(meta)) return(NULL)
+  if(nrow(meta) == 0) return(NULL)
   meta <- flag_deprecated(meta)
   changed_data <- !is.na(meta[meta$deprecated, "month"][[1]])
   meta[changed_data,]

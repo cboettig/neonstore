@@ -17,6 +17,39 @@ show_deprecated_data(
   dir = neon_dir()
 )
 }
+\arguments{
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
+
+\item{table}{Include only files matching this table name (or regex pattern).
+(optional).}
+
+\item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
+
+\item{start_date}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
+as \code{NA} to download up to the most recent available data.}
+
+\item{end_date}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
+\code{NA} to download all prior data.}
+
+\item{type}{Should we prefer the basic or expanded version of this product?
+Note that not all products have expanded formats.}
+
+\item{ext}{only match files with this file extension(s)}
+
+\item{timestamp}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
+
+\item{release}{Select only data files associated with a particular release tag,
+see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.}
+
+\item{dir}{Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see \code{\link[tools:userdir]{tools::R_user_dir()}}).  This default also be configured by
+setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} or
+\link{Renviron}.}
+}
 \description{
 Show the file information for any raw data files which have been deprecated by
 the release of modified historical data to the NEON API.
