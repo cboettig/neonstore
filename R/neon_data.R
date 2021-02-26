@@ -44,6 +44,11 @@ neon_data <- function(product,
     if(!quiet){ pb$tick() }
     resp[[i]] <- httr::GET(data_api[[i]],
                            httr::add_headers("X-API-Token" = .token))
+    x <- neon_warn_http_errors(resp[[i]])
+    if(status > 0){ # retry once
+      resp[[i]] <- httr::GET(data_api[[i]],
+                             httr::add_headers("X-API-Token" = .token))
+    }
     if(i %% batch == 0){
       if(!quiet) message("  NEON rate limiting enforced, pausing for 100s\n")
       Sys.sleep(105)
@@ -53,8 +58,7 @@ neon_data <- function(product,
   ## Format the result as a data.frame
   data <- do.call(rbind,
                   lapply(resp, function(x) {
-                    
-                    status <- neon_warn_http_errors(x)
+                    status <- httr::status_code(x)
                     if(status > 0) return(NULL)
                     cont <- httr::content(x, as = "text")
                     dat <- jsonlite::fromJSON(cont)[[1]]
@@ -73,7 +77,11 @@ neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
   out <- httr::content(x, encoding = "UTF-8")
-  warning(paste(status, "error:", as.character(out)), call. = FALSE)
+  warning(paste(status, "error:", 
+                as.character(out), 
+                "pausing for 100 s"), 
+          call. = FALSE)
+  Sys.sleep(101)
   invisible(1L)
 }
 
