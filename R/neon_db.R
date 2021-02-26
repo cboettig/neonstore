@@ -43,7 +43,7 @@ neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
   
   if (inherits(db, "DBIConnection")) {
     if (DBI::dbIsValid(db)) {
-      dir_matches <- db@driver@dbdir == dir
+      dir_matches <- db@driver@dbdir == dbname
       if (read_only & dir_matches) {
         return(db)
       } else {
@@ -112,8 +112,7 @@ neonstore_cache <- new.env()
 neon_delete_db <- function(db_dir = neon_db_dir(), ask = interactive()){
   continue <- TRUE
   if(ask){
-    continue <- utils::askYesNo(paste("Delete the local duckdb database?", 
-             "(downloaded files will be kept by default)"))
+    continue <- utils::askYesNo(paste("Delete local DB in", db_dir, "?"))
   }
   if(continue){
     db_files <- list.files(db_dir, "^database.*", full.names = TRUE)

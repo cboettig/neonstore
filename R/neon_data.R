@@ -44,8 +44,8 @@ neon_data <- function(product,
     if(!quiet){ pb$tick() }
     resp[[i]] <- httr::GET(data_api[[i]],
                            httr::add_headers("X-API-Token" = .token))
-    x <- neon_warn_http_errors(resp[[i]])
-    if(status > 0){ # retry once
+    status <- neon_warn_http_errors(resp[[i]])
+    if(status == 429){ # retry once
       resp[[i]] <- httr::GET(data_api[[i]],
                              httr::add_headers("X-API-Token" = .token))
     }
@@ -59,7 +59,7 @@ neon_data <- function(product,
   data <- do.call(rbind,
                   lapply(resp, function(x) {
                     status <- httr::status_code(x)
-                    if(status > 0) return(NULL)
+                    if(status >= 400) return(NULL)
                     cont <- httr::content(x, as = "text")
                     dat <- jsonlite::fromJSON(cont)[[1]]
                     if(length(dat) == 0) return(NULL)
@@ -82,7 +82,7 @@ neon_warn_http_errors <- function(x){
                 "pausing for 100 s"), 
           call. = FALSE)
   Sys.sleep(101)
-  invisible(1L)
+  invisible(status)
 }
 
 ## Some DataUrls reported by products table include date ranges that are not valid, e.g.: 
