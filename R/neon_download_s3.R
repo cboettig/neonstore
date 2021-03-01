@@ -108,7 +108,7 @@ neon_download_s3 <- function(product,
   ## URL and destination
   addr <- paste0(api, meta$path)
   dest <- file.path(dir, meta$path)
-
+  lapply(dirname(dest), dir.create, FALSE, TRUE)
   
   # crc32/md5 sums not recorded
   download_all(addr, dest, quiet = quiet, verify = FALSE)
