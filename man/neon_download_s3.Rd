@@ -68,10 +68,25 @@ flat file structure like that used by neonstore).}
 (invisibly) table of requested files and metadata
 }
 \description{
+It is possible to copy the local neonstore (see \verb{[neon_dir()]}) to
+an S3 bucket for faster shared access to a large store.  This function
+mimics the behavior of \verb{[neon_download()]} but accesses files directly
+from such an S3 bucket.
 Queries the AWS-S3 REST endpoint GET bucket for a file list
 in (in 1000-file chunks), then filters file names to determine
-what to download. This should be much faster than the NEON API and
-avoids rate-limiting.
+what to download. Users must set the \code{api} to the address of their S3
+bucket to take advantage of this feature.  For demonstration purposes,
+an example S3 bucket is provided as the default.  Note that data
+obtained in this way is only as up-to-date or complete as the underlying
+cache.  Users should always draw from the NEON API using \verb{[neon_download()]}
+to ensure they have the most recent and complete data files.
+}
+\details{
+Note: at this time, release information associated with files in the store
+is not available from neonstore S3 caches. As such, this mechanism is not
+able to filter data for specific RELEASE tags, is which are only available
+from the NEON API.  Querying products by \verb{[neon_download()]} will update
+the corresponding release tags.
 }
 \examples{
 
