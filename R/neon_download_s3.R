@@ -3,10 +3,26 @@
 
 #' Download requested NEON files from an S3 bucket 
 #' 
+#' It is possible to copy the local neonstore (see `[neon_dir()]`) to
+#' an S3 bucket for faster shared access to a large store.  This function
+#' mimics the behavior of `[neon_download()]` but accesses files directly
+#' from such an S3 bucket.
 #' Queries the AWS-S3 REST endpoint GET bucket for a file list
 #' in (in 1000-file chunks), then filters file names to determine
-#' what to download. This should be much faster than the NEON API and
-#' avoids rate-limiting.
+#' what to download. Users must set the `api` to the address of their S3
+#' bucket to take advantage of this feature.  For demonstration purposes,
+#' an example S3 bucket is provided as the default.  Note that data 
+#' obtained in this way is only as up-to-date or complete as the underlying
+#' cache.  Users should always draw from the NEON API using `[neon_download()]`
+#' to ensure they have the most recent and complete data files.  
+#' 
+#' Note: at this time, release information associated with files in the store
+#' is not available from neonstore S3 caches. As such, this mechanism is not
+#' able to filter data for specific RELEASE tags, is which are only available
+#' from the NEON API.  Querying products by `[neon_download()]` will update
+#' the corresponding release tags.  
+#' 
+#' 
 #' @inheritParams neon_download
 #' @param api URL to an S3 bucket containing raw NEON data files (in
 #' flat file structure like that used by neonstore).
@@ -72,7 +88,7 @@ neon_download_s3 <- function(product,
   } 
   
   ## Apply filters to filenames
-  meta <- filename_parser(basename(files))
+  meta <- filename_parser(files)
   meta <- meta_filter(meta, 
                       product = product, 
                       table = table,
@@ -91,12 +107,17 @@ neon_download_s3 <- function(product,
   
   ## URL and destination
   addr <- paste0(api, meta$path)
-  dest <- neon_subdir(basename(meta$path), dir)
+  dest <- file.path(dir, meta$path)
+  lapply(dirname(dest), dir.create, FALSE, TRUE)
   
   # crc32/md5 sums not recorded
   download_all(addr, dest, quiet = quiet, verify = FALSE)
   if(unzip) unzip_all(dest, dir)
 
+  
+  ## Technically we should hash the files and add them to the 
+  ## registry with the hashes and `UNKNOWN` release tag information
+  
   invisible(meta)
 }
 

@@ -295,22 +295,22 @@ download_filters <- function(files,
 
 ## Generate subdir paths and ensure they exist
 neon_subdir <- function(path, dir){
-    vapply(path, function(path){
     n <- basename(path)
     df <- neon_filename_parser(n)
     if(nrow(df) == 0){ # not parsable string
       return(file.path(dir, n))
     }
+
+
     product <- paste_na(df$DPL, df$PRNUM, df$REV)
     dirs <- file.path(dir, paste(product, 
                                  na_to_char(df$SITE), 
                                  na_to_char(df$YYYY_MM), sep = "/"))
     
-    
     lapply(unique(dirs), dir.create, FALSE, TRUE)
     dirs <- normalizePath(dirs) # path must exist for this to work...
-    paste(dirs, n, sep="/")
-    }, character(1L), USE.NAMES = FALSE)
+    paths <- paste(dirs, n, sep="/")
+    paths
 }
 
 download_all <- function(addr, 
