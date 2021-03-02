@@ -281,7 +281,7 @@ download_filters <- function(files,
   
   ## Filter out duplicate files, e.g. have identical hash values
   ## (as reported by NEON's own hash)
-  ## files <- take_first_match(files, hash_type(files))
+  files <- take_first_match(files, hash_type(files))
 
   ## filter out hashes we already have locally
   files <- already_have_hash(files, quiet = quiet, unique = unique, dir = dir)
