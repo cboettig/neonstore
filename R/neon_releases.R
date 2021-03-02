@@ -54,8 +54,8 @@ read_lmdb <- function(db, ids, ...){
   lmdb_parse(out, ...)
 }
 
-
-lmdb <- function(dir = neon_db_dir()) {
+## lmdb needs to remain synced to the filestore, not the database
+lmdb <- function(dir = neon_dir()) {
   path <- file.path(dir, "lmdb")
   thor::mdb_env(path, mapsize = 1e9)
 }
