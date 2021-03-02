@@ -192,8 +192,10 @@ neon_download_ <- function(product,
                verify = verify,
                quiet = quiet)
 
+  
+  if(!quiet) message("  updating release manifest...")
+  update_release_manifest(x = files, dir = dir)
 
-    
   if(unzip) 
     unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
@@ -224,13 +226,14 @@ type_check <- function(product, type){
 
 # filter files out based on hashes we have already seen
 already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_dir()){
-  db <- lmdb(dir = dir)
-  ids <- c(files$md5[!is.na(files$md5)], files$crc32[!is.na(files$crc32)])
-  drop <- db$exists(ids)
-  
-  ## Add all to manifest, even ones to-be-dropped, so release tag updates
-  if(!quiet) message("  updating release manifest...")
-  update_release_manifest(x = files, dir = dir)
+
+  ## Faster to check if IDs are in LMDB then to construct neon_index, but that
+  ## would not ensure files actually exist
+  index <- neon_index(dir = dir)
+
+  md5_dups <- files$md5 %in% stats::na.omit(index$md5)
+  crc32_dups <- files$crc32 %in% stats::na.omit(index$crc32)
+  drop <-  md5_dups | crc32_dups
   
   ## Now drop the duplicates unless opting out.
   if(!unique) return(files)
@@ -255,11 +258,6 @@ download_filters <- function(files,
   
   if(is.null(files)) return(invisible(NULL)) # nothing to download
   if(nrow(files) == 0) return(invisible(NULL)) # nothing to download
-  
-  ## Filter out the ones we already have BEFORE adding hashes to manifest
-  files <- already_have_hash(files, quiet = quiet, unique = unique, dir = dir)
-  
-
     
   if(get_zip){
     files <- files[grepl("[.]zip", files$name), ]
@@ -282,8 +280,13 @@ download_filters <- function(files,
   
   ## Filter out duplicate files, e.g. have identical hash values
   ## (as reported by NEON's own hash)
-  files <- take_first_match(files, hash_type(files))
+  ## files <- take_first_match(files, hash_type(files))
 
+  ## filter out hashes we already have locally
+  files <- already_have_hash(files, quiet = quiet, unique = unique, dir = dir)
+  
+  
+  
   ## create path column for dest
   ## NOTE: file$name not guaranteed to be unique.  
   files$path <- neon_subdir(files$name, dir = dir)
