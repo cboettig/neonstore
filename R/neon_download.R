@@ -226,7 +226,8 @@ type_check <- function(product, type){
 
 # filter files out based on hashes we have already seen
 already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_dir()){
-
+  
+  if(!quiet) message("  comparing hashes against local file index...")
   ## Faster to check if IDs are in LMDB then to construct neon_index, but that
   ## would not ensure files actually exist
   index <- neon_index(dir = dir)
