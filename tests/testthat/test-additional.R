@@ -120,3 +120,24 @@ test_that("ECdata", {
   expect_gt(length(path_h5), 0)
 
 })
+
+
+
+test_that("repeated download is zero-op", {
+  
+  
+  skip_on_cran()
+  skip_if_offline()
+  
+  x <- neon_download(product = "DP1.10003.001",
+                        site = "YELL")
+  expect_is(x, "data.frame")
+  expect_gt(nrow(x), 0)
+  
+  
+  x <- neon_download(product = "DP1.10003.001",
+                        site = "YELL")
+  expect_is(x, "data.frame")
+  expect_equal(nrow(x), 0)
+  
+})
