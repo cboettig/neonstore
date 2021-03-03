@@ -91,7 +91,10 @@ neon_filename_parser <- function(x){
     schema() # ensure all columns are present
   ))
   #unique(df)
-  df
+  
+  ## enforce original ordering of vector input
+  i <- match(x, df$name)
+  df[i,]
 }
 
 
