@@ -193,7 +193,7 @@ neon_download_ <- function(product,
                quiet = quiet)
 
   
-  if(!quiet) message("  updating release manifest...")
+  if(!quiet && nrow(files) > 0) message("  updating release manifest...")
   update_release_manifest(x = files, dir = dir)
 
   if(unzip) 
