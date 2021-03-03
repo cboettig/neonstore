@@ -17,6 +17,11 @@
 #' @param read_only allow concurrent connections by enforcing read_only.
 #'   See details. 
 #' @param ... additional arguments to dbConnect
+#' @param memory_limit Set a memory limit for duckdb, in GB.  This can
+#' also be set for the session by using options, e.g. 
+#' `options(duckdb_memory_limit=10)` for a limit of 10GB.  On most systems 
+#' duckdb will automatically set a limit to 80% of machine capacity if not 
+#' set explicitly.  
 #' @importFrom DBI dbConnect
 #' @importFrom duckdb duckdb
 #' @examples 
@@ -24,7 +29,10 @@
 #' # tempfile used for illustration only
 #' neon_db(tempfile())
 #' 
-neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
+neon_db <- function (dir = neon_db_dir(), 
+                     read_only = TRUE, 
+                     memory_limit = getOption("duckdb_memory_limit", NA), 
+                     ...) {
 
   if (!dir.exists(dir)){
     dir.create(dir, FALSE, TRUE)
@@ -40,7 +48,6 @@ neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
   }
 
   db <- mget("neon_db", envir = neonstore_cache, ifnotfound = NA)[[1]]
-  
   if (inherits(db, "DBIConnection")) {
     if (DBI::dbIsValid(db)) {
       dir_matches <- db@driver@dbdir == dbname
@@ -58,6 +65,10 @@ neon_db <- function (dir = neon_db_dir(), read_only = TRUE,  ...) {
                        dbdir = dbname,
                        read_only = read_only,
                        ...)
+  if(!is.na(memory_limit)){
+    pragma <- paste0("PRAGMA memory_limit='", memory_limit, "GB'")
+    DBI::dbExecute(con, pragma)
+  }
 
   if (read_only) {
     assign("neon_db", db, envir = neonstore_cache)

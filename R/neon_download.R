@@ -227,17 +227,25 @@ type_check <- function(product, type){
 # filter files out based on hashes we have already seen
 already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_dir()){
   
+  ## Opt out trigger.
+  if(!unique) return(files)
+  
   if(!quiet) message("  comparing hashes against local file index...")
   ## Faster to check if IDs are in LMDB then to construct neon_index, but that
   ## would not ensure files actually exist
   index <- neon_index(dir = dir)
-
+  
+  if(is.null(index)) return(files)
+  ## Also drop name duplicates.  This is dodgy, as these could potentially
+  ## have different content. Perhaps we should always overwrite instead.
+  ## however, files with same name aren't necessarily newer.
+  name_dups <- files$name %in% stats::na.omit(basename(index$path))
+  
   md5_dups <- files$md5 %in% stats::na.omit(index$md5)
   crc32_dups <- files$crc32 %in% stats::na.omit(index$crc32)
-  drop <-  md5_dups | crc32_dups
+  drop <-  md5_dups | crc32_dups | name_dups
   
-  ## Now drop the duplicates unless opting out.
-  if(!unique) return(files)
+
   
   files <- files[!drop,]
   if(any(drop) && !quiet){

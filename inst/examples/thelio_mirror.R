@@ -1,23 +1,25 @@
 
 library(neonstore)
+options(duckdb_memory_limit=10)
+## Birds
+x <- neon_download("DP1.10003.001")
 
-## birds, beetles, ticks (all sites)
-neon_download("DP1.10003.001")
-neon_download("DP1.10022.001", type = "expanded")
+# Beetles
+neon_download("DP1.10022.001", type = "expanded") 
 
 # Ticks
 tick_sites <- c("BLAN", "ORNL", "SCBI", "SERC", "KONZ", "TALL", "UKFS")
-neon_download_s3("DP1.10093.001", site = tick_sites)
+neon_download("DP1.10093.001", site = tick_sites)
 
 #Terrestrial
 ter_sites <- c("BART", "KONZ", "SRER", "OSBS")
-neonstore::neon_download_s3("DP4.00200.001", table="SWS_30", site = ter_sites, type = "basic")
-neonstore::neon_download_s3("DP1.00094.001", site = ter_sites, type = "basic")
+neonstore::neon_download("DP4.00200.001", table="SWS_30", site = ter_sites, type = "basic")
+neonstore::neon_download("DP1.00094.001", site = ter_sites, type = "basic")
 
 #Aquatic
 aq_sites <- c("BARC", "POSE")
 aq_products <- c("DP1.20053.001","DP1.20288.001", "DP1.20264.001")
-neon_download_s3(aq_products, site = aq_sites, type = "basic")
+neon_download(aq_products, site = aq_sites, type = "basic")
 
 
 ## import into local database
