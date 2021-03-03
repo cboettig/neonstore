@@ -67,7 +67,7 @@ neon_db <- function (dir = neon_db_dir(),
                        ...)
   if(!is.na(memory_limit)){
     pragma <- paste0("PRAGMA memory_limit='", memory_limit, "GB'")
-    DBI::dbExecute(con, pragma)
+    DBI::dbExecute(db, pragma)
   }
 
   if (read_only) {
