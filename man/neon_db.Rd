@@ -4,7 +4,12 @@
 \alias{neon_db}
 \title{Cache-able duckdb database connection}
 \usage{
-neon_db(dir = neon_db_dir(), read_only = TRUE, ...)
+neon_db(
+  dir = neon_db_dir(),
+  read_only = TRUE,
+  memory_limit = getOption("duckdb_memory_limit", NA),
+  ...
+)
 }
 \arguments{
 \item{dir}{Location where files should be downloaded. By default will
@@ -15,6 +20,12 @@ setting the environmental variable \code{NEONSTORE_HOME}, see \link{Sys.setenv} 
 
 \item{read_only}{allow concurrent connections by enforcing read_only.
 See details.}
+
+\item{memory_limit}{Set a memory limit for duckdb, in GB.  This can
+also be set for the session by using options, e.g.
+\code{options(duckdb_memory_limit=10)} for a limit of 10GB.  On most systems
+duckdb will automatically set a limit to 80\% of machine capacity if not
+set explicitly.}
 
 \item{...}{additional arguments to dbConnect}
 }

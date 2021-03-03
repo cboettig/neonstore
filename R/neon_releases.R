@@ -4,9 +4,11 @@ update_release_manifest <- function(x, dir = neon_dir()){
   if(nrow(x) < 1) return(invisible(NULL))
   x <- x[c("name", "md5", "crc32", "release")]
 
+  # index on name. NOTE: 
   db <- lmdb(dir)
   write_lmdb(db, x$name, x)
   
+  # index on hash
   md5s <- x[!is.na(x$md5),]
   crc32s <- x[!is.na(x$crc32),]
   if(nrow(md5s)>0) write_lmdb(db, md5s$md5, md5s)
