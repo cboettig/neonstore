@@ -108,7 +108,7 @@ test_that("unzip_all()", {
 test_that("verify_hash()", {
   
   x <- tempfile()
-  write.csv(mtcars, x)
+  write.csv(mtcars, x, fileEncoding = "UTF-8")
   y <- verify_hash(x, "6463474bfe6973a81dc7cbc4a71e8dd1", verify = TRUE)
   expect_null(y)
   expect_warning({
