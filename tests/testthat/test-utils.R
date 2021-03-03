@@ -107,15 +107,14 @@ test_that("unzip_all()", {
 
 test_that("verify_hash()", {
   
-  x <- system.file("DESCRIPTION", package="neonstore")
-  y <- verify_hash(x, "f9b8491fb7db639da62a048e414becdb", verify = TRUE)
+  x <- tempfile()
+  write.csv(mtcars, x)
+  y <- verify_hash(x, "6463474bfe6973a81dc7cbc4a71e8dd1", verify = TRUE)
   expect_null(y)
   expect_warning({
     verify_hash(x, "b9b8491fb7db639da62a048e414becdb", verify = TRUE)
   })
   
   
-}
-          
-          )
+})
 
