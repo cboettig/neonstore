@@ -1,4 +1,5 @@
-
+bench::bench_time({
+  
 library(neonstore)
 options(duckdb_memory_limit=10)
 ## Birds
@@ -6,6 +7,7 @@ x <- neon_download("DP1.10003.001")
 
 # Beetles
 neon_download("DP1.10022.001", type = "expanded") 
+
 
 # Ticks
 tick_sites <- c("BLAN", "ORNL", "SCBI", "SERC", "KONZ", "TALL", "UKFS")
@@ -77,3 +79,5 @@ neonstore::neon_store(product = "DP1.20016.001", type = "basic") # Elevation of 
 neonstore::neon_store(product = "DP1.20217.001", type = "basic") # Groundwater temperature
 neonstore::neon_store(product = "DP1.20033.001", type = "basic") # Nitrate
 
+
+})
