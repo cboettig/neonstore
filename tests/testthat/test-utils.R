@@ -109,9 +109,7 @@ test_that("verify_hash()", {
   
   x <- tempfile()
   write.csv(mtcars, x, fileEncoding = "UTF-8")
-  y <- verify_hash(x, "6463474bfe6973a81dc7cbc4a71e8dd1", verify = TRUE)
-  expect_null(y)
-  expect_warning({
+  expect_warning({ # when hash is wrong
     verify_hash(x, "b9b8491fb7db639da62a048e414becdb", verify = TRUE)
   })
   
