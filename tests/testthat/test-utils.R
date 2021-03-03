@@ -98,3 +98,24 @@ test_that("na_bool_to_char", {
                            "logical", "character"))
 })
 
+
+test_that("unzip_all()", {
+  
+  x <- unzip_all(".", tempdir(), keep_zips = FALSE)
+  expect_null(x)
+})
+
+test_that("verify_hash()", {
+  
+  x <- system.file("DESCRIPTION", package="neonstore")
+  y <- verify_hash(x, "f9b8491fb7db639da62a048e414becdb", verify = TRUE)
+  expect_null(y)
+  expect_warning({
+    verify_hash(x, "b9b8491fb7db639da62a048e414becdb", verify = TRUE)
+  })
+  
+  
+}
+          
+          )
+
