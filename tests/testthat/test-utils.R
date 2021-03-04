@@ -98,3 +98,21 @@ test_that("na_bool_to_char", {
                            "logical", "character"))
 })
 
+
+test_that("unzip_all()", {
+  
+  x <- unzip_all(".", tempdir(), keep_zips = FALSE)
+  expect_true(TRUE)
+})
+
+test_that("verify_hash()", {
+  
+  x <- tempfile()
+  write.csv(mtcars, x, fileEncoding = "UTF-8")
+  expect_warning({ # when hash is wrong
+    verify_hash(x, "b9b8491fb7db639da62a048e414becdb", verify = TRUE)
+  })
+  
+  
+})
+

@@ -76,7 +76,7 @@ test_that("neon_download()", {
   skip_if_offline()
   
   x <- neon_download("DP1.10003.001",
-                     site = "YELL",
+                     site = "BART",
                      start_date = "2018-01-01",
                      end_date = "2019-01-01")
   expect_is(x, "data.frame")
