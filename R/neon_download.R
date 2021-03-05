@@ -237,7 +237,8 @@ already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_di
   ## Also drop name duplicates.  This is dodgy, as these could potentially
   ## have different content. Perhaps we should always overwrite instead.
   ## however, files with same name aren't necessarily newer.
-  name_dups <- gsub(".gz$", "", files$name) %in% stats::na.omit(basename(index$path))
+  names <- gsub(".gz$", "", files$name)
+  name_dups <- files$name %in% stats::na.omit(basename(index$path))
   
   md5_dups <- files$md5 %in% stats::na.omit(index$md5)
   crc32_dups <- files$crc32 %in% stats::na.omit(index$crc32)
