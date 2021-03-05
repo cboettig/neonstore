@@ -34,7 +34,7 @@ neon_pane <- function() {
       },
       listColumns = function(table) {
         res <- DBI::dbGetQuery(neon_db(),
-                               paste("SELECT * FROM", table, "LIMIT 1"))
+                               paste0("SELECT * FROM \"", table, "\" LIMIT 1"))
         data.frame(
           name = names(res), 
           type = vapply(res, function(x) class(x)[1], character(1)),
@@ -43,7 +43,7 @@ neon_pane <- function() {
       },
       previewObject = function(rowLimit, table) {  #nolint
         DBI::dbGetQuery(neon_db(),
-                        paste("SELECT * FROM", table, "LIMIT", rowLimit))
+                        paste0("SELECT * FROM \"", table, "\" LIMIT ", rowLimit))
       },
       actions = list(
         Status = list(

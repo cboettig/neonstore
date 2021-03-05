@@ -106,6 +106,17 @@ test_that("ECdata", {
   expect_is(x, "data.frame")
   expect_gt(nrow(x), 0)
   
+  ## confirm we omit gz 
+  x <- neon_download(product = "DP4.00200.001",
+                     site = "BART",
+                     start_date = "2020-06-01",
+                     end_date = "2020-07-01",
+                     type = "basic",
+                     dir = dir)
+  expect_equal(nrow(x), 0)
+  
+  
+  
   df <- neon_index(product = "DP4.00200.001",
                    start_date = "2020-06-01",
                    ext = "h5",

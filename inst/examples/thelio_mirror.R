@@ -14,8 +14,8 @@ new_ticks <- neon_download("DP1.10093.001", site = tick_sites)
 
 #Terrestrial
 ter_sites <- c("BART", "KONZ", "SRER", "OSBS")
-new_ter_flux <- neon_download("DP4.00200.001", site = ter_sites) #h5
 new_ter_sw <- neon_download("DP1.00094.001", table = "SWS_30_minute", site = ter_sites)  ## SWS
+new_ter_flux <- neon_download("DP4.00200.001", site = ter_sites) #h5
 
 #Aquatic
 aq_sites <- c("BARC", "POSE")
