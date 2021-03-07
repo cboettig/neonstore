@@ -192,10 +192,6 @@ neon_download_ <- function(product,
                verify = verify,
                quiet = quiet)
 
-  
-  if(!quiet && nrow(files) > 0) message("  updating release manifest...")
-  update_release_manifest(x = files, dir = dir)
-
   if(unzip) 
     unzip_all(files$path, dir, keep_zips = TRUE, quiet = quiet)
 
@@ -204,6 +200,8 @@ neon_download_ <- function(product,
   gunzip_all(gzips, dir = dir, quiet = quiet)
 
   
+  if(!quiet && nrow(files) > 0) message("  updating release manifest...")
+  update_release_manifest(x = files, dir = dir) 
     
   ## file metadata (url, path, md5sum)  
   invisible(files)
@@ -239,6 +237,7 @@ already_have_hash <- function(files, quiet = FALSE, unique = TRUE, dir = neon_di
   ## Also drop name duplicates.  This is dodgy, as these could potentially
   ## have different content. Perhaps we should always overwrite instead.
   ## however, files with same name aren't necessarily newer.
+  names <- gsub(".gz$", "", files$name)
   name_dups <- files$name %in% stats::na.omit(basename(index$path))
   
   md5_dups <- files$md5 %in% stats::na.omit(index$md5)
@@ -353,7 +352,8 @@ safe_download <- function(url, dest, hash = NULL, algo = "md5", verify = TRUE){
     verify_hash(dest, hash, verify, algo)
     },
     error = function(e) 
-      warning(paste(e$message, "on", url),
+      warning(paste(e$message, "on", url, "\n",
+      "Repeat your download request to resume!"),
               call. = FALSE),
     finally = NULL
   )

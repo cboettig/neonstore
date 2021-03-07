@@ -104,22 +104,7 @@ gunzip_all <- function(filenames, dir, quiet = FALSE){
   if(length(gzips) > 0){
     destname <- neon_subdir(tools::file_path_sans_ext(gzips), dir = dir)
     mapply(gunzip_, gzips, destname, remove = TRUE, overwrite = TRUE)
-    
-    ## And update the release manifest hashes
-    add_gunzipped_to_manifest(gzips, destname, dir)   
-    
   }
-}
-
-add_gunzipped_to_manifest <- function(gzips, destname, dir){
-  hashes <- vapply(destname, md5, character(1L))
-  
-  manifest <- read_release_manifest(basename(gzips), dir = dir)
-  entries <- data.frame(name = basename(destname), 
-                        md5 = hashes,
-                        crc32 = NA_character_, 
-                        release = manifest$release)
-  update_release_manifest(entries, dir)
 }
 
 ## helper method for filtering out duplicate tables

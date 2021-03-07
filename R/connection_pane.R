@@ -43,7 +43,7 @@ neon_pane <- function() {
       },
       previewObject = function(rowLimit, table) {  #nolint
         DBI::dbGetQuery(neon_db(),
-                        paste("SELECT * FROM", table, "LIMIT", rowLimit))
+                        paste0("SELECT * FROM \"", table, "\" LIMIT ", rowLimit))
       },
       actions = list(
         Status = list(

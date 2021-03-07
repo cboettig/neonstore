@@ -4,7 +4,10 @@ update_release_manifest <- function(x, dir = neon_dir()){
   if(nrow(x) < 1) return(invisible(NULL))
   x <- x[c("name", "md5", "crc32", "release")]
 
-  # index on name. NOTE: 
+  ## Map gzip hashes expanded file-names
+  x$name <- gsub("\\.gz", "", x$name)
+ 
+  # index on name
   db <- lmdb(dir)
   write_lmdb(db, x$name, x)
   
