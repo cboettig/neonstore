@@ -46,6 +46,7 @@ duckdb
 easting
 flightline
 g'zipped
+gz
 hdf
 horizontalPosition
 http
@@ -55,6 +56,7 @@ neonUtilities
 neonscience
 northing
 parsers
+pluggable
 pre
 productCode
 publicationDate
