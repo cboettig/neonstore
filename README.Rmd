@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 )
 library(neonstore)
 Sys.setenv("NEONSTORE_HOME" = tempfile())
+Sys.setenv("NEONSTORE_DB" = tempfile())
+
 ```
 
 # neonstore
@@ -101,7 +103,7 @@ neon_store(product = "DP1.10003.001")
 Access an imported table using `neon_table()` instead of `neon_read()`:
 
 ```{r}
-neon_table("brd_countdata-expanded")
+neon_table("brd_countdata")
 ```
 
 
@@ -114,14 +116,13 @@ on the database.
 
 ```{r}
 library(dplyr)
-
 con <- neon_db()
-brd <- tbl(con, "brd_countdata-expanded")
+brd <- tbl(con, "brd_countdata-basic-DP1.10003.001")
 brd %>% filter(siteID == "ORNL")
 
 ```
 
-
+Note that we need to include the product name in the table name when accessing the database, as table names alone may not be unique. RStudio users can also list and explore all tables interactively in the Connections pane in RStudio using `neon_pane()`.  
 
 
 
@@ -149,5 +150,6 @@ require each month of sampling separately!)
 unlink("my_neondata.zip")
 unlink("index.csv")
 Sys.unsetenv("NEONSTORE_HOME")
+Sys.unsetenv("NEONSTORE_DB")
 ```
 

@@ -40,18 +40,18 @@ products <- neon_products()
 i <- grepl("Populations", products$themes)
 products[i, c("productCode", "productName")]
 #> # A tibble: 50 x 2
-#>    productCode   productName                                  
-#>    <chr>         <chr>                                        
-#>  1 DP1.00033.001 Phenology images                             
-#>  2 DP1.10003.001 Breeding landbird point counts               
-#>  3 DP1.10010.001 Coarse downed wood log survey                
-#>  4 DP1.10020.001 Ground beetle sequences DNA barcode          
-#>  5 DP1.10022.001 Ground beetles sampled from pitfall traps    
-#>  6 DP1.10026.001 Plant foliar physical and chemical properties
-#>  7 DP1.10033.001 Litterfall and fine woody debris sampling    
-#>  8 DP1.10038.001 Mosquito sequences DNA barcode               
-#>  9 DP1.10041.001 Mosquito-borne pathogen status               
-#> 10 DP1.10043.001 Mosquitoes sampled from CO2 traps            
+#>    productCode   productName                                              
+#>    <chr>         <chr>                                                    
+#>  1 DP1.00033.001 Phenology images                                         
+#>  2 DP1.10003.001 Breeding landbird point counts                           
+#>  3 DP1.10010.001 Coarse downed wood log survey                            
+#>  4 DP1.10020.001 Ground beetle sequences DNA barcode                      
+#>  5 DP1.10022.001 Ground beetles sampled from pitfall traps                
+#>  6 DP1.10026.001 Plant foliar traits                                      
+#>  7 DP1.10033.001 Litterfall and fine woody debris production and chemistry
+#>  8 DP1.10038.001 Mosquito sequences DNA barcode                           
+#>  9 DP1.10041.001 Mosquito-borne pathogen status                           
+#> 10 DP1.10043.001 Mosquitoes sampled from CO2 traps                        
 #> # … with 40 more rows
  
 i <- grepl("bird", products$keywords)
@@ -66,27 +66,30 @@ Download all data files in the bird survey data products.
 
 ``` r
 neon_download("DP1.10003.001")
+#>   comparing hashes against local file index...
+#>   updating release manifest...
 ```
 
 View your store of NEON products:
 
 ``` r
 neon_index()
-#> # A tibble: 1,632 x 11
-#>    product site  table type  ext   month timestamp           horizontalPosit…
-#>    <chr>   <chr> <chr> <chr> <chr> <chr> <dttm>              <lgl>           
-#>  1 DP1.10… ABBY  brd_… expa… csv   2017… 2019-11-07 15:33:41 NA              
-#>  2 DP1.10… ABBY  brd_… basic csv   2017… 2019-11-07 15:33:41 NA              
-#>  3 DP1.10… ABBY  brd_… expa… csv   2017… 2019-11-07 15:17:46 NA              
-#>  4 DP1.10… ABBY  brd_… basic csv   2017… 2019-11-07 15:17:46 NA              
-#>  5 DP1.10… ABBY  brd_… expa… csv   2018… 2019-11-07 15:34:24 NA              
-#>  6 DP1.10… ABBY  brd_… basic csv   2018… 2019-11-07 15:34:24 NA              
-#>  7 DP1.10… ABBY  brd_… expa… csv   2018… 2019-11-07 15:34:20 NA              
-#>  8 DP1.10… ABBY  brd_… basic csv   2018… 2019-11-07 15:34:20 NA              
-#>  9 DP1.10… ABBY  brd_… expa… csv   2019… 2019-12-05 15:01:51 NA              
-#> 10 DP1.10… ABBY  brd_… basic csv   2019… 2019-12-05 15:01:51 NA              
-#> # … with 1,622 more rows, and 3 more variables: verticalPosition <lgl>,
-#> #   samplingInterval <lgl>, path <chr>
+#> # A tibble: 854 x 15
+#>    product  site  table   type  ext   month timestamp           horizontalPosit…
+#>    <chr>    <chr> <chr>   <chr> <chr> <chr> <dttm>                         <dbl>
+#>  1 DP1.100… BART  brd_co… basic csv   2015… 2020-12-23 14:17:30               NA
+#>  2 DP1.100… BART  brd_co… basic csv   2016… 2020-12-23 14:17:14               NA
+#>  3 DP1.100… BART  brd_co… basic csv   2017… 2020-12-23 14:17:36               NA
+#>  4 DP1.100… BART  brd_co… basic csv   2018… 2020-12-23 14:17:21               NA
+#>  5 DP1.100… BART  brd_co… basic csv   2019… 2020-12-23 14:17:45               NA
+#>  6 DP1.100… BART  brd_co… basic csv   2020… 2020-12-23 14:17:03               NA
+#>  7 DP1.100… BART  brd_co… basic csv   2020… 2020-12-23 14:17:41               NA
+#>  8 DP1.100… BART  brd_pe… basic csv   2015… 2020-12-23 14:17:30               NA
+#>  9 DP1.100… BART  brd_pe… basic csv   2016… 2020-12-23 14:17:14               NA
+#> 10 DP1.100… BART  brd_pe… basic csv   2017… 2020-12-23 14:17:36               NA
+#> # … with 844 more rows, and 7 more variables: verticalPosition <dbl>,
+#> #   samplingInterval <chr>, date_range <chr>, path <chr>, md5 <chr>,
+#> #   crc32 <chr>, release <chr>
 ```
 
 These files will persist between sessions, so you only need to download
@@ -99,25 +102,7 @@ component tables into a single `data.frame`
 
 ``` r
 neon_read("brd_countdata-expanded")
-#> # A tibble: 164,782 x 24
-#>    uid   namedLocation domainID siteID plotID plotType pointID
-#>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
-#>  1 ae11… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  2 399d… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  3 d3e0… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  4 6bab… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  5 a4ae… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  6 c663… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  7 d4b1… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  8 1a68… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  9 a823… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#> 10 0c8a… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#> # … with 164,772 more rows, and 17 more variables: startDate <dttm>,
-#> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
-#> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
-#> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
-#> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
-#> #   clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>
+#> NULL
 ```
 
 ## Database backend
@@ -127,6 +112,7 @@ data from the raw downloaded files using `neon_store()`:
 
 ``` r
 neon_store(table = "brd_countdata-expanded")
+#> table brd_countdata-expanded not found, do you need to download first?
 ```
 
 Alternately, we could import all data tables associated with a given
@@ -134,33 +120,33 @@ product:
 
 ``` r
 neon_store(product = "DP1.10003.001")
-#> Some raw files were detected with updated timestamps.
-#>  Using only most updated file to avoid duplicates.
+#>   importing brd_countdata-basic-DP1.10003.001...
+#>   importing brd_perpoint-basic-DP1.10003.001...
 ```
 
 Access an imported table using `neon_table()` instead of `neon_read()`:
 
 ``` r
-neon_table("brd_countdata-expanded")
-#> # A tibble: 164,782 x 25
-#>    uid   namedLocation domainID siteID plotID plotType pointID
-#>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
-#>  1 ae11… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  2 399d… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  3 d3e0… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  4 6bab… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  5 a4ae… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  6 c663… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  7 d4b1… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  8 1a68… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#>  9 a823… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#> 10 0c8a… LAJA_017.bas… D04      LAJA   LAJA_… distrib… 21     
-#> # … with 164,772 more rows, and 18 more variables: startDate <dttm>,
+neon_table("brd_countdata")
+#> # A tibble: 203,220 x 23
+#>    uid                namedLocation     domainID siteID plotID plotType  pointID
+#>    <chr>              <chr>             <chr>    <chr>  <chr>  <chr>     <chr>  
+#>  1 01cef6c1-5851-407… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  2 43990e9a-1412-427… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  3 d4f59f3c-e3f1-4a7… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  4 4ad44b7d-1eb6-465… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  5 944a3e0e-08de-497… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  6 d4cb0f22-923b-449… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… C1     
+#>  7 0cc69b4f-650f-4f7… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… B1     
+#>  8 c6367f2f-8b74-402… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… B1     
+#>  9 406e8277-2c18-4b2… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… B1     
+#> 10 ef879541-c8d5-41c… HEAL_006.birdGri… D19      HEAL   HEAL_… distribu… B1     
+#> # … with 203,210 more rows, and 16 more variables: startDate <dttm>,
 #> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
 #> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
-#> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
-#> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
-#> #   clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>, file <chr>
+#> #   observerDistance <dbl>, detectionMethod <chr>, visualConfirmation <chr>,
+#> #   sexOrAge <chr>, clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>,
+#> #   file <chr>
 ```
 
 Access the remote database using `neon_db()`. This is a `DBIConnection`
@@ -179,30 +165,34 @@ library(dplyr)
 #> The following objects are masked from 'package:base':
 #> 
 #>     intersect, setdiff, setequal, union
-
 con <- neon_db()
-brd <- tbl(con, "brd_countdata-expanded")
+brd <- tbl(con, "brd_countdata-basic-DP1.10003.001")
 brd %>% filter(siteID == "ORNL")
-#> # A tibble: 7,041 x 25
-#>    uid   namedLocation domainID siteID plotID plotType pointID
-#>    <chr> <chr>         <chr>    <chr>  <chr>  <chr>    <chr>  
-#>  1 bf07… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  2 2bec… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  3 a384… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  4 2a12… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  5 cee1… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  6 0b52… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  7 71c7… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  8 a62b… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#>  9 3793… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#> 10 364b… ORNL_002.bir… D07      ORNL   ORNL_… distrib… B3     
-#> # … with 7,031 more rows, and 18 more variables: startDate <dttm>,
+#> # A tibble: 8,797 x 23
+#>    uid                namedLocation     domainID siteID plotID plotType  pointID
+#>    <chr>              <chr>             <chr>    <chr>  <chr>  <chr>     <chr>  
+#>  1 33425600-9ce1-4a9… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  2 faf5ee98-43e9-40f… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  3 2dc63a4a-3da1-4e0… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  4 7952192b-55b4-48f… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  5 41bf843e-3433-4d0… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  6 e88d8ada-e43a-409… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  7 04604bac-dd88-4d1… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  8 05a8d535-3f59-413… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#>  9 b5cccafa-acbf-41e… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#> 10 63d9e30e-ab6c-41b… ORNL_002.birdGri… D07      ORNL   ORNL_… distribu… A1     
+#> # … with 8,787 more rows, and 16 more variables: startDate <dttm>,
 #> #   eventID <chr>, pointCountMinute <dbl>, targetTaxaPresent <chr>,
 #> #   taxonID <chr>, scientificName <chr>, taxonRank <chr>, vernacularName <chr>,
-#> #   family <chr>, nativeStatusCode <chr>, observerDistance <dbl>,
-#> #   detectionMethod <chr>, visualConfirmation <chr>, sexOrAge <chr>,
-#> #   clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>, file <chr>
+#> #   observerDistance <dbl>, detectionMethod <chr>, visualConfirmation <chr>,
+#> #   sexOrAge <chr>, clusterSize <dbl>, clusterCode <chr>, identifiedBy <chr>,
+#> #   file <chr>
 ```
+
+Note that we need to include the product name in the table name when
+accessing the database, as table names alone may not be unique. RStudio
+users can also list and explore all tables interactively in the
+Connections pane in RStudio using `neon_pane()`.
 
 ## Note on API limits
 
