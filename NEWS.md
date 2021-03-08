@@ -1,3 +1,16 @@
+# v0.4.0
+
+- A new function, `show_deprecated_data()`, shows which if any local data files have been updated in the NEON API.  Such files have changed both the timestamp in their filename and changed content, and older versions are no longer returned by the NEON API.  The warning only appears if the deprecated data files are still available in the local store. 
+- Compatibility update for significant changes to the NEON API, including dropping the use of the `.zip` file packaging in favor of requests to individual files.
+- Support for version tracking of NEON's new RELEASE tags, see: <https://www.neonscience.org/data-samples/data-management/data-revisions-releases>
+- `neon_download()`, `neon_index()`, `neon_read()` gain a `release` filter.  Release tags associated with each file are recorded in the database, but database functions `neon_store()` and `neon_table()` do not directly filter by release tag since the database holds all current data.  
+- `neon_download()` now creates and maintains a 'manifest' tracking the release tag associated with each file by content hash. 
+- We also use the same manifest to filter out downloads where the timestamp changed but the content did not, without having to compute hashes locally. 
+- `neon_index()` gains a `release` column, as well as displaying the hashes recorded in the manifest.  Note: With the .h5.gz files we record the hash of the compressed file even though we don't keep the .gz version around, which is a bit of a slight-of-hand. This means that consecutive calls to neon_download() will no longer perform any downloads whenever the data remains unchanged. 
+- Improvements to `neon_db()` handle multiple connections better
+- Some minor tweaks have been made to how files are mapped to subdirectories in the store, 
+- tables in the database are now named with both the file description and product number to avoid namespace collision
+
 # v0.3.3
 
 - Allow concurrent connections for reading from database.  
