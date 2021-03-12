@@ -214,3 +214,86 @@ product is collected.
 (It would be much more efficient on the NEON server if the API could
 take queries of the from `/data/<product>/<site>`, and pool the results,
 rather than require each month of sampling separately\!)
+
+## Non-stacking files and low-level interface
+
+At it’s core, `neonstore` is simply a mechanism to download files from
+the NEON API. While the `.csv` files from the Observation Systems (OS,
+e.g. bird count surveys), and Instrument Systems (e.g. aquatic sensors)
+are typically stacked into large tables, other products, such as the
+`.laz` and `.tif` images produced by the airborne observation platform
+LIDAR and cameras may require a different approach.
+
+``` r
+# Read in a large file list for illustration purposes
+cper_data <- readr::read_csv("https://minio.thelio.carlboettiger.info/shared-data/neon_data_catalog.csv.gz")
+#> Registered S3 methods overwritten by 'readr':
+#>   method           from 
+#>   format.col_spec  vroom
+#>   print.col_spec   vroom
+#>   print.collector  vroom
+#>   print.date_names vroom
+#>   print.locale     vroom
+#>   str.col_spec     vroom
+#> 
+#> ── Column specification ────────────────────────────────────────────────────────
+#> cols(
+#>   crc32 = col_character(),
+#>   name = col_character(),
+#>   size = col_double(),
+#>   url = col_character()
+#> )
+
+## Typically one would read all files in local store, e.g. list.file(neon_dir())
+df <- neon_filename_parser(cper_data$name)
+```
+
+``` r
+library(dplyr)
+df %>% count(EXT, sort=TRUE)
+#> # A tibble: 13 x 2
+#>    EXT       n
+#>    <chr> <int>
+#>  1 csv   38816
+#>  2 <NA>   8938
+#>  3 zip    4197
+#>  4 tif    3994
+#>  5 txt    3359
+#>  6 xml    3316
+#>  7 kml    1155
+#>  8 dbf    1100
+#>  9 prj    1100
+#> 10 shp    1100
+#> 11 shx    1100
+#> 12 h5     1093
+#> 13 laz     330
+```
+
+We can take a look at all `laz` LIDAR files:
+
+``` r
+df %>% 
+  filter(EXT == "laz")
+#> # A tibble: 330 x 31
+#>    NEON  DOM   SITE  DPL   PRNUM REV   DESC  YYYY_MM PKGTYPE GENTIME EXT   name 
+#>    <chr> <chr> <chr> <chr> <chr> <chr> <chr> <chr>   <chr>   <chr>   <chr> <chr>
+#>  1 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  2 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  3 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  4 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  5 NEON  D10   CPER  DP1   <NA>  <NA>  uncl… <NA>    <NA>    <NA>    laz   NEON…
+#>  6 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  7 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  8 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#>  9 NEON  D10   CPER  DP1   <NA>  <NA>  clas… <NA>    <NA>    <NA>    laz   NEON…
+#> 10 NEON  D10   CPER  DP1   <NA>  <NA>  uncl… <NA>    <NA>    <NA>    laz   NEON…
+#> # … with 320 more rows, and 19 more variables: MISC <chr>, HOR <chr>,
+#> #   VER <chr>, TMI <chr>, YYYY_MM_DD <chr>, DATE_RANGE <chr>, FLHTSTRT <chr>,
+#> #   EHCCCCCC <chr>, IMAGEDATETIME <chr>, NNNN <chr>, NNN <chr>, R <chr>,
+#> #   FLIGHTSTRT <chr>, EEEEEE <chr>, NNNNNNN <chr>, FLHTDATE <chr>,
+#> #   FFFFFF <chr>, README <lgl>, COMPRESSION <lgl>
+```
+
+Note that many of the airborne observation platform (AOP) products, such
+as these LIDAR files, do not include the PRNUM or REV components that
+make up part of the `productCode`s used in the NEON `product` tables.

@@ -9,7 +9,6 @@ author:
     affiliation: neon
   - name: "Claire Lunch"
     affiliation: neon
-    
 address:
   - code: ucb
     address: "Dept of Environmental Science, Policy, and Management, University of California Berkeley, Berkeley CA 94720-3114, USA"
@@ -19,7 +18,7 @@ address:
     address: "Virginia Tech"
 abstract: |
   The National Ecological Observatory Network
-journal: "Ecoinformatics"
+journal: preprint
 date: "`r Sys.Date()`"
 bibliography: refs.bib
 layout: 3p
@@ -43,7 +42,10 @@ library(neonstore)
 Sys.setenv("NEONSTORE_HOME" = tempfile())
 ```
 
-The National Ecological Observatory Network (NEON) provides open access ecological data as 181 (active and planned) data products at 81 (permanent and relocatable) sites throughout the United States.  The `neonstore` R package seeks to provide quick, convenient access and persistent storage of NEON data files.  `neonstore` design emphasizes simplicity and data provenance. Here, we describe the design, use, and rationale for the package.
+The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing envionmental science [@NAS_NEON; @NAS_GRAND].  
+
+
+provides open access ecological data as 181 (active and planned) data products at 81 (permanent and relocatable) sites throughout the United States.  The `neonstore` R package seeks to provide quick, convenient access and persistent storage of NEON data files.  `neonstore` design emphasizes simplicity and data provenance. Here, we describe the design, use, and rationale for the package.
 
 ## Rationale and package design
 
@@ -120,11 +122,14 @@ Even adding a handful of products can generate thousands or hundreds of thousand
 neon_index()
 ```
 
-`neon_index()` takes optional arguments such as `product`, `start_date`, `end_date`, and `site` to allow for convenient sub-setting.  Because most observational and instrument-based products are divided by site and month, this is still not a convenient way to browse the data.
 
+`neon_index()` takes optional arguments such as `product`, `start_date`, `end_date`, and `site` to allow for convenient sub-setting.  Because most observational and instrument-based products are divided by site and month, this is still not a convenient way to browse the data.  The helper function, `neon_store()`, summarizes products that all share the same file description and can thus be easily stacked.  Like `neon_index()`, optional arguments can filter the results to specific products, dates, and sites.  
 
+```{r}
+neon_store()
+```
 
-We can read in all the individual files  
+In this example, we recognize several tables corresponding to the NEON bird survey, product `DP01.10003.001` (all prefixed with `brd_`).  We can read in all the individual files  
 
 
 ```{r}
