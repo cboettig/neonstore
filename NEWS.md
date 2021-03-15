@@ -1,3 +1,7 @@
+# v0.4.1
+
+- More robust de-duplication (even if `neon_store()` import terminates prematurely, [#48])
+
 # v0.4.0
 
 - A new function, `show_deprecated_data()`, shows which if any local data files have been updated in the NEON API.  Such files have changed both the timestamp in their filename and changed content, and older versions are no longer returned by the NEON API.  The warning only appears if the deprecated data files are still available in the local store. 
