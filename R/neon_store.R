@@ -160,7 +160,7 @@ duckdb_memory_manager <- function(con){
     ## power cycle to force import
     ## shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
-    DBI::dbDisconnect(db, shutdown = TRUE)
+    DBI::dbDisconnect(con, shutdown = TRUE)
     con <- neon_db(dir, read_only = FALSE)
   }
   con
