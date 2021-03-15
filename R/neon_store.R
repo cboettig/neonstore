@@ -154,7 +154,7 @@ db_chunks <- function(con,
 
 
 duckdb_memory_manager <- function(con){
-  if(!inherits("duckdb_connection")) return(con)
+  if(!inherits(con, "duckdb_connection")) return(con)
   if(Sys.getenv("duckdb_restart", TRUE)){
     message("finalizing duckdb import to disk...")
     ## power cycle to force import
