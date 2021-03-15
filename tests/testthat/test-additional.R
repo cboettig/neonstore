@@ -29,20 +29,20 @@ test_that("bigger neon_store() import", {
   x <- neon_download(product = "DP1.10003.001",
                      start_date="2014-01-01",
                      end_date = "2017-01-01",
-                     type = "expanded")
+                     type = "basic")
   
-  y <- neon_store(table = "brd_countdata", n = 50)
+  y <- neon_store(table = "brd_countdata-basic", n = 50)
   expect_true(nrow(y)> 0)
-  z <- neon_store(table = "brd_countdata", n = 50)
+  z <- neon_store(table = "brd_countdata-basic", n = 50)
   expect_true(is.null(z))
   
   db <- neon_db()
   x <- DBI::dbListTables(db)
-  expect_true("brd_countdata-expanded-DP1.10003.001" %in% x)
+  expect_true("brd_countdata-basic-DP1.10003.001" %in% x)
   
   expect_true("provenance" %in% x)
   
-  tbl <- DBI::dbReadTable(db, "brd_countdata-expanded-DP1.10003.001")
+  tbl <- DBI::dbReadTable(db, "brd_countdata-basic-DP1.10003.001")
   expect_is(tbl, "data.frame")
   expect_true(nrow(tbl) > 0)
   expect_true(any(grepl("observerDistance", colnames(tbl))))

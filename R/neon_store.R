@@ -154,7 +154,7 @@ db_chunks <- function(con,
 
 
 duckdb_memory_manager <- function(con){
-  if(Sys.getenv("duckdb_restart", TRUE)){
+  if(Sys.getenv("duckdb_restart", FALSE)){
     ## power cycle to force import
     ## shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
@@ -191,17 +191,18 @@ omit_imported <- function(con, index){
     ## table doesn't exist yet,
     if (!(db_table %in% existing)) {
       query <- paste0("SELECT * FROM zzzfilter ", 
-                      "WHERE ((product == '",product,"') ",
-                      "AND (table == '",table, "))")
+                      "WHERE ((\"product\" = '",product,"') ",
+                      "AND (\"table\" = '",table, "'))")
       df <- DBI::dbGetQuery(con, query)
       return(df)
     }
     ## filter 
     query <- paste0("SELECT * FROM zzzfilter ", 
-                    "WHERE ((product == '",product,"') ",
-                    "AND (table == '",table, ")",
-                    "AND zzzfilter.id NOT IN ( SELECT file FROM",
-                    "'", db_table, "');")
+                    "WHERE (",
+                    "(\"product\" = '",product,"') AND ",
+                    "(\"table\" = '",table, "') AND ",
+                    "zzzfilter.id NOT IN ( SELECT \"file\" FROM ",
+                    "\"", db_table, "\"))")
     df <- DBI::dbGetQuery(con, query)
     df
   })
