@@ -19,7 +19,6 @@ neon_store <- function(table = NA,
                        quiet = FALSE,
                        ...)
 {
-  
   ## Determine which files will be imported:
   index <- neon_index(table = table,
                       product = product,
@@ -43,8 +42,6 @@ neon_store <- function(table = NA,
   
   ## standardize table name with product name:
   tables <- stackable_tables(paste0(index$table, "-", index$product))
-
-  
 
   ## Omit already imported files
   index <- omit_imported(db, index)
@@ -74,18 +71,17 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(db, "provenance", as.data.frame(index), append = TRUE)
   }
   
+  db <- duckdb_memory_manager(db)
   neon_disconnect(db = db)
   invisible(index)
 }
 
 
-
-
 stackable_tables <- function(tables){
   tables <- unique(tables)
+  ## We do not attempt to stack these:
   tables <- tables[!grepl("^variables", tables)]
   tables <- tables[!grepl("^readme", tables)]
-  
   tables
 }
 
@@ -158,12 +154,13 @@ db_chunks <- function(con,
 
 
 duckdb_memory_manager <- function(con){
-  if(Sys.getenv("duckdb_restart", FALSE)){
+  if(!inherits(con, "duckdb_connection")) return(con)
+  if(Sys.getenv("duckdb_restart", TRUE)){
+    message("finalizing duckdb import to disk...")
     ## power cycle to force import
     ## shouldn't be necessary when memory management improves in duckdb...
     dir <- dirname(con@driver@dbdir)
-    db <- neon_db(dir, read_only = FALSE)
-    DBI::dbDisconnect(db, shutdown = TRUE)
+    DBI::dbDisconnect(con, shutdown = TRUE)
     con <- neon_db(dir, read_only = FALSE)
   }
   con
@@ -171,25 +168,55 @@ duckdb_memory_manager <- function(con){
 
 #' @importFrom DBI dbWriteTable dbListTables dbGetQuery
 omit_imported <- function(con, index){
-  index$id <- basename(index$path)
   
-  if( !("provenance" %in% DBI::dbListTables(con)) ){
-    return(index)
-  }
+  # if nothing here, return empty data.frame
   if(is.null(index)){
     return(data.frame())
   }
-    
-    
+  # from import index, here are table names in database format
+  db_tables <- stackable_tables(paste0(index$table, "-", index$product))
+  existing <- DBI::dbListTables(con)
+  
+  # basename for comparison
+  index$id <- basename(index$path)
+  
+  ## place the index into the database temporarily so we can use it
   DBI::dbWriteTable(con, "zzzfilter", as_tibble(index),
                     overwrite = TRUE, temporary = TRUE)
-  query <- paste0(
-    'SELECT * FROM zzzfilter ', 
-    'WHERE zzzfilter.id NOT IN ( SELECT ID FROM provenance );'
-  )
   
-  df <- DBI::dbGetQuery(con, query)
-  df
+
+  out <- lapply(db_tables, function(db_table){
+    who <- split_db_tablename(db_table)
+    table <- who[1]
+    product <- who[2]
+    ## table doesn't exist yet,
+    if (!(db_table %in% existing)) {
+      query <- paste0("SELECT * FROM zzzfilter ", 
+                      "WHERE ((\"product\" = '",product,"') ",
+                      "AND (\"table\" = '",table, "'))")
+      df <- DBI::dbGetQuery(con, query)
+      return(df)
+    }
+    ## filter 
+    query <- paste0("SELECT * FROM zzzfilter ", 
+                    "WHERE (",
+                    "(\"product\" = '",product,"') AND ",
+                    "(\"table\" = '",table, "') AND ",
+                    "zzzfilter.id NOT IN ( SELECT \"file\" FROM ",
+                    "\"", db_table, "\"))")
+    df <- DBI::dbGetQuery(con, query)
+    df
+  })
+  ## return index slices
+  do.call(rbind, out)
+}
+
+
+split_db_tablename <- function(db_table) {
+  table_regex <- paste0("(^.*)", "-(", paste(DPL, PRNUM, REV, sep="."), ")")
+  product <- gsub(table_regex,"\\2", db_table)
+  table <- gsub(table_regex,"\\1", db_table)
+  c(table, product)
 }
 
 
