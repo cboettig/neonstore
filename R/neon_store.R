@@ -237,9 +237,9 @@ drop_deprecated <- function(table,
                      product = product,
                      dir = dir, 
                      deprecated = TRUE)
-  key_cols <- c("product", "site", "month", "table", 
-                "verticalPosition", "horizontalPosition")
-  deprecated <- duplicated(meta[key_cols])
+  meta <- flag_deprecated(meta)
+ 
+  deprecated <- meta$deprecated
   
   if(!any(deprecated)){
    return(invisible(NULL))
