@@ -1,3 +1,7 @@
+# v0.4.2
+
+- Bugfix de-deplication within `neon_store()` [#50]
+
 # v0.4.1
 
 - More robust de-duplication (even if `neon_store()` import terminates prematurely, [#48])
