@@ -222,7 +222,7 @@ split_db_tablename <- function(db_table) {
 
 drop_deprecated <- function(table, 
                             dir = neon_dir(),
-                            con = neon_db()){
+                            con = neon_db(read_only = FALSE)){
   
   if( !(table %in% DBI::dbListTables(con)) ){
     return(invisible(NULL))
