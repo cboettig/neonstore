@@ -1,6 +1,7 @@
 # v0.4.2
 
-- Bugfix de-deplication within `neon_store()` [#50]
+- Bugfix de-duplication within `neon_store()` [#50]
+- Fix paths on unparse-able names [#51]
 
 # v0.4.1
 
