@@ -28,21 +28,22 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
+Depends: R (>= 4.0.0)
 Imports: 
     DBI,
     duckdb (>= 0.2.3),
-    vroom,
     httr,
-    R.utils,
-    zip,
-    jsonlite,
-    tibble,
     progress,
+    R.utils,
     tools,
+    thor,
     utils,
-    thor
+    vroom,
+    zip
 RoxygenNote: 7.1.1
 Suggests: 
+    tibble,
+    jsonlite,
     testthat,
     covr,
     xml2,

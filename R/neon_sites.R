@@ -4,8 +4,6 @@
 #' to the `/sites` endpoint.
 #' @inheritParams neon_download
 #' @importFrom httr GET content
-#' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble
 #' @export
 neon_sites <- function(api = "https://data.neonscience.org/api/v0", 
                        .token = Sys.getenv("NEON_TOKEN")){

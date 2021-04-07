@@ -308,12 +308,12 @@ download_filters <- function(files,
 neon_subdir <- function(path, dir){
     n <- basename(path)
     df <- neon_filename_parser(n)
-    if(nrow(df) == 0){ # not parsable string
+    if(nrow(df) == 0 || all(is.na(df))){ # not parsable string
       return(file.path(dir, n))
     }
 
 
-    product <- paste_na(df$DPL, df$PRNUM, df$REV)
+    product <- paste_na(df$DPL, df$PRNUM, df$REV, sep = ".", char = character())
     dirs <- file.path(dir, paste(product, 
                                  na_to_char(df$SITE), 
                                  na_to_char(df$YYYY_MM), sep = "/"))
