@@ -181,7 +181,7 @@ omit_imported <- function(con, index){
   index$id <- basename(index$path)
   
   ## place the index into the database temporarily so we can use it
-  DBI::dbWriteTable(con, "zzzfilter", as_tibble(index),
+  DBI::dbWriteTable(con, "zzzfilter", tibble::as_tibble(index),
                     overwrite = TRUE, temporary = TRUE)
   
 

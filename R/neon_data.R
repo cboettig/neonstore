@@ -2,7 +2,6 @@
 
 #' @importFrom progress progress_bar
 #' @importFrom httr GET content
-#' @importFrom jsonlite fromJSON
 #' @noRd
 #' @examples
 #' x <- neon_data("DP1.10003.001") 
