@@ -219,7 +219,7 @@ name_parse <- function(path, pattern, col_names, split = ".", fixed = TRUE){
   y <- path[grepl(pattern, x)] # operate only on those matching the pattern
   z <- basename(y)
   tmp <- strsplit(z, split, fixed = fixed)
-  out <- as_tibble(do.call("rbind", tmp), .name_repair = "minimal")
+  out <- tibble::as_tibble(do.call("rbind", tmp), .name_repair = "minimal")
   
   colnames(out) <- col_names
   out <- out[ !is.na(colnames(out)) ]
@@ -240,7 +240,7 @@ name_parse_gsub <- function(path, pattern, col_names){
   for(i in seq_along(col_names)){
     tmp[[i]] <- gsub(pattern, paste0("\\", as.character(i)), z)
   }
-  out <- as_tibble(tmp, .name_repair = "check_unique")
+  out <- tibble::as_tibble(tmp, .name_repair = "check_unique")
   out$name <- y
   #out$path <- path
   out
@@ -368,7 +368,7 @@ schema <- function(){
   
   x <- as.list(rep(NA, length(cols)))
   names(x) <- cols
-  as_tibble(x)[0,]
+  tibble::as_tibble(x)[0,]
 }
   
 

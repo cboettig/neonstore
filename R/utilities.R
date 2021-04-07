@@ -18,13 +18,14 @@ na_bool_to_char <- function(df){
 
 na_to_char <- function(x, char = ""){
   x <- as.character(x)
+  if(length(char) == 0) return(stats::na.omit(x))
   x[is.na(x)] <- char
   x
 }
 
 ## Whoa nelly, make this faster
-paste_na <- function(..., sep = "."){
-  do.call("paste", c(lapply(list(...), na_to_char), list(sep = sep)))
+paste_na <- function(..., sep = ".", char = ""){
+  do.call("paste", c(lapply(list(...), na_to_char, char = char), list(sep = sep)))
 }
 
 
