@@ -26,7 +26,6 @@ Description: The National Ecological Observatory Network (NEON) provides access
   to work with tables that are far to big to fit into memory.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 Depends: R (>= 4.0.0)
 Imports: 
