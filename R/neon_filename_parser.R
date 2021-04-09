@@ -145,7 +145,8 @@ IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
 OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
                  PKGTYPE, GENTIME, "csv$", sep = "\\.")
 ##
-## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv  (Actually LAB data)
+## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv  
+## (Technically considered LAB data, which could be shared across products)
 OS_DATA3 <- paste(NEON, DESC, DESC, "csv$", sep = "\\.")
 ## LAB parser: note GENTIME is now part of the standard
 LAB_META <- paste(NEON, LAB, DESC, GENTIME, "([0-9a-z]+)", sep = "\\.")
