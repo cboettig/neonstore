@@ -145,8 +145,11 @@ IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
 OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
                  PKGTYPE, GENTIME, "csv$", sep = "\\.")
 ##
-## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv
+## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv  (Actually LAB data)
 OS_DATA3 <- paste(NEON, DESC, DESC, "csv$", sep = "\\.")
+## LAB parser: note GENTIME is now part of the standard
+LAB_META <- paste(NEON, LAB, DESC, GENTIME, "([0-9a-z]+)", sep = "\\.")
+
 
 ## Eddy Covariance is a single product, with its own formats:
 EC_ZIP <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", 
@@ -178,8 +181,6 @@ META <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC,
 EML <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, "EML",
              "\\d{8}-\\d{8}", GENTIME, "xml$", sep = "\\.")
 
-## LAB parser
-LAB_META <- paste(NEON, LAB, DESC, GENTIME, "([0-9a-z]+)", sep = "\\.")
 
 ################# AOP Products ###############################################
 CAMERA <-	paste0(FLHTSTRT,"_","EH",CCCCCC, "\\(", IMAGEDATETIME, "\\)-",
