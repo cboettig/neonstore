@@ -386,3 +386,8 @@ these LIDAR files, do not include the PRNUM or REV components that make up part
 of the `productCode`s used in the NEON `product` tables.  
 
 
+
+## Appendix
+
+Discuss the NEON filename convention parser, link to `neon_filename_parser.R` source for regex patterns.  
+Discuss cases of NEON changing filename conventions.
