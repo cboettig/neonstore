@@ -88,6 +88,7 @@ neon_filename_parser <- function(x){
     ec_parser(x),
     misc_parser(x),
     aop_parser(x),
+    lab_parser(x),
     schema() # ensure all columns are present
   ))
   #unique(df)
@@ -130,7 +131,7 @@ EEEEEE <- "(\\d{6})"
 NNNNNNN <- "(\\d{7})"
 EXT <- "\\.([0-9a-z]+$)"
 
-
+LAB <- ("(\\w+)")
 
 ############## REGEXs for specific Filename types #############################
 ## Based on:  https://data.neonscience.org/file-naming-conventions
@@ -144,8 +145,12 @@ IS_DATA <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, HOR, VER,
 OS_DATA2 <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC, 
                  PKGTYPE, GENTIME, "csv$", sep = "\\.")
 ##
-## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv
+## NEON.Bird_Conservancy_of_the_Rockies.brd_personnel.csv  
+## (Technically considered LAB data, which could be shared across products)
 OS_DATA3 <- paste(NEON, DESC, DESC, "csv$", sep = "\\.")
+## LAB parser: note GENTIME is now part of the standard
+LAB_META <- paste(NEON, LAB, DESC, GENTIME, "([0-9a-z]+)", sep = "\\.")
+
 
 ## Eddy Covariance is a single product, with its own formats:
 EC_ZIP <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", 
@@ -154,7 +159,7 @@ EC_MONTHLY <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
                     YYYY_MM, PKGTYPE, "h5$", sep = "\\.")
 EC_DAILY <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
                   YYYY_MM_DD, PKGTYPE, "h5$", sep = "\\.")
-## More recent EC products inculde the GENTIME field as well
+## More recent EC products include the GENTIME field as well
 EC_MONTHLY2 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
                      YYYY_MM, PKGTYPE, GENTIME, "h5$", sep = "\\.")
 EC_DAILY2 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
@@ -163,8 +168,6 @@ EC_DAILY2 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
 EC_DAILY3 <- paste(NEON, DOM, SITE, "DP4\\.00200\\.001", DESC,
                    YYYY_MM_DD, PKGTYPE, GENTIME, "h5", "gz$", sep = "\\.")
 
-
-is_sensor_data <- function(x) any(grepl(IS_DATA,x))
 
 ######### Miscellaneous or Unspecified product types #########################
 ## This next group is not explicitly specified by the standard
@@ -178,6 +181,7 @@ META <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, DESC,
               GENTIME, "csv", sep = "\\.")
 EML <- paste(NEON, DOM, SITE, DPL, PRNUM, REV, "EML",
              "\\d{8}-\\d{8}", GENTIME, "xml$", sep = "\\.")
+
 
 ################# AOP Products ###############################################
 CAMERA <-	paste0(FLHTSTRT,"_","EH",CCCCCC, "\\(", IMAGEDATETIME, "\\)-",
@@ -199,6 +203,9 @@ ZIP_AOP3 <- paste0(paste(NEON,DOM,SITE,DPL,EEEEEE, NNNNNNN,
 ZIP_AOP2 <- paste0(paste(NEON,DOM,SITE,DPL,FLHTDATE, FFFFFF, DESC, sep = "_"),
                    "\\.(zip)$")
 
+
+
+is_sensor_data <- function(x) any(grepl(IS_DATA,x))
 
 
 ## Still leaves some unidentified XML formats:
@@ -247,6 +254,9 @@ name_parse_gsub <- function(path, pattern, col_names){
 }
 
 ## We combine one strategy
+lab_parser <- function(x) {
+  name_parse(x, LAB_META, c("NEON", "LAB", "DESC", "GENTIME", "EXT"))
+}
 
 os_is_parser <- function(x){
   ragged_bind(list(
