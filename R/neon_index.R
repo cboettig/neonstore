@@ -84,7 +84,7 @@ neon_index <- function(product = NA,
   ## Add release information; (optional for read-only filesystem)
   meta <- tryCatch(
     add_release(meta, dir = dir),
-    function(e) return(meta),
+    error = function(e) return(meta),
     finally = meta)
 
   ## Apply filters
