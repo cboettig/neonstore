@@ -1,3 +1,8 @@
+# v0.4.3
+
+- allow `neon_index()` to run on read-only filesystems
+- fix updated parsing of lab names [#52]
+
 # v0.4.2
 
 - Bugfix de-duplication within `neon_store()` [#50]
