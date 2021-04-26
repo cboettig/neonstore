@@ -47,8 +47,6 @@ focal_sites <- c("BARC", "POSE")
 # Will download everything the first time, and then only download updated files:
 #Water quality
 neon_download("DP1.20288.001", site =  focal_sites)
-#Precipiation: NO data at these sites?
-neon_download("DP1.00006.001", site =  focal_sites)
 # Wind Speed
 neon_download("DP1.20059.001", site =  focal_sites)
 # Barometric Pressure
@@ -70,7 +68,6 @@ neon_download("DP1.20033.001", site =  focal_sites)
 
 # will import downloaded files into local SQL DB:
 neon_store(product = "DP1.20288.001") #Water Quality
-neon_store(product = "DP1.00006.001") # Precip
 neon_store(product = "DP1.20059.001") # Wind Speed
 neon_store(product = "DP1.20004.001") # pressure
 neon_store(product = "DP1.20046.001") # temperature
@@ -81,4 +78,20 @@ neon_store(product = "DP1.20217.001") # Groundwater temperature
 neon_store(product = "DP1.20033.001") # Nitrate
 
 
+neon_download("DP4.00001.001") # summary weather
+
+neon_download("DP1.00003.001") # Temp
+neon_download("DP1.00006.001") # Precipitation (terrestrial sites)
+neon_download("DP1.00098.001") # Humidity (includes temp)
+
+neon_store(product = "DP4.00001.001") # Summary weather
+
+neon_store(product = "DP1.00006.001", table = "THRPRE_30min-basic") # Precip, thoughfall
+neon_store(product = "DP1.00098.001", table = "RH_30min") # Humidity, note two different sensor positions
+neon_store(product = "DP1.00003.001", table= "TAAT_30min") # Temp
+
 })
+## Peak at the readme for a product.  Consider a README fn?  open in viewer?
+# index <- neon_index()
+# index %>% filter(product == "DP1.00003.001", table=="readme") %>% pull(path) %>% getElement(1) %>% usethis::edit_file()
+
