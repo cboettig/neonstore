@@ -76,18 +76,18 @@ vroom_each <- function(files,
       width = 80)
   }
   
-  suppress_msg({
     groups <-  lapply(files,
                       function(x){
                         if(progress) pb$tick()
                         out <- vroom::vroom(x, guess_max = 1e5,
                                             altrep = altrep,
                                             progress = vroom_progress,
+                                            show_col_types = FALSE,
                                             ...)
                         out$file <- basename(x)
                         out
                       })
-  })
+
   suppressWarnings({
     df <- ragged_bind(groups)
     na_bool_to_char(df)
@@ -103,19 +103,19 @@ vroom_many <- function(files,
                        progress = FALSE,
                        vroom_progress = FALSE,
                        ...){
-  suppress_msg({ ## We don't need vroom telling us every table spec!
     df <- tryCatch(vroom::vroom(files, 
                                 guess_max = 5e4, 
                                 altrep = altrep,
                                 progress = vroom_progress,
+                                show_col_types = FALSE,
                                 ...),
                    error = function(e) vroom_ragged(files, 
                                                     guess_max = 5e4,
                                                     altrep = altrep,
                                                     vroom_progress = FALSE,
+                                                    show_col_types = FALSE,
                                                     ...),
                    finally = NULL)
-  })
   na_bool_to_char(df)
 }
 
@@ -124,14 +124,14 @@ vroom_many <- function(files,
 vroom_ragged <- function(files, altrep = FALSE, vroom_progress = FALSE, ...){
   
   ## We read the 1st line of every file to determine schema  
-  suppress_msg(
     schema <- lapply(files, 
                      vroom::vroom, 
                      n_max = 1, 
                      altrep = altrep, 
                      progress = FALSE,
+                     show_col_types = FALSE,
                      ...)
-  )
+  
   ## Now, we read in tables in groups of matching schema,
   ## filling in additional columns as in bind_rows.
   
@@ -249,15 +249,5 @@ as_type <- function(x, type){
     "integer" = as.integer(x),
     "logical" = as.logical(x),
     x)
-}
-
-
-
-suppress_msg <- function(expr, pattern = c("Rows:")){
-  withCallingHandlers(expr,
-                      message = function(e){
-                        if(any(vapply(pattern, grepl, logical(1), e$message)))
-                          invokeRestart("muffleMessage")
-                      })
 }
 

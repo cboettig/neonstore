@@ -1,3 +1,7 @@
+# v0.4.4
+
+- Use vroom >= 1.5.1 and avoid verbose vroom messages in vroom >= 1.5.0; [#53]
+
 # v0.4.3
 
 - allow `neon_index()` to run on read-only filesystems

@@ -1,6 +1,6 @@
 Package: neonstore
 Title: NEON Data Store
-Version: 0.4.3
+Version: 0.4.4
 Authors@R: c(person(
               "Carl", "Boettiger", 
               email = "cboettig@gmail.com", 
@@ -36,7 +36,7 @@ Imports:
     tools,
     thor,
     utils,
-    vroom,
+    vroom (>= 1.5.1),
     zip
 RoxygenNote: 7.1.1
 Suggests: 
