@@ -1,5 +1,5 @@
 bench::bench_time({
-  
+
 library(neonstore)
 options(duckdb_memory_limit=10)
 
@@ -48,7 +48,7 @@ neon_store(product = "DP1.10022.001") # Beetles
 neon_store(product = "DP1.10093.001") # Ticks
 
 ## Aquatics SQL Import
-neon_store(product =c("DP1.20053.001","DP1.20288.001")) 
+neon_store(product =c("DP1.20053.001","DP1.20288.001"))
 neon_store(product="DP1.20264.001", table = "TSD_30")
 
 ## Terrestrial SQL Import

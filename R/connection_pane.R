@@ -111,4 +111,8 @@ in_chk <- function() {
   )
 }
 
+## Shouldn't be required globally, but seems that RStudio panel
+## now tries to automate creation of the connections pane but doesn't do it correctly,
+## or else duckdb implementation is missing some feature. 
+options(rstudio.connectionObserver.errorsSuppressed = TRUE)
 
