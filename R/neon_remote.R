@@ -41,5 +41,12 @@ neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
 neon_remote <- function(tbl = "", product = "", type = "", db = neon_remote_db()){
   labels <- names(db)
   i <- grepl(tbl, labels) & grepl(product, labels)  & grepl(type, labels)
-  db[i]
+  if(sum(i) > 1){
+    message(paste0("multiple matches found\n", 
+                  "returning list with tables:\n",
+                  paste(labels[i], collapse = "\n")))
+    return(invisible(db[i]))
+  }
+    
+  db[[which(i)]]
 }
