@@ -18,7 +18,7 @@
 #' @importFrom utils bibentry person
 #' @export
 #' @examples 
-#' 
+#' \donttest{ # may be slow
 #' neon_citation("DP1.10003.001")
 #' 
 #' ## or the citation for all products in store:
@@ -26,6 +26,7 @@
 #' 
 #' ## as bibtex
 #' format(neon_citation("DP1.10003.001"), "bibtex")
+#' }
 #' 
 neon_citation <- function(product = NULL, 
                           download_date = Sys.Date(),
