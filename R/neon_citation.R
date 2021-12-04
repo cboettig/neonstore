@@ -17,7 +17,7 @@
 #' 
 #' @importFrom utils bibentry person
 #' @export
-#' @examples 
+#' @examplesIf interactive()
 #' \donttest{ # may be slow
 #' neon_citation("DP1.10003.001")
 #' 
