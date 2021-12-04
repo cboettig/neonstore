@@ -51,5 +51,6 @@ Suggests:
     rhdf5,
     curl,
     openssl,
-    digest
+    digest,
+    arrow
 Language: en-US

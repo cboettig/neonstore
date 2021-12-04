@@ -4,3 +4,4 @@
 .Ruserdata
 .Renviron
 README_cache
+neon_parquet/*
