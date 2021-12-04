@@ -1,5 +1,16 @@
-
-
+#' Establish a remote database connection using `arrow`
+#' 
+#' 
+#' Provides a remote connection 
+#' @param host An S3-compliant host address
+#' @param bucket bucket name
+#' @param path path (prefix) on bucket to parquet files
+#' 
+#' @export
+#' @examplesIf interactive()
+#' 
+#' db <- neon_remote_db()
+#' 
 neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
                           bucket = "shared-data",
                           path = "neonstoredb") {
@@ -38,6 +49,20 @@ neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
   db
 }
 
+#' neon_remote 
+#'  
+#' select a table from the remote connection
+#' @param tbl table name (pattern match regex)
+#' @param product product code
+#' @param type basic or extended (if necessary to distinguish)
+#' @export
+#' @return a arrow::FileSystemDataset object, or a named list of such
+#' objects if multiple matches are found.  This table is not downloaded
+#' but remains on the remote storage location, but can be filtered
+#' with dplyr functions like filter and select, and can also be
+#' grouped and summarised, all without ever downloading the whole table.
+#' Use [dplyr::collect()] to download the (possibly filtered) table into
+#' and pull into memory.  
 neon_remote <- function(tbl = "", product = "", type = "", db = neon_remote_db()){
   labels <- names(db)
   i <- grepl(tbl, labels) & grepl(product, labels)  & grepl(type, labels)
