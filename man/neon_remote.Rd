@@ -14,6 +14,9 @@ neon_remote(tbl = "", product = "", type = "", db = neon_remote_db())
 \item{product}{product code}
 
 \item{type}{basic or extended (if necessary to distinguish)}
+
+\item{db}{a \link{neon_remote_db} connection.  If not provided, one will be created,
+but it is faster to pass this on for re-use in multiple \code{neon_remote} calls.}
 }
 \value{
 a arrow::FileSystemDataset object, or a named list of such

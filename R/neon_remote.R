@@ -55,6 +55,8 @@ neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
 #' @param tbl table name (pattern match regex)
 #' @param product product code
 #' @param type basic or extended (if necessary to distinguish)
+#' @param db a [neon_remote_db] connection.  If not provided, one will be created,
+#' but it is faster to pass this on for re-use in multiple `neon_remote` calls.
 #' @export
 #' @return a arrow::FileSystemDataset object, or a named list of such
 #' objects if multiple matches are found.  This table is not downloaded
