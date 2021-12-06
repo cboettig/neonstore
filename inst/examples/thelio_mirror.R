@@ -1,7 +1,20 @@
 bench::bench_time({
 
 library(neonstore)
-options(duckdb_memory_limit=10)
+
+  
+  mem_limit <- function(mem_limit = 16, units = "GB"){
+    DBI::dbExecute(db, paste0("PRAGMA memory_limit='", mem_limit, " ", units,"'"))
+  }
+  
+  enable_parallel <- function(duckdb_cores = arrow::cpu_count()){
+    DBI::dbExecute(neon_db(), paste0("PRAGMA threads=", arrow::cpu_count()))
+  }
+  mem_limit()
+  enable_parallel()
+  
+  
+# neonstore::neon_delete_db()
 
 tick_sites <- c("BLAN", "ORNL", "SCBI", "SERC", "KONZ", "TALL", "UKFS")
 ter_sites <- c("BART", "KONZ", "SRER", "OSBS")
