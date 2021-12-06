@@ -71,10 +71,10 @@ neon_store(product="DP4.00200.001") # hdf5
 # Terrestrial meteorology
 neon_store(product = "DP1.00006.001", table = "THRPRE_30min-basic") # Precip, thoughfall
 neon_store(product = "DP1.00098.001", table = "RH_30min") # Humidity, note two different sensor positions
-neon_store(product = "DP1.00003.001", table= "TAAT_30min") # Temp
-neon_store(product = "DP1.00002.001", table="SAAT_30min-basic")
-neon_store(product = "DP1.00023.001", table = "SLRNR_30min-basic")
-neon_store(product = "DP1.00006.001", table = "SECPRE_30min-basic")
+neon_store(product = "DP1.00003.001", table= "TAAT_30min") # Temp (triple-aspirated)
+neon_store(product = "DP1.00002.001", table="SAAT_30min-basic") #Temp single aspirated
+neon_store(product = "DP1.00023.001", table = "SLRNR_30min-basic") # Short and long wave radiation
+neon_store(product = "DP1.00006.001", table = "SECPRE_30min-basic") # Precipitation secondary
 neon_store(product = "DP1.00100.001") #empty
 
 
@@ -98,6 +98,11 @@ neon_store("DP1.00098.001", table = "30") # Humidity (includes temp)
 
 })
 ## Peak at the readme for a product.  Consider a README fn?  open in viewer?
-# index <- neon_index()
 # index %>% filter(product == "DP1.00003.001", table=="readme") %>% pull(path) %>% getElement(1) %>% usethis::edit_file()
 
+## Get full names and descriptions of all products imported into this index: 
+index <- neon_index()
+products <- neon_products()
+index %>% select(product) %>%  distinct() %>% 
+  left_join(products, by =c(product="productCode")) %>% 
+  select(product, productName, productDescription) 
