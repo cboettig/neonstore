@@ -4,7 +4,7 @@
 \alias{neon_table}
 \title{Return a neon table from the database}
 \usage{
-neon_table(table, site = NA, db = neon_db())
+neon_table(table, site = NA, db = neon_db(), lazy = FALSE)
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
@@ -13,6 +13,17 @@ see \link{neon_index}}
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 
 \item{db}{a connection to the database, see \verb{[neon_db()]}.}
+
+\item{lazy}{logical, default FALSE. Should we return a remote dplyr
+connection to the table in duckdb? This can substantially improve
+performance and avoid out-of-memory errors when working with very large
+tables. However, not all R operations can be performed on a remote table,
+only (most) functions from \code{dplyr} and \code{tidyr}, as these can be
+translated automatically to SQL language used by the remote database.
+Use \code{dplyr} functions like \code{\link[dplyr:filter]{dplyr::filter()}}, \code{\link[dplyr:group_by]{dplyr::group_by()}}, and
+\code{\link[dplyr:summarise]{dplyr::summarise()}} to subset
+the data appropriately within the remote table before calling
+\verb{[dplyr::collect()]} to import the data fully into R.}
 }
 \description{
 Return a neon table from the database

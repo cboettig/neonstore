@@ -52,5 +52,6 @@ Suggests:
     curl,
     openssl,
     digest,
-    arrow
+    arrow,
+    dplyr
 Language: en-US

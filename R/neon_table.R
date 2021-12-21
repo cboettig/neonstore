@@ -6,17 +6,35 @@
 #' We cannot filter on start_date or end_date since these
 #' come only from the filename metadata and are only added
 #' to instrument tables, not observation tables etc.
-#' 
+#' @param lazy logical, default FALSE. Should we return a remote dplyr 
+#' connection to the table in duckdb? This can substantially improve 
+#' performance and avoid out-of-memory errors when working with very large
+#' tables. However, not all R operations can be performed on a remote table,
+#' only (most) functions from `dplyr` and `tidyr`, as these can be 
+#' translated automatically to SQL language used by the remote database.
+#' Use `dplyr` functions like [dplyr::filter()], [dplyr::group_by()], and 
+#' [dplyr::summarise()] to subset
+#' the data appropriately within the remote table before calling
+#'  `[dplyr::collect()]` to import the data fully into R.
 #' @export
 #' @importFrom DBI dbGetQuery
 #' 
 neon_table <- function(table,
                        site = NA,
-                       db = neon_db()){
+                       db = neon_db(),
+                       lazy = FALSE){
 
   con <- db
   tables <- DBI::dbListTables(con)
   table <- check_tablename(table, tables)
+  
+  
+  if(lazy){
+    if(!requireNamespace("dplyr", quietly = TRUE)){
+      stop("dplyr is required for lazy evaluation")
+    }
+    return(dplyr::tbl(db, table))
+  }
   
   where <- NULL
   query <- paste0("SELECT * FROM \"", table, "\"")

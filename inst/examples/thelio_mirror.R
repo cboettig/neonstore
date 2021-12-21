@@ -40,9 +40,9 @@ neon_download("DP1.20217.001", site =  aq_sites) # Groundwater temperature
 neon_download("DP1.20033.001", site =  aq_sites) # Nitrate in surface water
 
 ## Terrestrial meteorology
-neon_download(product = "DP1.00002.001", site = ter_sites, type = "basic", table = "30") #
+neon_download(product = "DP1.00002.001", site = ter_sites, type = "basic", table = "30") #Temp single aspirated
 neon_download(product = "DP1.00006.001", site = ter_sites, type = "basic", table = "30") #
-neon_download(product = "DP1.00007.001", site = ter_sites, type = "basic") #
+neon_download(product = "DP1.00007.001", site = ter_sites, type = "basic") # Precip, thoughfall
 neon_download(product = "DP1.00023.001", site = ter_sites, type = "basic") #
 neon_download(product = "DP2.00024.001", site = ter_sites, type = "basic") #
 neon_download(product = "DP1.00100.001", site = ter_sites, type = "basic") #
