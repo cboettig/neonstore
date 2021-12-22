@@ -20,7 +20,7 @@ abstract: |
   The National Ecological Observatory Network
 journal: preprint
 date: "`r Sys.Date()`"
-bibliography: refs.bib
+#bibliography: refs.bib
 layout: 3p
 header-includes:
    - \usepackage{lineno}
@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%",
-  cache = TRUE
+  cache = FALSE
 )
 library(neonstore)
 #Sys.setenv("NEONSTORE_HOME" = tempfile())
@@ -420,6 +420,16 @@ This is much cheaper and raises less security concerns than maintaining a server
 
 We pass the connection details to `neon_remote_db`.  
 In this case, we use a public (read-only) bucket, though other users may prefer to configure access that requires a secret key.
+
+
+```{r include=FALSE}
+Sys.unsetenv("AWS_DEFAULT_REGION")
+Sys.unsetenv("AWS_S3_ENDPOINT")
+Sys.unsetenv("AWS_ACCESS_KEY_ID")
+Sys.unsetenv("AWS_SECRET_ACCESS_KEY")
+Sys.setenv("AWS_EC2_METADATA_DISABLED"="TRUE")
+```
+
 
 ```{r}
 con <- neon_remote_db(host = "minio.thelio.carlboettiger.info",
