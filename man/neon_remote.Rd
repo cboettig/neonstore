@@ -6,10 +6,10 @@
 
 select a table from the remote connection}
 \usage{
-neon_remote(tbl = "", product = "", type = "", db = neon_remote_db())
+neon_remote(table = "", product = "", type = "", db = neon_remote_db())
 }
 \arguments{
-\item{tbl}{table name (pattern match regex)}
+\item{table}{table name (pattern match regex)}
 
 \item{product}{product code}
 

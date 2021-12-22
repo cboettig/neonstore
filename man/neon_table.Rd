@@ -4,11 +4,20 @@
 \alias{neon_table}
 \title{Return a neon table from the database}
 \usage{
-neon_table(table, site = NA, db = neon_db(), lazy = FALSE)
+neon_table(
+  table,
+  product = NA,
+  type = NA,
+  site = NA,
+  db = neon_db(),
+  lazy = FALSE
+)
 }
 \arguments{
 \item{table}{the name of a downloaded NEON table in the store,
 see \link{neon_index}}
+
+\item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
 

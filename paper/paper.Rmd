@@ -39,13 +39,16 @@ knitr::opts_chunk$set(
   cache = TRUE
 )
 library(neonstore)
-Sys.setenv("NEONSTORE_HOME" = tempfile())
+#Sys.setenv("NEONSTORE_HOME" = tempfile())
 ```
 
 The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing environmental science [@NAS_NEON; @NAS_GRAND].  
+NEON provides access to 181 (active and planned) ecological data products at 81 (permanent and relocatable) sites throughout the United States.  The `neonstore` R package seeks to provide provenance aware, high performance access and persistent storage of NEON data files. 
+Here, we describe the design, use, and rationale for the package.
+We illustrate a few example use cases, including downloading the 30 minute single-aspirated temperature data across all available NEON sites and dates, a collection of over 13 thousand individual files totalling nearly 2 gigabytes of data.
+We demonstrate how `neonstore` facilitates summary calculations such as computing monthly means across all sites in a fraction of a second with minimal memory requirements.
+The approaches taken in `neonstore` maximize reproducibility, facilitate collaboration including across computer languages, and help making analyses which leverage the full spatial and temporal scale of NEON easily available to researchers with modest computational resources and expertise. 
 
-
-NEON provides access to 181 (active and planned) ecological data products at 81 (permanent and relocatable) sites throughout the United States.  The `neonstore` R package seeks to provide provenance aware, high performance access and persistent storage of NEON data files. Here, we describe the design, use, and rationale for the package.
 
 # Rationale and package design
 
@@ -326,33 +329,121 @@ in an overall smaller table.
 
 Consider the example of a much larger table collected by sensor data; say, single-aspirated temperature collected every 30 mintues across all sites:
 Note that we exploit pattern matching to provide a short-hand to the table name.
-We download and import the 30m sampled table
+We download and import the 30m sampled table. 
+The initial download is not a fast operation - in our example, rate-limiting rules by NEON make the command take over 20 minutes to complete the API requests that would otherwise take only 3 minutes.  
+The download itself is determined more by network speed. 
+In our example this takes about 1 hour to download over 13 thousand individual files.
+Because NEON uses download links that expire after 1 hour, it may be necessary to repeat the download command after more than an hour expires,
+(alternatively, divide the download into multiple batches by years or sites).
+The `neon_download()` utility can pick up from where it left off.
+
+`neon_store()` import is also a slow, one-time operation to read in all of these files into the database, depending on disk and precessor speeds. 
+In our example, this takes about 20 minutes.
+Note that it is not necessary to repeat these commands later except to import newly released data, which will be added to the persistent store.
 
 ```{r}
-neon_download(product = "DP1.00002.001", table = "30") #Temp single aspirated
-neon_store(product = "DP1.00002.001", table = "30") #Temp single aspirated
+neon_download(product = "DP1.00002.001", table = "30min") #Temp single aspirated
+neon_store(product = "DP1.00002.001", table = "30min") #Temp single aspirated
 ```
 
-```{r}
-temp <- neon_table(product = "DP1.00002.001",  table = "30", lazy=TRUE) #Temp single aspirated
-```
+With the data imported into the database, `neon_table()` can quickly connect to the remote database.
 
 ```{r}
-temp %>% 
-  group_by(month) %>%
-  summarise(mean = mean(),
-            max = max(),
-            min = min()) %>% 
+temp <- neon_table(product = "DP1.00002.001",  table = "30min", lazy=TRUE) #Temp single aspirated
+```
+
+This is a lot of data! Over 19 million rows:
+
+```{r}
+temp %>% count()
+```
+
+However, working with the remote duckdb connection, we can compute summary statistics, such as monthly averages for each site, takes only milliseconds:
+
+```{r}
+bench::mark({
+temp_monthly <- temp %>%
+  mutate(month = month(startDateTime)) %>%
+  group_by(siteID, month) %>%
+  summarise(mean_temp = mean(tempSingleMean, na.rm=TRUE),
+            max = max(tempSingleMean, na.rm=TRUE),
+            min = min(tempSingleMean, na.rm=TRUE),
+            .groups = "drop") %>% 
   collect()
+})
 ```
+Not only is this about 10x faster than if we had read the table entirely into R first, but this also executes with minimal memory footprint (317Kb) instead of the over 2.6 GB required to perform the same operation in R.
+Having summarized the data using our desired statistics, the `collect()` command has returned the result as a regular in-memory `data.frame` which we can use with other R functions, such as data visualization tools: 
 
 
 ```{r}
-index <- neon_index(product = "DP1.00002.001", table = "30") 
+library(ggplot2)
+library(lubridate)
+temp_monthly %>% mutate(month = lubridate::month(month, label=TRUE)) %>%
+  filter(siteID %in% c("HARV", "ORNL")) %>%
+  ggplot(aes(month, mean_temp, col=siteID, ymin = min, ymax = max, fill = siteID)) +
+  geom_linerange(lwd=4, alpha=.5) +
+  geom_point(size=8, shape="_")
+```
+
+Similarly, it is straight forward to use most other `dplyr` operations, such as the joins, to combine data across multiple tables.
+The promise of NEON is precisely this ability to work across a large spatial and temporal range of data collected in standardized fashion.
+
+
+
+```{r include=FALSE}
+temp %>% select(verticalPosition, horizontalPosition) %>% distinct()
+
+index <- neon_index(product = "DP1.00002.001", table = "30min") 
 info <- index$path %>% fs::file_info()
 n_files <- length(index$path)
 n_bytes <- sum(info$size)
 ```
+
+**Network-based access**.
+
+In R, we refer to the `duckdb` database as a "remote" connection because the operations are handled outside of R, by `duckdb`.
+Some database connections, like MySQL or Postgres, require the user to install a separate piece of software, often on an external server,
+which we then access over the network connection (with appropriate security credentials), though it can also be run on the same local machine as the 'client' software.
+This client-server approach can be very powerful, but requires more knowledge and resources to deploy.
+In contrast, `duckdb` installs automatically as a stand-alone R package.
+
+
+As illustrated above, the slowest part of the process by far are the one-time steps of initial download of over 10,000 individual files, and the importing of those files into the database.
+Further, the storage requirements for users working with NEON data spanning many products, sites, and dates can be restrictive. 
+As such, it may be desirable for a research team working on such an analysis to establish a single shared `neonstore` storage center rather than expect that all users will download, import, and maintain their own local stores.
+To facilitate this process, `neonstore` supports access to remote network-based storage over cloud-native storage protocols with the help of  Apache `arrow` [@arrow].
+First, using `neonstore`, we download and import the data as above.  
+Our next step is export this database to a parquet snapshot using `neon_export_db()` and upload that data to cloud native storage system such as Amazon Web Services (AWS) S3 bucket, or, in our case, a self-hosted MINIO [@minio] instance. 
+This is much cheaper and raises less security concerns than maintaining a server, as the remote service is providing only networked storage, not general-purpose computing power.
+
+
+We pass the connection details to `neon_remote_db`.  
+In this case, we use a public (read-only) bucket, though other users may prefer to configure access that requires a secret key.
+
+```{r}
+con <- neon_remote_db(host = "minio.thelio.carlboettiger.info",
+                      bucket = "shared-data",
+                      path = "neonstoredb")
+```
+
+
+Once a connection to the remote database is established, we can request individual tables using `neon_remote` to access the data using dplyr functions.  
+Like `neon_table()`, we must use `collect()` to draw the data into R if we wish to perform advanced R-specific operations that are not supported by the backend engine.
+
+```{r}
+remote_temp <- neon_remote("30min", product = "DP1.00002.001", db = con)
+remote_temp %>% count(siteID) %>% collect()
+```
+
+Because this approach relies on operations over a network connection, it will generally be bandwidth limited unless the bucket is located in the same region as compute operations (e.g. in a regional cloud server). 
+Users may also download the `parquet` exported files directly and import them into a local `neonstore` instance (see `neon_import_db()`) to share neonstore snapshots without requiring independent downloads.  
+Using `neon_db_export()` to generate snapshots is also a reliable way to preserve and version your analyses for future that does not depend on access to the NEON API or even to `neonstore`. 
+This approach should work equally well for data exchange with collaborators not using R.
+`parquet` is a widely used data interchange format with support in most major languages, including python, Java and C++.
+Similarly, `duckdb` is a cross-platform tool that can be accessed not only from R, but from python, Java, and many other languages, including web assembly (for running in the browser) or run using a stand-alone CLI [@duckdb].
+
+
 
 
 

@@ -20,13 +20,18 @@
 #' @importFrom DBI dbGetQuery
 #' 
 neon_table <- function(table,
+                       product = NA,
+                       type = NA,
                        site = NA,
                        db = neon_db(),
                        lazy = FALSE){
 
   con <- db
-  tables <- DBI::dbListTables(con)
-  table <- check_tablename(table, tables)
+
+  table <- check_tablename(table, 
+                           product = product,
+                           type = type,
+                           tables = DBI::dbListTables(con))
   
   
   if(lazy){
@@ -58,8 +63,19 @@ neon_table <- function(table,
 
 
 ## Sanitize table names, particularly extended/basic matching
-check_tablename <- function(x, tables){
+check_tablename <- function(x, product = NA, type = NA, tables){
  out <- tables[grepl(x, tables)]
+ 
+ ## Filter on product & type if requested
+ if (!is.na(product)) {
+   out <- out[grepl(product, out)]
+ }
+
+ if (!is.na(type)) {
+   out <- out[grepl(type, out)]
+ }
+ 
+  
  if(length(out) > 1){
    stop(paste("multiple matches for table", 
               x, ":", out), call. = FALSE)

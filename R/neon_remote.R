@@ -52,7 +52,7 @@ neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
 #' neon_remote 
 #'  
 #' select a table from the remote connection
-#' @param tbl table name (pattern match regex)
+#' @param table table name (pattern match regex)
 #' @param product product code
 #' @param type basic or extended (if necessary to distinguish)
 #' @param db a [neon_remote_db] connection.  If not provided, one will be created,
@@ -65,9 +65,9 @@ neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
 #' grouped and summarised, all without ever downloading the whole table.
 #' Use [dplyr::collect()] to download the (possibly filtered) table into
 #' and pull into memory.  
-neon_remote <- function(tbl = "", product = "", type = "", db = neon_remote_db()){
+neon_remote <- function(table = "", product = "", type = "", db = neon_remote_db()){
   labels <- names(db)
-  i <- grepl(tbl, labels) & grepl(product, labels)  & grepl(type, labels)
+  i <- grepl(table, labels) & grepl(product, labels)  & grepl(type, labels)
   if(sum(i) > 1){
     message(paste0("multiple matches found\n", 
                   "returning list with tables:\n",
