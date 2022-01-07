@@ -33,7 +33,8 @@ Indeed, \code{neon_download()} is designed in precisely this way, to allow easy
 updating of downloads without re-downloading older data.
 }
 \examples{
-
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\donttest{ # may be slow
 neon_citation("DP1.10003.001")
 
 ## or the citation for all products in store:
@@ -41,7 +42,8 @@ neon_citation()
 
 ## as bibtex
 format(neon_citation("DP1.10003.001"), "bibtex")
-
+}
+\dontshow{\}) # examplesIf}
 }
 \references{
 https://www.neonscience.org/data-samples/data-policies-citation

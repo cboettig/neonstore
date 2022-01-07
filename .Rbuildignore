@@ -12,3 +12,4 @@
 ^CRAN-RELEASE$
 ^paper$
 ^docs$
+^neon_parquet$

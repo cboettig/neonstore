@@ -126,10 +126,10 @@ test_that("neon_table", {
 
 test_that("check_tablename", {
   
-  expect_error(check_tablename("A", c("B", "D")))
-  expect_error(check_tablename("A", c("A-basic", "A-expanded")))
+  expect_error(check_tablename("A", tables = c("B", "D")))
+  expect_error(check_tablename("A", tables =  c("A-basic", "A-expanded")))
   
-  x <- check_tablename("A-expan", c("A-basic", "A-expanded"))
+  x <- check_tablename("A-expan",  tables = c("A-basic", "A-expanded"))
   expect_equal(x, "A-expanded")
   
 })

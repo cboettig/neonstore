@@ -1,3 +1,18 @@
+# v0.5.5
+
+- New functions `neon_export_db()` and `neon_import_db()` 
+  export/import from `duckdb` to parquet.
+- New functions `neon_remote_db()` and `neon_remote()`. Place parquet files in
+  an AWS S3 bucket (or compatible system such as the open source MINIO object
+  store), then `neon_remote_db()` allows an immediate connection to the remote 
+  database.  `neon_remote()` queries any specific table in the remote database.
+  Default example links to an example S3 mirror which contains some commonly
+  used NEON tables. 
+- `neon_table()` gains the optional argument `lazy`. Set to TRUE to return a 
+  "lazy" table as a dplyr connection directly to the table in duckdb.  This
+  is suitable for working with any tables that would be much to large to interact
+  with directly in R. 
+
 # v0.4.4
 
 - Use vroom >= 1.5.1 and avoid verbose vroom messages in vroom >= 1.5.0; [#53]

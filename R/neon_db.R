@@ -66,8 +66,7 @@ neon_db <- function (dir = neon_db_dir(),
                        read_only = read_only,
                        ...)
   if(!is.na(memory_limit)){
-    pragma <- paste0("PRAGMA memory_limit='", memory_limit, "GB'")
-    DBI::dbExecute(db, pragma)
+    duckdb_mem_limit(db, memory_limit, "GB")
   }
 
   if (read_only) {
@@ -135,5 +134,13 @@ neon_delete_db <- function(db_dir = neon_db_dir(), ask = interactive()){
     )
   }
   return(invisible(continue))
+}
+
+
+duckdb_mem_limit <- function(db = neon_db(), mem_limit = 16, units = "GB"){
+  DBI::dbExecute(db, paste0("PRAGMA memory_limit='", mem_limit, " ", units,"'"))
+}
+duckdb_parallel <- function(duckdb_cores = getOption("mc.cores", 2L)){
+  DBI::dbExecute(neon_db(), paste0("PRAGMA threads=", duckdb_cores))
 }
 
