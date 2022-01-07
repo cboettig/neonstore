@@ -9,7 +9,9 @@ neon_stack <- function(files,
                        progress = TRUE,
                        vroom_progress = FALSE,
                        ...){
-  
+
+
+    
   ## Stack H5 Files (eddy-covariance only)
   if(any(grepl("[.]h5$", files))){
     stack_eddy(files, progress = progress, ...)
@@ -121,7 +123,11 @@ vroom_many <- function(files,
 
 
 ## Apply vroom over files that share a common schema.
-vroom_ragged <- function(files, altrep = FALSE, vroom_progress = FALSE, ...){
+vroom_ragged <- function(files, 
+                         altrep = FALSE,
+                         vroom_progress = FALSE, 
+                         show_col_types = FALSE,
+                         ...){
   
   ## We read the 1st line of every file to determine schema  
     schema <- lapply(files, 
