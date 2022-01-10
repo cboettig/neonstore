@@ -3,7 +3,7 @@ title: "neonstore: provenance-aware persistent storage for NEON data"
 author:
   - name: "Carl Boettiger"
     affiliation: ucb
-  - name: "Quinn Thomas"
+  - name: "R. Quinn Thomas"
     affiliation: vt
   - name: "Christine Laney"
     affiliation: neon
@@ -20,7 +20,7 @@ abstract: |
   The National Ecological Observatory Network
 journal: preprint
 date: "`r Sys.Date()`"
-#bibliography: refs.bib
+bibliography: refs.bib
 layout: 3p
 header-includes:
    - \usepackage{lineno}
@@ -34,16 +34,16 @@ output: rticles::elsevier_article
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
   out.width = "100%",
   cache = FALSE
 )
 library(neonstore)
-#Sys.setenv("NEONSTORE_HOME" = tempfile())
+Sys.setenv("NEONSTORE_HOME" = "store")
 ```
 
-The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing environmental science [@NAS_NEON; @NAS_GRAND].  
-NEON provides access to 181 (active and planned) ecological data products at 81 (permanent and relocatable) sites throughout the United States.  The `neonstore` R package seeks to provide provenance aware, high performance access and persistent storage of NEON data files. 
+The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing environmental science [@NAS_NEON; @Balch2020; @Nagy2021].
+NEON provides access to 181 (active and planned) ecological data products at 81 (permanent and relocatable) sites throughout the United States.
+The `neonstore` R package seeks to provide provenance aware, high performance access and persistent storage of NEON data files. 
 Here, we describe the design, use, and rationale for the package.
 We illustrate a few example use cases, including downloading the 30 minute single-aspirated temperature data across all available NEON sites and dates, a collection of over 13 thousand individual files totalling nearly 2 gigabytes of data.
 We demonstrate how `neonstore` facilitates summary calculations such as computing monthly means across all sites in a fraction of a second with minimal memory requirements.
@@ -71,7 +71,7 @@ This atomized approach facilitates sub-setting and data transfer, because users 
 As some NEON data products can be quite large (NEON's complete data catalog to date is already in excess of 1 petabyte, primarily due to the size of many AOP products), being able to download or read only the files of interest is already important to save bandwidth or computer memory, or disk space.
 This approach also facilitates data provenance and reproducibility, because it means that an update or correction to data collected at a particular site and time results only in a change to a single file and not the whole data product.
 However, the highly atomized structure of NEON's data can also become a barrier to entry.
-Most analyses will inevitably require multiple files to be combined or stacked, e.g. to create a unified record for a product across many months or years of sampling or across many sites. `neonstore` provides functions to stack data products that have been atomized into separate files by month, site or sensor position into single `data.frame` objects, store stacked tables in a local, high-performance database, and track individual data rows back to their raw data files.  
+Most analyses will inevitably require multiple files to be combined or stacked, e.g. to create a unified record for a product across many months or years of sampling or across many sites. `neonstore` provides functions to stack data products that have been atomized into separate files by month, site or sensor position into single `data.frame` objects, store stacked tables in a local, high-performance database, and track individual data rows back to their raw data files.
 
 Managing provenance of NEON data means dealing with the addition of new data, corrections published to old data, and changes to file names that do not represent changes in underlying data.
 Any analysis is only as good as as the data supporting it.
@@ -85,7 +85,7 @@ These elements creates five distinct tasks for managing NEON data provenance:
 (2) The ability to append new data as it is collected and released 
 (3) the ability to transparently replace existing data when corrections are published, 
 (4) the ability to avoid re-downloading or re-stacking data that has been previously processed, 
-(5) the ability to freeze the data used in a given analysis, so that results can reliably be repeated without accidentally including revised or newer data products.  
+(5) the ability to freeze the data used in a given analysis, so that results can reliably be repeated without accidentally including revised or newer data products.
 
 To provide these five abilities for data provenance, `neonstore` maintains a local file store containing all raw data files downloaded from NEON.
 Additionally, each file is entered into a local registry, along with the file's MD5 checksum (CRC32 for AOP products) and currently associated NEON release (if any).
@@ -101,7 +101,7 @@ AOP products use a somewhat different convention with flight information.
 Data are organized into subdirectories based on product, site, and year-month respectively.
 Data or metadata files shared across all months or all sites of a product are stored in the corresponding parent directory.
 The function `neon_index()` returns a `data.frame` listing every recognized individual file in the local store, along with the corresponding metadata fields parsed from the filename.
-Optional arguments can be given to restrict this table to files matching specific products, sites, date ranges, etc.  
+Optional arguments can be given to restrict this table to files matching specific products, sites, date ranges, etc.
 
 ## Performance
 
@@ -113,7 +113,7 @@ This allows users to perform common tasks on data much larger than would fit int
 Traditional relational databases such as MariaDB and Postgres use a server-client model with row-oriented data structures, suitable for concurrent read and write operations by many simultaneous client processes acccessing a central database (e.g. many client banks simultaneously updating a central registry of accounts, see ACID).
 Modern data science workflows frequently benefit more from column-oriented data structures where simultaneous operations (ACID transactions) are not required.
 This makes it possible to both eliminate the requirement of separately installing and running a database server while also opening the door to substantial performance improvements beyond the reach of traditional relational database clients.
-`duckdb` is a leading example of such a columnar database [@duckdb], with seamless support for R integration and superior performance benchmarks to both traditional relational databases and in-memory operations in R using `dplyr`. 
+`duckdb` is a leading example of such a columnar database [@Raasveldt_2019; @duckdb], with seamless support for R integration and superior performance benchmarks to both traditional relational databases and in-memory operations in R using `dplyr`. 
 
 `neonstore` allows users to easily import tabular NEON data products (including `.h5` based eddy covariance products) into a local `duckdb` database using the function `neon_store()`.
 If desired, users can instead use their own existing databases by providing the appropriate `DBI::dbConnection` object to the `db` argument of `neon_store()`. `neon_store()` stacks corresponding individual raw tabular data files by month, site, and (for IS data) sensor position into individual database tables.
@@ -123,21 +123,23 @@ Data revisions are indicated by downloading files which share the same data prod
 Because sensor data does not indicate the site or position information in individual data files (this is provided only through the file name) `neonstore` stacking functions add additional columns for these variables automatically.
 Additionally, a `file` column is always included indicating the raw file source for each row.
 Many NEON data products come in two types: a "basic" format and an "expanded" format which may include additional columns providing data fields that were not included in the original product specification.
-NEON does not always use globally unique names for table descriptions, particularly for metadata tables such as `sensor_positions`. To avoid ambiguities created by these issues, database table names are formed using the table description name, the product type, and the product number, e.g. `brd_countdata-basic-DP1.10003.001`, rather than the description component alone, `brd_countdata`.  
-
-RStudio users can bring up an interactive list of available tables in the RStudio "Connections" pane using the function `neon_pane()` [Fig #1].  
-
+NEON does not always use globally unique names for table descriptions, particularly for metadata tables such as `sensor_positions`. To avoid ambiguities created by these issues, database table names are formed using the table description name, the product type, and the product number, e.g. `brd_countdata-basic-DP1.10003.001`, rather than the description component alone, `brd_countdata`.
+RStudio users can bring up an interactive list of available tables in the RStudio "Connections" pane using the function `neon_pane()` [Fig #1].
 
 
+![RStudio Connections pane showing interactive panel listing all tables imported into the local duckdb database.](rstudio-pane.png) 
+
+<!--
 
 Box 1: Provenance workflow
 - Existing NEON data used in an analysis to support a result.
-- A data file is corrected for an error. Revised data file is downloaded, imported into `neonstore` database, replacing deprecated data. Deprecated data file is retained in local file store for future reference.  Analysis confirms same result
+- A data file is corrected for an error. Revised data file is downloaded, imported into `neonstore` database, replacing deprecated data. Deprecated data file is retained in local file store for future reference.
+Analysis confirms same result
 - Next month's data are released, downloaded, imported by `neonstore`, and then used to revise model and provide updated result
 
+-->
 
 `neonstore` seeks to help users download and manage NEON files locally in a way that lets analyses be quickly traced back to the raw data files.
-
 `neonstore` is distinguished as much by what it does not do as by what it does.
 All `neonstore` operations are intended to be transparent and intuitive, and could easily be duplicated in another computational language or command line interface.
 Specifically, `neonstore` will never automatically "clean" data: opaque data transformations make output sensitive to the version and implementation details of the tool in question.
@@ -149,7 +151,7 @@ When functions perform tasks like guessing the data type (numeric, string, Date,
 ## `neonstore` Functionality
 
 
-`neonstore` functionality can be divided into two halves: functions that interface with the NEON Application Programming Interface (API), and functions for working with a local store of previously-downloaded NEON files.  
+`neonstore` functionality can be divided into two halves: functions that interface with the NEON Application Programming Interface (API), and functions for working with a local store of previously-downloaded NEON files.
 
 
 ```{r}
@@ -170,7 +172,7 @@ It is of course possible to use a temporary directory such as `tempdir()` for th
 Such an approach is the default download location of the alternative package, `neonUtilities`, although this can be configured there as well.
 However, doing so defeats the purpose of having a persistent store, which allows us to both preserve the original raw data files between R sessions.
 Because new NEON data files are released regularly, this approach allows us to easily download only the new files.
-This contrasts to the typical workflow in `neonUtilities`, in which a user discards the individually downloaded files and is left to their own devices on how to keep store the resulting stacked data in order to avoid re-downloading each time.  
+This contrasts to the typical workflow in `neonUtilities`, in which a user discards the individually downloaded files and is left to their own devices on how to keep store the resulting stacked data in order to avoid re-downloading each time.
 
 The best way to set the file directory of the store is to declare the path using the environmental variable, `NEONSTORE_HOME`, for example, using a `.Renviron` file in the user or system home directory.
 For one-off use, all functions that access the store take an optional argument `dir` to specify the directory location, (which defaults to `neon_dir()`, a function that either uses the value set by `NEONSTORE_HOME` or the `rappdirs` location if unset).
@@ -178,12 +180,13 @@ However, using the environmental variable instead results in more portable code,
 
 The local `neonstore` database is written in the same user and OS specific location by default, but is configured using a separate environmental variable, `NEONSTORE_DB`, or optional argument to appropriate functions,  `db_dir`.
 Because simultaneous write-access is not supported by the default high-performance database engine, `duckdb`, in multi-user environments it may be advantageous to share a location for raw data files by setting `NEONSTORE_HOME` while allowing users to create individual local databases in their home directories by leaving `NEONSTORE_DB` unset.
-Alternately, users can share a database as well by setting `NEONSTORE_DB` to a shared location, and adopting workflows which do ensure multiple users do not simultaneously call `neon_store()` to update the database.  
+Alternately, users can share a database as well by setting `NEONSTORE_DB` to a shared location, and adopting workflows which do ensure multiple users do not simultaneously call `neon_store()` to update the database.
 
 
 ### NEON API functions
 
-`neon_products()` and `neon_sites()` bind the NEON REpresentational State Transfer (REST) API endpoints for `/products` and `/sites`, providing information about each as a data frame. This can be useful for product discovery and occassionally for referencing other useful metadata about products and sites.  Each of these functions requires only a single API call (see discussion of rate limiting below).
+`neon_products()` and `neon_sites()` bind the NEON REpresentational State Transfer (REST) API endpoints for `/products` and `/sites`, providing information about each as a data frame. This can be useful for product discovery and occassionally for referencing other useful metadata about products and sites.
+Each of these functions requires only a single API call (see discussion of rate limiting below).
 
 ```{r}
 products <- neon_products()
@@ -195,7 +198,7 @@ sites <- neon_sites()
 sites
 ```
 
-One of the most important functions of `neonstore` is `neon_download()`, which downloads all files identified by a given product code, optionally constrained to specific site, date range, or file name pattern.  
+One of the most important functions of `neonstore` is `neon_download()`, which downloads all files identified by a given product code, optionally constrained to specific site, date range, or file name pattern.
 For instance, we can download all of the NEON landbird survey data, identified as NEON data product `DP1.10003.001`: 
 (The three-digit code identifies this as a Level 1 data product (DP1), product number 10003, revision 001, indicating this is the first and so far the only protocol used for bird survey sampling). 
 
@@ -209,16 +212,15 @@ Then for each site, for each month for which that site collected data, the funct
 The  table from `neon_data()` indicates 4 values: the file name, the MD5 or CRC32 hash of the data file (CRC32 hashes are used only for AOP data products), the file size (in bytes -- encoded as a character because some file sizes are too long to be represented as an integer), and a download URL.
 The download URL embeds a temporary access token which expires after an hour, so users must complete all the downloads before this time expires.
 The access string for each file is unique, thus it is (at the time of writing) impossible to download any given data file without making a corresponding API request, even if the precise file name and address is already known.
-For the most part, this issue is invisible to `neonstore` users, as `neon_download()` calls automatically pass all download URLs to the download step.   
+For the most part, this issue is invisible to `neonstore` users, as `neon_download()` calls automatically pass all download URLs to the download step. 
 
 `neon_download()` handles the following tasks:
 
 
 - `neonstore` aims to provide persistent storage, writing raw data files to
   the appropriate app directory for your operating system (see `rappdirs`,
-  [Ratnakumar et al 2016](https://CRAN.R-project.org/package=rappdirs)), now provided
-  by the base R function `tools::R_user_dir()`.  Files are organized into appropriate 
-  subdirectories by product, site, and year-month of sampling.  
+  [Ratnakumar et al 2016](https://CRAN.R-project.org/package=rappdirs)), now provided by the base R function `tools::R_user_dir()`.
+  Files are organized into appropriate subdirectories by product, site, and year-month of sampling.
 - `neon_download()` provides  clean and concise progress bars for the two key
   processes involved: querying the API to obtain download URLs (which involves no 
   large data transfer but counts against API rate limiting, see below), and the
@@ -231,8 +233,14 @@ For the most part, this issue is invisible to `neonstore` users, as `neon_downlo
   rate limiting may interfere with large requests.
 - `neon_download()` uses `curl::curl_download()` instead of `downloadr` package
   used in `neonUtilities`, which can be finicky on Windows and older versions of R. 
-- Automatic handling NEON's rate limiting policy.  To do, `neon_download()` must  pause 100 seconds every 150 requests if an API token is not supplied or every 950 requests if a token is available.  Should a rate-limit error be detected, (possible if the same token is used in parallel requests), `neon_download()` will also pause for 100 seconds before retrying the failed request.   Requests and pauses are communicated through the user messaging interface.  
-- Expanding compressed HDF5 files (`*h5.gz`). (Note: unusually, NEON chooses to compress binary h5 files with gzip, even though gzip compression is built internally into the H5 specification at configurable compression levels.  NEON does not choose to compress text-based formats such as .csv, where compression has larger gains.  Compression has implications for version management, where `neonstore` must track the hashes of compressed files to avoid duplicate downloads)
+- Automatic handling NEON's rate limiting policy.
+  To do this, `neon_download()` must  pause 100 seconds every 150 requests if an API token is not supplied or every 950 requests if a token is available.
+  Should a rate-limit error be detected, (possible if the same token is used in parallel requests), `neon_download()` will also pause for 100 seconds before retrying the failed request.
+  Requests and pauses are communicated through the user messaging interface.
+- Expanding compressed HDF5 files (`*h5.gz`).
+  (Note: unusually, NEON chooses to compress binary h5 files with gzip, even though gzip compression is built internally into the H5 specification at configurable compression levels.
+  NEON does not choose to compress text-based formats such as .csv, where compression has larger gains.
+  Compression has implications for version management, where `neonstore` must track the hashes of compressed files to avoid duplicate downloads)
 - Updating the local manifest in LMDB with the individual checksum and current release tag for each downloaded object (see Provenance)
 
 
@@ -249,8 +257,11 @@ neon_download("DP1.10003.001",
 
 
 Even adding a handful of products can generate thousands or hundreds of thousands of files in a local store.
-Surprisingly, these can even exceed the capacity of common `bash` shell utilities like `ls`.  `neonstore` sidesteps this issue through a convenient R-based interface.
-The function `neon_index()` will list all recognized files found in the local store as a `data.frame`.  `neon_index()` uses a sophisticated filename parser, `neon_parse_filenames()`, that understands all documented file naming conventions listed at <https://data.neonscience.org/file-naming-conventions>, and quite a few that are not yet listed (internal NEON communication).  The most common of these are displayed in the table:
+Surprisingly, these can even exceed the capacity of common `bash` shell utilities like `ls`.
+`neonstore` sidesteps this issue through a convenient R-based interface.
+The function `neon_index()` will list all recognized files found in the local store as a `data.frame`.
+`neon_index()` uses a sophisticated filename parser, `neon_parse_filenames()`, that understands all documented file naming conventions listed at <https://data.neonscience.org/file-naming-conventions>, and quite a few that are not yet listed (internal NEON communication).
+The most common of these are displayed in the table:
 
 ```{r}
 neon_index()
@@ -264,7 +275,7 @@ Internally, `neonstore` uses checksums to track the provenance of all files down
 
 **Stacking datasets**
 
-The highly atomized file structure breaks tables down by site and year/month as individual csv files (and other formats, including h5).  
+The highly atomized file structure breaks tables down by site and year/month as individual csv files (and other formats, including h5).
 Typical workflows will treat a collection of such files as a single data table, with columns indicating the site, year, and month of sampling.
 When combining the collection of files into a single table (a process sometimes known as stacking), `neonstore` must handle several special cases:
 
@@ -272,9 +283,10 @@ When combining the collection of files into a single table (a process sometimes 
 2) The data types of columns (string, numeric, date, timestamp, etc) must be inferred correctly. 
    This can be difficult when certain columns within individual files have no non-missing (`NA`) values.
 3) Additional columns must be added to capture information (metadata) that is only available in the file name, such as siteID and position (for sensor-based products).
-4) Most importantly, reading must be provenance-aware -- if there are two files with matching product, table, site, year-month and position (for sensor-based products) must resolve which file should be read in based on the timestamp provided, or the requested version.  
+4) Most importantly, reading must be provenance-aware -- if there are two files with matching product, table, site, year-month and position (for sensor-based products) must resolve which file should be read in based on the timestamp provided, or the requested version.
 
-`neonstore`'s stacking functions handle all of this for us.  When a version of the same data is detected with a revised timestamp compared to an earlier download, `neonstore` will notify us of the detection, but default to reading the most recent available version.
+`neonstore`'s stacking functions handle all of this for us.
+When a version of the same data is detected with a revised timestamp compared to an earlier download, `neonstore` will notify us of the detection, but default to reading the most recent available version.
 
 `neonstore` provides two alternative mechanisms for stacking data.
 The simplest approach is `neon_read()`, which stacks all matching files into a single, in-memory `data.frame`.
@@ -285,7 +297,7 @@ Note that `neon_read()` can be given arguments to filter by site, date range, et
 brd_countdata <- neon_read("brd_countdata-expanded")
 ```
 
-For very large tables such as sensor data collections spanning many sites and years, users will require the increased performance provided by the high-performance, columnar-oriented relational database, `duckdb` [@duckdb].
+For very large tables such as sensor data collections spanning many sites and years, users will require the increased performance provided by the high-performance, columnar-oriented relational database, `duckdb` [@Raasveldt_2019; @duckdb].
 To take advantage of this approach, we must first store the contents of the individual data files in the relational database using the function `neon_store()`:
 
 ```{r}
@@ -330,7 +342,7 @@ in an overall smaller table.
 Consider the example of a much larger table collected by sensor data; say, single-aspirated temperature collected every 30 mintues across all sites:
 Note that we exploit pattern matching to provide a short-hand to the table name.
 We download and import the 30m sampled table. 
-The initial download is not a fast operation - in our example, rate-limiting rules by NEON make the command take over 20 minutes to complete the API requests that would otherwise take only 3 minutes.  
+The initial download is not a fast operation - in our example, rate-limiting rules by NEON make the command take over 20 minutes to complete the API requests that would otherwise take only 3 minutes.
 The download itself is determined more by network speed. 
 In our example this takes about 1 hour to download over 13 thousand individual files.
 Because NEON uses download links that expire after 1 hour, it may be necessary to repeat the download command after more than an hour expires,
@@ -341,7 +353,7 @@ The `neon_download()` utility can pick up from where it left off.
 In our example, this takes about 20 minutes.
 Note that it is not necessary to repeat these commands later except to import newly released data, which will be added to the persistent store.
 
-```{r}
+```{r download_temp}
 neon_download(product = "DP1.00002.001", table = "30min") #Temp single aspirated
 neon_store(product = "DP1.00002.001", table = "30min") #Temp single aspirated
 ```
@@ -413,12 +425,12 @@ As illustrated above, the slowest part of the process by far are the one-time st
 Further, the storage requirements for users working with NEON data spanning many products, sites, and dates can be restrictive. 
 As such, it may be desirable for a research team working on such an analysis to establish a single shared `neonstore` storage center rather than expect that all users will download, import, and maintain their own local stores.
 To facilitate this process, `neonstore` supports access to remote network-based storage over cloud-native storage protocols with the help of  Apache `arrow` [@arrow].
-First, using `neonstore`, we download and import the data as above.  
+First, using `neonstore`, we download and import the data as above.
 Our next step is export this database to a parquet snapshot using `neon_export_db()` and upload that data to cloud native storage system such as Amazon Web Services (AWS) S3 bucket, or, in our case, a self-hosted MINIO [@minio] instance. 
 This is much cheaper and raises less security concerns than maintaining a server, as the remote service is providing only networked storage, not general-purpose computing power.
 
 
-We pass the connection details to `neon_remote_db`.  
+We pass the connection details to `neon_remote_db`.
 In this case, we use a public (read-only) bucket, though other users may prefer to configure access that requires a secret key.
 
 
@@ -438,7 +450,7 @@ con <- neon_remote_db(host = "minio.thelio.carlboettiger.info",
 ```
 
 
-Once a connection to the remote database is established, we can request individual tables using `neon_remote` to access the data using dplyr functions.  
+Once a connection to the remote database is established, we can request individual tables using `neon_remote` to access the data using dplyr functions.
 Like `neon_table()`, we must use `collect()` to draw the data into R if we wish to perform advanced R-specific operations that are not supported by the backend engine.
 
 ```{r}
@@ -446,9 +458,9 @@ remote_temp <- neon_remote("30min", product = "DP1.00002.001", db = con)
 remote_temp %>% count(siteID) %>% collect()
 ```
 
-Because this approach relies on operations over a network connection, it will generally be bandwidth limited unless the bucket is located in the same region as compute operations (e.g. in a regional cloud server). 
-Users may also download the `parquet` exported files directly and import them into a local `neonstore` instance (see `neon_import_db()`) to share neonstore snapshots without requiring independent downloads.  
-Using `neon_db_export()` to generate snapshots is also a reliable way to preserve and version your analyses for future that does not depend on access to the NEON API or even to `neonstore`. 
+Because this approach relies on operations over a network connection, it will generally be bandwidth limited unless the bucket is located in the same region as compute operations (e.g. in a regional cloud server).
+Users may also download the `parquet` exported files directly and import them into a local `neonstore` instance (see `neon_import_db()`) to share neonstore snapshots without requiring independent downloads.
+Using `neon_db_export()` to generate snapshots is also a reliable way to preserve and version your analyses for future that does not depend on access to the NEON API or even to `neonstore`.
 This approach should work equally well for data exchange with collaborators not using R.
 `parquet` is a widely used data interchange format with support in most major languages, including python, Java and C++.
 Similarly, `duckdb` is a cross-platform tool that can be accessed not only from R, but from python, Java, and many other languages, including web assembly (for running in the browser) or run using a stand-alone CLI [@duckdb].
@@ -459,16 +471,21 @@ Similarly, `duckdb` is a cross-platform tool that can be accessed not only from 
 
 ## Dependencies and optional dependencies
 
-`neonstore`'s core dependencies are quite light, avoiding hard requirements on other packages which themselves bring in a large recursive list of dependencies. `DBI` [@DBI], `duckdb` [@duckdb], and `thor` [@thor] provide the core database interfaces; all have no recursive dependencies. `httr` [@httr] provides functionality required to interface with the NEON REST API, and `R.utils`, `zip`, and `vroom` [@vroom] provide parsers required to unpack the data. `progress` provides user-friendly progress bars and estimated run-times for slow functions.  
-
+`neonstore`'s core dependencies are quite light, avoiding hard requirements on other packages which themselves bring in a large recursive list of dependencies. `DBI` [@dbi], `duckdb` [@duckdb], and `thor` [@thor] provide the core database interfaces; all have no recursive dependencies.
+`httr` [@httr] provides functionality required to interface with the NEON REST API, and `R.utils`, `zip`, and `vroom` [@vroom] provide parsers required to unpack the data.
+`progress` provides user-friendly progress bars and estimated run-times for slow functions.
 Optional dependencies are required for specific tasks. `dplyr` is needed for lazy read in `neon_table()`.
 `neonUtilities` [@neonUtilities] and `rhdf5` are required at this time for reading in eddy-covariance products.
 `arrow` [@arrow] is required for remote database connections using `neon_remote()`.
 `rstudioapi` is required to utilize `neon_pane()` to view the connections pane from within RStudio.
 The remaining suggested dependencies are utilized within testing only.
 
+## Conclusions
 
-## Appendix
+`neonstore` provides a high-performance and provenance-aware mechanism for accessing, maintaining, and working with NEON data products, designed to scale seamlessly to analyses which stretch across the full spatial and temporal range which makes this nation-wide dataset so uniquely valuable. 
+The `neonstore` package follows simple and robust best-practices for data management that can work across most popular computing languages; such as preserving a local library of the original raw data files downloaded from NEON, and importing data into a local relational database (`duckdb`) that can be accessed from a wide range of libraries.
+Additional utilities enable serverless network-based sharing of a large `neonstore` database across a team through the use of `parquet` and `arrow`'s remote filesystems (which likewise supports most major computing languages.)
+`neonstore` has been co-developed by NEON staff (CL & CL) and members of the Ecological Forecasting Initiative (CB & RQT), tested in supporting the EFI NEON forecasting challenge [@efi_challenge], among other use cases. 
 
-Discuss the NEON filename convention parser, link to `neon_filename_parser.R` source for regex patterns.  
-Discuss cases of NEON changing filename conventions.
+
+# References
