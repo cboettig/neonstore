@@ -3,12 +3,12 @@ bench::bench_time({
 library(neonstore)
 
   
-  mem_limit <- function(mem_limit = 16, units = "GB"){
+  mem_limit <- function(db = neon_db(), mem_limit = 16, units = "GB"){
     DBI::dbExecute(db, paste0("PRAGMA memory_limit='", mem_limit, " ", units,"'"))
   }
   
-  enable_parallel <- function(duckdb_cores = arrow::cpu_count()){
-    DBI::dbExecute(neon_db(), paste0("PRAGMA threads=", arrow::cpu_count()))
+  enable_parallel <- function(db = neon_db(), duckdb_cores = arrow::cpu_count()){
+    DBI::dbExecute(db, paste0("PRAGMA threads=", arrow::cpu_count()))
   }
   mem_limit()
   enable_parallel()

@@ -1,4 +1,4 @@
-# v0.5.5
+# v0.5.0
 
 - New functions `neon_export_db()` and `neon_import_db()` 
   export/import from `duckdb` to parquet.

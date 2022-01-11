@@ -30,18 +30,37 @@ output: rticles::elsevier_article
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, setup, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   out.width = "100%",
-  cache = FALSE
+  cache = TRUE
 )
 library(neonstore)
+library(dplyr)
+library(ggplot2)
+library(magick)
 Sys.setenv("NEONSTORE_HOME" = "store")
+
+
+## embed images
+ggimage <- function(path, transparent = FALSE){
+  img <- magick::image_read(path)
+  if(transparent)  img <- magick::image_transparent(img, "white")
+  ggplot2::ggplot() + 
+  ggplot2::annotation_raster(img, 
+                    xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+    theme(axis.line = element_blank(), 
+          panel.background = element_blank(),
+          axis.ticks = element_blank(), 
+          axis.text = element_blank(), 
+          axis.title = element_blank())
+  
+}
 ```
 
-The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing environmental science [@NAS_NEON; @Balch2020; @Nagy2021].
+The National Ecological Observatory Network (NEON) represents an important resource and a major investment in data collection infrastructure needed to address many of the grand challenges facing environmental science [@nap_neon; @Balch2020; @Nagy2021].
 NEON provides access to 181 (active and planned) ecological data products at 81 (permanent and relocatable) sites throughout the United States.
 The `neonstore` R package seeks to provide provenance aware, high performance access and persistent storage of NEON data files. 
 Here, we describe the design, use, and rationale for the package.
@@ -127,8 +146,9 @@ NEON does not always use globally unique names for table descriptions, particula
 RStudio users can bring up an interactive list of available tables in the RStudio "Connections" pane using the function `neon_pane()` [Fig #1].
 
 
-![RStudio Connections pane showing interactive panel listing all tables imported into the local duckdb database.](rstudio-pane.png) 
-
+```{r fig1, echo=FALSE, fig.cap="RStudio Connections pane showing interactive panel listing all tables imported into the local duckdb database."}
+ggimage("rstudio-pane.png") 
+```
 <!--
 
 Box 1: Provenance workflow
@@ -443,7 +463,7 @@ Sys.setenv("AWS_EC2_METADATA_DISABLED"="TRUE")
 ```
 
 
-```{r}
+```{r cache=FALSE}
 con <- neon_remote_db(host = "minio.thelio.carlboettiger.info",
                       bucket = "shared-data",
                       path = "neonstoredb")
@@ -453,7 +473,7 @@ con <- neon_remote_db(host = "minio.thelio.carlboettiger.info",
 Once a connection to the remote database is established, we can request individual tables using `neon_remote` to access the data using dplyr functions.
 Like `neon_table()`, we must use `collect()` to draw the data into R if we wish to perform advanced R-specific operations that are not supported by the backend engine.
 
-```{r}
+```{r  cache=FALSE}
 remote_temp <- neon_remote("30min", product = "DP1.00002.001", db = con)
 remote_temp %>% count(siteID) %>% collect()
 ```
