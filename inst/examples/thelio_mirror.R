@@ -1,7 +1,8 @@
 bench::bench_time({
 
 library(neonstore)
-
+  message(neon_dir())
+  
   
   mem_limit <- function(db = neon_db(), mem_limit = 16, units = "GB"){
     DBI::dbExecute(db, paste0("PRAGMA memory_limit='", mem_limit, " ", units,"'"))
@@ -57,7 +58,7 @@ neon_download("DP1.00098.001", table = "30") # Humidity (includes temp)
 
 ## SQL Import
 neon_store(product = "DP1.10003.001") # Birds
-neon_store(product = "DP1.10022.001") # Beetles
+neon_store(product = "DP1.10022.001", type = "expanded") # Beetles
 neon_store(product = "DP1.10093.001") # Ticks
 
 ## Aquatics SQL Import
