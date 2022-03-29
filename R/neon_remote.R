@@ -10,15 +10,14 @@
 #' @examplesIf interactive()
 #' 
 #' db <- neon_remote_db()
-#' 
-neon_remote_db <- function(host = "minio.thelio.carlboettiger.info",
-                           bucket = "shared-data",
-                           ...) {
+#' @param s3 an `arrow::s3_bucket()` connection
+neon_remote_db <- function(s3 = s3_bucket("neon",
+                                          endpoint_override = "data.ecoforecast.org")
+                           ) {
     
   if(!requireNamespace("arrow", quietly = TRUE))
     stop("arrow must be installed to use neon_remote()")
 
-  s3 <- arrow::s3_bucket(bucket, endpoint_override = host, ...)
 
   parquet_files <- s3$ls()
   parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]

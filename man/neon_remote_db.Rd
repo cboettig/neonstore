@@ -5,12 +5,12 @@
 \title{Establish a remote database connection using \code{arrow}}
 \usage{
 neon_remote_db(
-  host = "minio.thelio.carlboettiger.info",
-  bucket = "shared-data",
-  ...
+  s3 = s3_bucket("neon", endpoint_override = "data.ecoforecast.org")
 )
 }
 \arguments{
+\item{s3}{an \code{arrow::s3_bucket()} connection}
+
 \item{host}{An S3-compliant host address}
 
 \item{bucket}{bucket name}
