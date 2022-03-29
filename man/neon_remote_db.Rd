@@ -7,7 +7,7 @@
 neon_remote_db(
   host = "minio.thelio.carlboettiger.info",
   bucket = "shared-data",
-  path = "neonstoredb"
+  ...
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ neon_remote_db(
 
 \item{bucket}{bucket name}
 
-\item{path}{path (prefix) on bucket to parquet files}
+\item{...}{additional arguments to \code{arrow::s3_bucket()}}
 }
 \description{
 Provides a remote connection

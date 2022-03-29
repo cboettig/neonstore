@@ -33,9 +33,7 @@ Imports:
     httr,
     progress,
     R.utils,
-    tools,
     thor,
-    utils,
     vroom (>= 1.5.1),
     zip
 RoxygenNote: 7.1.2

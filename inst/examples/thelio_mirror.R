@@ -90,12 +90,14 @@ neon_store(product = "DP1.20016.001") # Elevation of surface water
 neon_store(product = "DP1.20217.001") # Groundwater temperature
 neon_store(product = "DP1.20033.001") # Nitrate
 
-# Shared meterology (all sites, slow!)
+# Shared meteorology (all sites, slow!)
 neon_store(product = "DP4.00001.001") # Summary weather
 neon_store("DP1.00003.001", table = "30") # Temp
 neon_store("DP1.00006.001", table = "30") # Precipitation (terrestrial sites)
 neon_store("DP1.00098.001", table = "30") # Humidity (includes temp)
 
+
+neon_export_db()
 
 })
 ## Peak at the readme for a product.  Consider a README fn?  open in viewer?

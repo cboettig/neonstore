@@ -35,3 +35,48 @@ neon_import_db <- function(dir = file.path(neon_dir(), "parquet"),
   DBI::dbDisconnect(db, shutdown=TRUE)
   
 }
+
+
+rename_tables <- function(dir) {
+  
+  parquet_files <- list.files(dir, full.names = TRUE)
+  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
+  ## Ick, table names were mangled in file names, repair them!
+  con <- file.path(dir, "load.sql")
+  meta <- vroom::vroom_lines(con)
+  pattern <- '^COPY "?(.*)"? FROM \'.*\\w*/(\\d+\\w*\\.parquet).*'
+  table_name <- gsub('\\"', '', unname(gsub(pattern, "\\1", meta )))
+  file_name <- unname(gsub(pattern, "\\2", meta ))
+  names(table_name) <- file_name
+  
+  labels <- table_name[file_name]
+  file.rename(file.path(dir, names(labels)),
+                file.path(dir, paste0(labels, ".parquet"))
+  )
+  invisible(labels)
+}
+
+
+#' sync local parquet export to an S3 database
+#' 
+#' @inheritParams neon_export_db
+#' @param s3 an `[arrow::s3_bucket()]` connection or other valid arrow path
+#' @export
+neon_share_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
+  
+  if (!requireNamespace("arrow", quietly = TRUE)) {
+    stop("arrow must be installed to use  this function")
+  }
+
+  parquet_files <- list.files(dir, full.names = TRUE)
+  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
+  
+  status <- lapply(parquet_files, 
+               function(fi) {
+                 df <- arrow::open_dataset(fi)
+                 arrow::write_dataset(df, s3)
+                 TRUE
+               })
+  
+  
+}
