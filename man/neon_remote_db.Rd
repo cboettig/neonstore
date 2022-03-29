@@ -9,7 +9,7 @@ neon_remote_db(
 )
 }
 \arguments{
-\item{s3}{an \code{arrow::s3_bucket()} connection}
+\item{s3}{an \verb{[arrow::s3_bucket()]} connection or other valid arrow path}
 }
 \description{
 Provides a remote connection

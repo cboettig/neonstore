@@ -8,7 +8,6 @@
 #' @examplesIf interactive()
 #' 
 #' db <- neon_remote_db()
-#' @param s3 an `arrow::s3_bucket()` connection
 neon_remote_db <- function(s3 = arrow::s3_bucket("neon",
                                           endpoint_override = "data.ecoforecast.org")
                            ) {
