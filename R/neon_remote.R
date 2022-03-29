@@ -2,9 +2,7 @@
 #' 
 #' 
 #' Provides a remote connection 
-#' @param host An S3-compliant host address
-#' @param bucket bucket name
-#' @param ... additional arguments to `arrow::s3_bucket()`
+#' @inheritParams neon_share_db
 #' 
 #' @export
 #' @examplesIf interactive()
@@ -22,13 +20,12 @@ neon_remote_db <- function(s3 = arrow::s3_bucket("neon",
   parquet_files <- s3$ls()
   parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
   
-  db <- lapply(seq_along(parquet_files), 
-      function(i) {
-        parquet_file <- dir$ls()[i]
+  db <- lapply(parquet_files, 
+      function(parquet_file) {
         fi <- s3$path(parquet_file)
         arrow::open_dataset(fi)
       })
-  
+  names(db) <- parquet_files
   db
 }
 

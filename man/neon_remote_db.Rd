@@ -10,12 +10,6 @@ neon_remote_db(
 }
 \arguments{
 \item{s3}{an \code{arrow::s3_bucket()} connection}
-
-\item{host}{An S3-compliant host address}
-
-\item{bucket}{bucket name}
-
-\item{...}{additional arguments to \code{arrow::s3_bucket()}}
 }
 \description{
 Provides a remote connection
