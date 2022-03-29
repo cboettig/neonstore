@@ -71,7 +71,7 @@ neon_sync_db <- function(to, from = local_bucket()) {
     stop("arrow must be installed to use  this function")
   }
 
-  parquet_files <- list.files(dir, full.names = TRUE)
+  parquet_files <- from$ls()
   parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
   
   status <- lapply(parquet_files, 
