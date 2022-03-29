@@ -5,14 +5,15 @@
 \title{Establish a remote database connection using \code{arrow}}
 \usage{
 neon_remote_db(
-  s3 = arrow::s3_bucket("neon", endpoint_override = "data.ecoforecast.org")
+  bucket = arrow::s3_bucket("neon", endpoint_override = "data.ecoforecast.org")
 )
 }
 \arguments{
-\item{s3}{an \verb{[arrow::s3_bucket()]} connection or other valid arrow path}
+\item{bucket}{an \verb{[arrow::s3_bucket]} connection or other
+\link[arrow:FileSystem]{arrow::SubTreeFileSystem} object.}
 }
 \description{
-Provides a remote connection
+Establish a remote database connection using \code{arrow}
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

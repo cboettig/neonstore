@@ -1,14 +1,13 @@
 #' Establish a remote database connection using `arrow`
 #' 
-#' 
-#' Provides a remote connection 
-#' @inheritParams neon_share_db
+#' @param bucket an `[arrow::s3_bucket]` connection or other 
+#' [arrow::SubTreeFileSystem] object.
 #' 
 #' @export
 #' @examplesIf interactive()
 #' 
 #' db <- neon_remote_db()
-neon_remote_db <- function(s3 = arrow::s3_bucket("neon",
+neon_remote_db <- function(bucket = arrow::s3_bucket("neon",
                                           endpoint_override = "data.ecoforecast.org")
                            ) {
     
@@ -16,12 +15,12 @@ neon_remote_db <- function(s3 = arrow::s3_bucket("neon",
     stop("arrow must be installed to use neon_remote()")
 
 
-  parquet_files <- s3$ls()
+  parquet_files <- bucket$ls()
   parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
   
   db <- lapply(parquet_files, 
       function(parquet_file) {
-        fi <- s3$path(parquet_file)
+        fi <- bucket$path(parquet_file)
         arrow::open_dataset(fi)
       })
   names(db) <- parquet_files

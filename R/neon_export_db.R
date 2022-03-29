@@ -59,10 +59,13 @@ rename_tables <- function(dir) {
 
 #' sync local parquet export to an S3 database
 #' 
-#' @inheritParams neon_export_db
-#' @param s3 an `[arrow::s3_bucket()]` connection or other valid arrow path
+#' @param to an `[arrow::SubTreeFileSystem]`, such as a remote connection to
+#' an S3 bucket from `[arrow::s3_bucket()]`.
+#' @param from another `[arrow::SubTreeFileSystem]`, such as local path. 
+#'  By default, this is the same default path used by `[neon_import_db()]`
+#'  and `[neon_export_db()]`
 #' @export
-neon_share_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
+neon_sync_db <- function(to, from = local_bucket()) {
   
   if (!requireNamespace("arrow", quietly = TRUE)) {
     stop("arrow must be installed to use  this function")
@@ -74,9 +77,13 @@ neon_share_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
   status <- lapply(parquet_files, 
                function(fi) {
                  df <- arrow::open_dataset(fi)
-                 arrow::write_dataset(df, s3)
+                 arrow::write_dataset(df, to)
                  TRUE
                })
   
   
+}
+
+local_bucket <- function(dir =  file.path(neon_dir(), "parquet")) {
+  SubTreeFileSystem$create(base_path = dir, LocalFileSystem$create())
 }
