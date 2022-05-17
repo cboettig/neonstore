@@ -14,7 +14,10 @@ neon_remote_db <- function(bucket = arrow::s3_bucket("neon",
   if(!requireNamespace("arrow", quietly = TRUE))
     stop("arrow must be installed to use neon_remote()")
 
-
+  if(is.character(bucket)) {
+    bucket <- local_bucket(dir = bucket)
+  }
+  
   parquet_files <- bucket$ls()
   parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
   

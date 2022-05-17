@@ -23,6 +23,10 @@ neon_export_db <- function(dir = file.path(neon_dir(), "parquet"),
 neon_import_db <- function(dir = file.path(neon_dir(), "parquet"),
                            db = neon_db(read_only = FALSE)
                            ) {
+  
+  ## FIXME detect if `schema.sql` & `load.sql` do not exist, and 
+  ## create views of each table based on table name
+  
   queries <- readLines(file.path(dir, "schema.sql"))
   queries <- queries[queries != ""]
   
@@ -64,11 +68,21 @@ rename_tables <- function(dir) {
 #' @param from another `[arrow::SubTreeFileSystem]`, such as local path. 
 #'  By default, this is the same default path used by `[neon_import_db()]`
 #'  and `[neon_export_db()]`
+#' @details character strings will be interpreted as local paths for either
+#'  argument.
 #' @export
-neon_sync_db <- function(to, from = local_bucket()) {
+neon_sync_db <- function(to, from = file.path(neon_dir(), "parquet")) {
   
   if (!requireNamespace("arrow", quietly = TRUE)) {
     stop("arrow must be installed to use  this function")
+  }
+  
+  if(is.character(to)) {
+    to <- local_bucket(dir = to)
+  }
+  
+  if(is.character(from)) {
+    from <- local_bucket(dir = from)
   }
 
   parquet_files <- from$ls()
@@ -76,8 +90,8 @@ neon_sync_db <- function(to, from = local_bucket()) {
   
   status <- lapply(parquet_files, 
                function(fi) {
-                 df <- arrow::open_dataset(fi)
-                 arrow::write_dataset(df, to)
+                 df <- arrow::open_dataset(from$path(fi))
+                 arrow::write_dataset(df, to$path(fi))
                  TRUE
                })
   
@@ -85,5 +99,6 @@ neon_sync_db <- function(to, from = local_bucket()) {
 }
 
 local_bucket <- function(dir =  file.path(neon_dir(), "parquet")) {
-  SubTreeFileSystem$create(base_path = dir, LocalFileSystem$create())
+  arrow::SubTreeFileSystem$create(base_path = dir, 
+                                  arrow::LocalFileSystem$create())
 }

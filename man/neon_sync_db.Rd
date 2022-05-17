@@ -4,7 +4,7 @@
 \alias{neon_sync_db}
 \title{sync local parquet export to an S3 database}
 \usage{
-neon_sync_db(to, from = local_bucket())
+neon_sync_db(to, from = file.path(neon_dir(), "parquet"))
 }
 \arguments{
 \item{to}{an \verb{[arrow::SubTreeFileSystem]}, such as a remote connection to
@@ -16,4 +16,8 @@ and \verb{[neon_export_db()]}}
 }
 \description{
 sync local parquet export to an S3 database
+}
+\details{
+character strings will be interpreted as local paths for either
+argument.
 }

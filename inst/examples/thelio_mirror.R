@@ -2,6 +2,7 @@ bench::bench_time({
 
 library(neonstore)
   message(neon_dir())
+  message(neon_db_dir())
   
   
   mem_limit <- function(db = neon_db(), mem_limit = 16, units = "GB"){
@@ -11,8 +12,11 @@ library(neonstore)
   enable_parallel <- function(db = neon_db(), duckdb_cores = arrow::cpu_count()){
     DBI::dbExecute(db, paste0("PRAGMA threads=", arrow::cpu_count()))
   }
-  mem_limit()
-  enable_parallel()
+  
+  db <- neon_db(read_only = FALSE)
+  
+  mem_limit(db)
+  enable_parallel(db)
   
   
 # neonstore::neon_delete_db()
