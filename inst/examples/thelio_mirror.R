@@ -1,6 +1,6 @@
 bench::bench_time({
 
-library(neonstore)
+  library(neonstore)
   message(neon_dir())
   message(neon_db_dir())
   
@@ -104,12 +104,11 @@ neon_store("DP1.00098.001", table = "30") # Humidity (includes temp)
 neon_export_db()
 
 })
+
+s3 <- arrow::s3_bucket("targets/neon", endpoint_override="minio.carlboettiger.info")
+s3$ls()
+neon_sync_db(s3)
+
+
 ## Peak at the readme for a product.  Consider a README fn?  open in viewer?
 # index %>% filter(product == "DP1.00003.001", table=="readme") %>% pull(path) %>% getElement(1) %>% usethis::edit_file()
-
-## Get full names and descriptions of all products imported into this index: 
-index <- neon_index()
-products <- neon_products()
-index %>% select(product) %>%  distinct() %>% 
-  left_join(products, by =c(product="productCode")) %>% 
-  select(product, productName, productDescription) 

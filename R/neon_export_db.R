@@ -90,7 +90,8 @@ neon_sync_db <- function(to, from = file.path(neon_dir(), "parquet")) {
   
   status <- lapply(parquet_files, 
                function(fi) {
-                 df <- arrow::open_dataset(from$path(fi))
+                 f <- file.path(from$base_path,fi)
+                 df <- arrow::open_dataset(f)
                  arrow::write_dataset(df, to$path(fi))
                  TRUE
                })
