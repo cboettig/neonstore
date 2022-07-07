@@ -42,18 +42,7 @@ neon_import_db <- function(dir = file.path(neon_dir(), "parquet"),
 
 
 rename_tables <- function(dir) {
-  
-  parquet_files <- list.files(dir, full.names = TRUE)
-  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
-  ## Ick, table names were mangled in file names, repair them!
-  con <- file.path(dir, "load.sql")
-  meta <- vroom::vroom_lines(con)
-  pattern <- '^COPY "?(.*)"? FROM \'.*\\w*/(\\d+\\w*\\.parquet).*'
-  table_name <- gsub('\\"', '', unname(gsub(pattern, "\\1", meta )))
-  file_name <- unname(gsub(pattern, "\\2", meta ))
-  names(table_name) <- file_name
-  
-  labels <- table_name[file_name]
+  labels <- parquet_labels(dir)
   file.rename(file.path(dir, names(labels)),
                 file.path(dir, paste0(labels, ".parquet"))
   )
@@ -61,39 +50,54 @@ rename_tables <- function(dir) {
 }
 
 
+from_sql_strings <- function(str, part = 2){ 
+  table_names <- vapply(strsplit(str, " "), 
+                        function(x){
+                          bits <- gsub("[\'\"]", "", x)
+                          bits[[part]]
+                        }, 
+                        character(1L))
+}
+
+parquet_labels <- function(dir) {
+  parquet_files <- list.files(dir, full.names = TRUE)
+  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
+  ## Ick, table names were mangled in file names, repair them!
+  con <- file.path(dir, "load.sql")
+  meta <- vroom::vroom_lines(con)
+  table_name <- from_sql_strings(meta, 2)
+  file_path <-  from_sql_strings(meta, 4)
+  names(table_name) <- file_path
+  table_name
+}
+
+
 #' sync local parquet export to an S3 database
 #' 
-#' @param to an `[arrow::SubTreeFileSystem]`, such as a remote connection to
+#' @param s3 an `[arrow::SubTreeFileSystem]`, such as a remote connection to
 #' an S3 bucket from `[arrow::s3_bucket()]`.
-#' @param from another `[arrow::SubTreeFileSystem]`, such as local path. 
-#'  By default, this is the same default path used by `[neon_import_db()]`
-#'  and `[neon_export_db()]`
-#' @details character strings will be interpreted as local paths for either
-#'  argument.
+#' @inheritParams neon_export_db
+#' @details Remote files are named according to the table name (including 
+#'     product id, not according to the 'santitized' file name duckdb uses 
+#'     when generating exports.)
 #' @export
-neon_sync_db <- function(to, from = file.path(neon_dir(), "parquet")) {
+neon_sync_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
   
   if (!requireNamespace("arrow", quietly = TRUE)) {
     stop("arrow must be installed to use  this function")
   }
   
-  if(is.character(to)) {
-    to <- local_bucket(dir = to)
+  if(is.character(s3)) {
+    s3 <- local_bucket(dir = s3)
   }
   
-  if(is.character(from)) {
-    from <- local_bucket(dir = from)
-  }
-
-  parquet_files <- from$ls()
-  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
+  table_names <- parquet_labels(dir)
+  file_paths <- names(table_names)
   
-  status <- lapply(parquet_files, 
-               function(fi) {
-                 f <- file.path(from$base_path,fi)
-                 df <- arrow::open_dataset(f)
-                 arrow::write_dataset(df, to$path(fi))
-                 TRUE
+  status <- lapply(seq_along(table_names), 
+               function(i) {
+                 df <- arrow::open_dataset(file_paths[[i]])
+                 arrow::write_dataset(df, s3$path(table_names[[i]]))
                })
   
   

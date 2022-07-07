@@ -7,7 +7,7 @@
 #' @examplesIf interactive()
 #' 
 #' db <- neon_remote_db()
-neon_remote_db <- function(bucket = arrow::s3_bucket("neon",
+neon_remote_db <- function(bucket = arrow::s3_bucket("targets/neon",
                                           endpoint_override = "data.ecoforecast.org")
                            ) {
     
@@ -19,8 +19,7 @@ neon_remote_db <- function(bucket = arrow::s3_bucket("neon",
   }
   
   parquet_files <- bucket$ls()
-  parquet_files <- parquet_files[grepl("[.]parquet",parquet_files)]
-  
+
   db <- lapply(parquet_files, 
       function(parquet_file) {
         fi <- bucket$path(parquet_file)

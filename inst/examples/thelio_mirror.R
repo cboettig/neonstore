@@ -106,9 +106,8 @@ neon_export_db()
 })
 
 s3 <- arrow::s3_bucket("targets/neon", endpoint_override="minio.carlboettiger.info")
-s3$ls()
 neon_sync_db(s3)
-
+s3$ls() 
 
 ## Peak at the readme for a product.  Consider a README fn?  open in viewer?
 # index %>% filter(product == "DP1.00003.001", table=="readme") %>% pull(path) %>% getElement(1) %>% usethis::edit_file()
