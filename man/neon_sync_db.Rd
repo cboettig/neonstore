@@ -17,6 +17,6 @@ sync local parquet export to an S3 database
 }
 \details{
 Remote files are named according to the table name (including
-product id, not according to the 'santitized' file name duckdb uses
+product id, not according to the 'sanitized' file name duckdb uses
 when generating exports.)
 }

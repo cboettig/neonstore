@@ -78,7 +78,7 @@ parquet_labels <- function(dir) {
 #' an S3 bucket from `[arrow::s3_bucket()]`.
 #' @inheritParams neon_export_db
 #' @details Remote files are named according to the table name (including 
-#'     product id, not according to the 'santitized' file name duckdb uses 
+#'     product id, not according to the 'sanitized' file name duckdb uses 
 #'     when generating exports.)
 #' @export
 neon_sync_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {

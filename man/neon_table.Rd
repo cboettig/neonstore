@@ -19,7 +19,7 @@ see \link{neon_index}}
 
 \item{product}{A NEON \code{productCode} or list of product codes, see examples.}
 
-\item{type}{filter for basic or expanded. Can be ommitted unless you have
+\item{type}{filter for basic or expanded. Can be omitted unless you have
 imported both types a given table into your database.}
 
 \item{site}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}

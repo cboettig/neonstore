@@ -6,7 +6,7 @@
 #' We cannot filter on start_date or end_date since these
 #' come only from the filename metadata and are only added
 #' to instrument tables, not observation tables etc.
-#' @param type filter for basic or expanded. Can be ommitted unless you have 
+#' @param type filter for basic or expanded. Can be omitted unless you have 
 #' imported both types a given table into your database.
 #' @param lazy logical, default FALSE. Should we return a remote dplyr 
 #' connection to the table in duckdb? This can substantially improve 
