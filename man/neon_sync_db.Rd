@@ -4,20 +4,19 @@
 \alias{neon_sync_db}
 \title{sync local parquet export to an S3 database}
 \usage{
-neon_sync_db(to, from = file.path(neon_dir(), "parquet"))
+neon_sync_db(s3, dir = file.path(neon_dir(), "parquet"))
 }
 \arguments{
-\item{to}{an \verb{[arrow::SubTreeFileSystem]}, such as a remote connection to
+\item{s3}{an \verb{[arrow::SubTreeFileSystem]}, such as a remote connection to
 an S3 bucket from \verb{[arrow::s3_bucket()]}.}
 
-\item{from}{another \verb{[arrow::SubTreeFileSystem]}, such as local path.
-By default, this is the same default path used by \verb{[neon_import_db()]}
-and \verb{[neon_export_db()]}}
+\item{dir}{directory to which parquet export is written.}
 }
 \description{
 sync local parquet export to an S3 database
 }
 \details{
-character strings will be interpreted as local paths for either
-argument.
+Remote files are named according to the table name (including
+product id, not according to the 'santitized' file name duckdb uses
+when generating exports.)
 }
