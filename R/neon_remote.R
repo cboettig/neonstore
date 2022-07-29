@@ -7,7 +7,7 @@
 #' @examplesIf interactive()
 #' 
 #' db <- neon_remote_db()
-neon_remote_db <- function(bucket = arrow::s3_bucket("targets/neon",
+neon_remote_db <- function(bucket = arrow::s3_bucket("neon4cast-targets/neon",
                                           endpoint_override = "data.ecoforecast.org")
                            ) {
     
