@@ -103,6 +103,23 @@ neon_sync_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
   
 }
 
+
+
+
+standardize_export_names <- function(s3, 
+                                     dir = file.path(neon_dir(), 
+                                                     "parquet")
+                                     ) {
+  table_names <- parquet_labels(dir)
+  file_paths <- names(table_names)
+  status <- lapply(seq_along(table_names), 
+                   function(i) {
+                     fs::file_move(file_paths[[i]], table_names[[i]])
+                   })
+
+}
+
+
 local_bucket <- function(dir =  file.path(neon_dir(), "parquet")) {
   arrow::SubTreeFileSystem$create(base_path = dir, 
                                   arrow::LocalFileSystem$create())
