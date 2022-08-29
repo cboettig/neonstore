@@ -53,14 +53,14 @@ slower parsing.  Default \code{FALSE}.}
 \verb{mapping error: Too many open files}.}
     \item{\code{files}}{optionally, specify a vector of file paths directly (e.g. as
 provided from \link{neon_index}) and specify \code{table} argument as NULL.}
-    \item{\code{site}}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
+    \item{\code{ext}}{only match files with this file extension(s)}
+    \item{\code{timestamp}}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
+Should be a datetime POSIXct object (or coerce-able string)}
     \item{\code{start_date}}{Download only files as recent as (\code{YYYY-MM-DD}). Leave
 as \code{NA} to download up to the most recent available data.}
     \item{\code{end_date}}{Download only files up to end_date (\code{YYYY-MM-DD}). Leave as
 \code{NA} to download all prior data.}
-    \item{\code{ext}}{only match files with this file extension(s)}
-    \item{\code{timestamp}}{only match timestamps prior this. See details in \code{\link[=neon_index]{neon_index()}}.
-Should be a datetime POSIXct object (or coerce-able string)}
+    \item{\code{site}}{4-letter site code(s) to filter on. Leave as \code{NA} to search all.}
     \item{\code{release}}{Select only data files associated with a particular release tag,
 see \url{https://www.neonscience.org/data-samples/data-management/data-revisions-releases},
 e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that

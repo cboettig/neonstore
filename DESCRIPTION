@@ -36,7 +36,7 @@ Imports:
     thor,
     vroom (>= 1.5.1),
     zip
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Suggests: 
     tibble,
     jsonlite,

@@ -103,11 +103,20 @@ neon_sync_db <- function(s3, dir = file.path(neon_dir(), "parquet")) {
   
 }
 
-
-
-
-standardize_export_names <- function(s3, 
-                                     dir = file.path(neon_dir(), 
+#' standardize export names
+#' 
+#' @details
+#' DUCKDB clobbers database filenames to avoid potentially incompatible characters.
+#' This is pretty unnecessary, so we can restore the original table names for
+#' use with S3-based remote access which assumes parquet files map to the 
+#' desired table names (i.e. including product numbers.)
+#' 
+#' However, note that `[neon_import_db()]` uses native duckdb functions 
+#' that assume the original mangled names.
+#' 
+#' @inheritParams neon_export_db
+#' @export
+standardize_export_names <- function(dir = file.path(neon_dir(), 
                                                      "parquet")
                                      ) {
   table_names <- parquet_labels(dir)
