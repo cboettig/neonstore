@@ -105,7 +105,7 @@ neon_export_db()
 
 })
 
-s3 <- arrow::s3_bucket("targets/neon", endpoint_override="minio.carlboettiger.info")
+s3 <- arrow::s3_bucket("targets/neon", endpoint_override="data.ecoforecast.org")
 neon_sync_db(s3)
 s3$ls() 
 
