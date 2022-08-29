@@ -123,7 +123,7 @@ standardize_export_names <- function(dir = file.path(neon_dir(),
   file_paths <- names(table_names)
   status <- lapply(seq_along(table_names), 
                    function(i) {
-                     fs::file_move(file_paths[[i]], table_names[[i]])
+                     file.rename(file_paths[[i]], table_names[[i]])
                    })
 
 }
