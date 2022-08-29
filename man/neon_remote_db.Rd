@@ -5,7 +5,8 @@
 \title{Establish a remote database connection using \code{arrow}}
 \usage{
 neon_remote_db(
-  bucket = arrow::s3_bucket("neon", endpoint_override = "data.ecoforecast.org")
+  bucket = arrow::s3_bucket("neon4cast-targets/neon", endpoint_override =
+    "data.ecoforecast.org")
 )
 }
 \arguments{

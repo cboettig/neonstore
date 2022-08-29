@@ -1,4 +1,5 @@
 AOP
+Bugfix
 CCCCCC
 Codecov
 DESC
@@ -11,10 +12,12 @@ FFFFFF
 FLHTDATE
 FLHTSTRT
 FLIGHTSTRT
+FileSystemDataset
 GENTIME
 HOR
 IMAGEDATETIME
 LIDAR
+MINIO
 NEON's
 NNN
 NNNN
@@ -43,8 +46,11 @@ crc
 csv
 datetime
 dbConnect
+de
+dplyr
 duckdb
 easting
+filesystems
 flightline
 g'zipped
 gz
@@ -66,7 +72,9 @@ reproducibility
 sharded
 solaris
 subdir
+summarised
 tiem
+unparse
 verticalPosition
 vroom
 www
