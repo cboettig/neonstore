@@ -11,6 +11,7 @@
 neon_export_db <- function(dir = file.path(neon_dir(), "parquet"),
                            db = neon_db()
                            ) {
+  dir <- path.expand(dir)
   query <- paste0("EXPORT DATABASE '", dir, "' (FORMAT PARQUET);")
   DBI::dbExecute(db, query)
 }
@@ -27,6 +28,7 @@ neon_import_db <- function(dir = file.path(neon_dir(), "parquet"),
   ## FIXME detect if `schema.sql` & `load.sql` do not exist, and 
   ## create views of each table based on table name
   
+  dir <- path.expand(dir)
   queries <- readLines(file.path(dir, "schema.sql"))
   queries <- queries[queries != ""]
   
@@ -121,9 +123,11 @@ standardize_export_names <- function(dir = file.path(neon_dir(),
                                      ) {
   table_names <- parquet_labels(dir)
   file_paths <- names(table_names)
+  new_names <- file.path(dir, table_names, "part-0.parquet")
   status <- lapply(seq_along(table_names), 
                    function(i) {
-                     file.rename(file_paths[[i]], table_names[[i]])
+                     file.rename(file_paths[[i]],
+                                 new_names[[i]])
                    })
 
 }
