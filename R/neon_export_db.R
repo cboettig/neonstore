@@ -124,6 +124,9 @@ standardize_export_names <- function(dir = file.path(neon_dir(),
   table_names <- parquet_labels(dir)
   file_paths <- names(table_names)
   new_names <- file.path(dir, table_names, "part-0.parquet")
+  lapply(dirname(new_names), dir.create)
+  
+  
   status <- lapply(seq_along(table_names), 
                    function(i) {
                      file.rename(file_paths[[i]],
