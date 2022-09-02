@@ -19,6 +19,7 @@ neon_remote_db <- function(bucket = arrow::s3_bucket("neon4cast-targets/neon",
   }
   
   parquet_files <- bucket$ls()
+  parquet_files <- parquet_files[!grepl("[.]sql", parquet_files)]
 
   db <- lapply(parquet_files, 
       function(parquet_file) {
