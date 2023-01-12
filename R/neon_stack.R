@@ -81,7 +81,7 @@ vroom_each <- function(files,
     groups <-  lapply(files,
                       function(x){
                         if(progress) pb$tick()
-                        out <- vroom::vroom(x, guess_max = 1e5,
+                        out <- vroom::vroom(x, guess_max = 1e6,
                                             altrep = altrep,
                                             progress = vroom_progress,
                                             show_col_types = FALSE,
@@ -106,13 +106,13 @@ vroom_many <- function(files,
                        vroom_progress = FALSE,
                        ...){
     df <- tryCatch(vroom::vroom(files, 
-                                guess_max = 5e4, 
+                                guess_max = 1e6, 
                                 altrep = altrep,
                                 progress = vroom_progress,
                                 show_col_types = FALSE,
                                 ...),
                    error = function(e) vroom_ragged(files, 
-                                                    guess_max = 5e4,
+                                                    guess_max = 1e6,
                                                     altrep = altrep,
                                                     vroom_progress = FALSE,
                                                     show_col_types = FALSE,
@@ -128,15 +128,19 @@ vroom_ragged <- function(files,
                          vroom_progress = FALSE, 
                          show_col_types = FALSE,
                          ...){
+  options(readr.show_col_types = FALSE)
+  options(vroom.show_col_types = FALSE)
   
-  ## We read the 1st line of every file to determine schema  
+  ## We read the guess_max line of every file to determine schema  
     schema <- lapply(files, 
                      vroom::vroom, 
-                     n_max = 1, 
+                     n_max = 1e6, 
                      altrep = altrep, 
                      progress = FALSE,
                      show_col_types = FALSE,
-                     ...)
+                     guess_max = 1e6,
+                     #...
+                     )
   
   ## Now, we read in tables in groups of matching schema,
   ## filling in additional columns as in bind_rows.
