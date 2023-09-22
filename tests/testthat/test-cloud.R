@@ -9,12 +9,13 @@ test_that("Direct cloud access", {
   
   df <-  neonstore:::neon_cloud(table = "waq_instantaneous",
                                product = "DP1.20288.001",
-                               start_date = "2020-06-01",
+                               start_date = "2023-06-01",
                                end_date = "2023-08-01",
                                type="basic"
   )
   
-
+  expect_s3_class(df, "tbl_lazy")
+  
   
   df <-  neonstore:::neon_cloud(table = "bet_sorting",
                                 product = "DP1.10022.001",
@@ -24,6 +25,9 @@ test_that("Direct cloud access", {
   )
   
   
+  expect_s3_class(df, "tbl_lazy")
   
   
 })
+
+
