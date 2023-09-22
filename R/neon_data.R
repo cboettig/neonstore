@@ -1,4 +1,4 @@
-#
+# FIGURE OUT CACHE / MEMOISE CALLS
 
 #' @importFrom progress progress_bar
 #' @importFrom httr GET content
@@ -27,6 +27,7 @@ neon_data <- function(product,
                                .token = .token)
   
   ## Adjust for rate-limiting
+  ## as the API for the remaining limit?
   batch <- 950                 # authenticated
   if(.token == "") batch <- 150 # unauthenticated
   

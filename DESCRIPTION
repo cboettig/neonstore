@@ -35,8 +35,9 @@ Imports:
     R.utils,
     thor,
     vroom (>= 1.5.1),
-    zip
-RoxygenNote: 7.2.1
+    zip,
+    duckdbfs
+RoxygenNote: 7.2.3
 Suggests: 
     tibble,
     jsonlite,
