@@ -5,7 +5,7 @@
 #' archive and share your database files with another user or machine, 
 #' (2) expose your database using an S3 bucket using neon_remote_db(),
 #' (3) assist in upgrading your duckdb version.
-#' @param dir directory to which parquet export is written.data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAWElEQVR42mNgGPTAxsZmJsVqQApgmGw1yApwKcQiT7phRBuCzzCSDSHGMKINIeDNmWQlA2IigKJwIssQkHdINgxfmBBtGDEBS3KCxBc7pMQgMYE5c/AXPwAwSX4lV3pTWwAAAABJRU5ErkJggg==
+#' @param dir directory to which parquet export is written.
 #' @param db Connection to your local NEON database
 #' @export
 neon_export_db <- function(dir = file.path(neon_dir(), "parquet"),
