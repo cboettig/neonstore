@@ -1,9 +1,15 @@
 # FIGURE OUT CACHE / MEMOISE CALLS
 
-#' @importFrom progress progress_bar
-#' @importFrom httr GET content
-#' @noRd
-#' @examples
+#' 
+#' Query the NEON API for URLs of matching data products
+#' Repeated requests will be cached
+#' @inheritParams neon_download
+#' @export
+#' @return a data.frame containing the name, filesize (in bytes),
+#' checksums (columns md5, crc32, or crc32c, though each product will use
+#' only one of these), url, and release status.
+#' @examplesIf interactive()
+#' 
 #' x <- neon_data("DP1.10003.001") 
 #' x <- neon_data("DP1.10003.001", release="RELEASE-2021") 
 neon_data <- function(product, 
@@ -15,6 +21,11 @@ neon_data <- function(product,
                       quiet = FALSE,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
+  
+  
+  cache <- cachem::cache_disk(tempdir())
+  mGET <- memoise::memoise(httr::GET, cache = cache)
+  
   
   data_api <- data_api_queries(product = product, 
                                start_date = start_date, 
@@ -42,13 +53,15 @@ neon_data <- function(product,
   resp <- vector("list", length = length(data_api))
   for(i in seq_along(data_api)){
     if(!quiet){ pb$tick() }
-    resp[[i]] <- httr::GET(data_api[[i]],
-                           httr::add_headers("X-API-Token" = .token))
+    resp[[i]] <- mGET(data_api[[i]],
+                      httr::add_headers("X-API-Token" = .token))
     status <- neon_warn_http_errors(resp[[i]])
+    
     if(status == 429){ # retry once
-      resp[[i]] <- httr::GET(data_api[[i]],
-                             httr::add_headers("X-API-Token" = .token))
+      resp[[i]] <- mGET(data_api[[i]],
+                        httr::add_headers("X-API-Token" = .token))
     }
+    
     if(i %% batch == 0){
       if(!quiet) message("  NEON rate limiting enforced, pausing for 100s\n")
       Sys.sleep(105)
@@ -76,9 +89,10 @@ neon_data <- function(product,
 neon_warn_http_errors <- function(x){
   status <- httr::status_code(x)
   if(status < 400) return(invisible(0L))
+  
   out <- httr::content(x, encoding = "UTF-8")
-  message("  NEON rate limiting enforced, pausing for 100s\n")
-  Sys.sleep(101)
+  # message("  NEON rate limiting enforced, pausing for 100s\n")
+  # Sys.sleep(101)
   invisible(status)
 }
 
@@ -158,7 +172,6 @@ data_api_queries <- function(product,
   
   data_api
 }
-
 
 
 

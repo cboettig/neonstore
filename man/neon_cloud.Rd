@@ -10,10 +10,11 @@ neon_cloud(
   start_date = NA,
   end_date = NA,
   site = NA,
-  type = NA,
+  type = "basic",
   release = NA,
   quiet = FALSE,
   api = "https://data.neonscience.org/api/v0",
+  unify_schemas = FALSE,
   .token = Sys.getenv("NEON_TOKEN")
 )
 }
@@ -41,6 +42,11 @@ files associated with a particular release will not change.}
 \item{quiet}{Should download progress be displayed?}
 
 \item{api}{the URL to the NEON API, leave as default.}
+
+\item{unify_schemas}{if cloud-read fails to collect data due to miss-matched
+schemas, set this to \code{TRUE}. Warning: Results in much slower reads and may
+demand more memory due to parsing the schema of each file, especially when
+many files are involved.}
 
 \item{.token}{an authentication token from NEON. A token is not
 required but will allow access to a higher number of requests before

@@ -36,7 +36,8 @@ Imports:
     thor,
     vroom (>= 1.5.1),
     zip,
-    duckdbfs
+    duckdbfs,
+    memoise
 RoxygenNote: 7.2.3
 Suggests: 
     tibble,
