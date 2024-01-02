@@ -74,7 +74,7 @@ neon_db <- function (dir = neon_db_dir(),
   }
   
   e <- globalenv()
-  reg.finalizer(e, function(e) neon_disconnect(),TRUE)
+  #reg.finalizer(e, function(e) neon_disconnect(),TRUE)
   
   db
 }

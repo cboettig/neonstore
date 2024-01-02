@@ -1,11 +1,13 @@
 AOP
 Bugfix
 CCCCCC
+CMD
 Codecov
 DESC
 DOI
 DOM
 DPL
+DUCKDB
 DomainID
 EEEEEE
 FFFFFF
@@ -42,6 +44,7 @@ altrep
 bibtex
 bugfix
 bugfixes
+checksums
 crc
 csv
 datetime
@@ -50,6 +53,7 @@ de
 dplyr
 duckdb
 easting
+filesize
 filesystems
 flightline
 g'zipped
@@ -59,6 +63,7 @@ horizontalPosition
 http
 https
 iteratively
+md
 neonUtilities
 neonscience
 northing
@@ -69,6 +74,7 @@ productCode
 publicationDate
 readme
 reproducibility
+schemas
 sharded
 solaris
 subdir
