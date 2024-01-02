@@ -73,6 +73,9 @@ neon_db <- function (dir = neon_db_dir(),
     assign("neon_db", db, envir = neonstore_cache)
   }
   
+  e <- globalenv()
+  reg.finalizer(e, function(e) neon_disconnect(db),TRUE)
+  
   db
 }
 

@@ -24,7 +24,7 @@ neon_cloud <-function(table,
   urls <- neon_urls(table, product, start_date, end_date, site, type, release,
                     quiet, api, .token = .token)
   
-  format <- gsub(".*(.\\w+)$", "\\1", urls)
+  format <- gsub(".*\\.(\\w+)$", "\\1", urls)
   if(all(format == "csv")) {
     df <- cloud_csv(urls, unify_schemas = unify_schemas)
   } else {
@@ -38,14 +38,16 @@ neon_cloud <-function(table,
 cloud_csv <- function(urls, unify_schemas = FALSE) {   
   # Parse most recent first. Reduces the chance of int/char coercion failures
   # when hitting an all-empty column
-  #meta <- neon_filename_parser(urls)
-  #chrono <- order(meta$GENTIME, decreasing = TRUE)
-  #urls <- urls[chrono]
+  #timestamp <- neon_filename_parser(urls)$GENTIME
+  timestamp <- gsub(paste0(".*", GENTIME, "\\..*"), "\\1", urls)
+  chrono <- order(timestamp, decreasing = TRUE)
+  urls <- urls[chrono]
   ## discover or enforce extension
   ## Detect product type from `meta` and dispatch appropriately.
   
   # https://duckdb.org/docs/data/csv/overview.html
-  # consider all_varchar=1 as possible fallback 
+  # consider all_varchar=1 as possible fallback
+  
   # (possibly avoided by coercion after parsing in chrono order?)
   df <- duckdbfs::open_dataset(urls, format = "csv", filename = TRUE,
                                unify_schemas = unify_schemas)

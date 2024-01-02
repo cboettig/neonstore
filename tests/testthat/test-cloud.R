@@ -15,6 +15,13 @@ test_that("Direct cloud access", {
   )
   
   format <- gsub(".*\\.(\\w+)$", "\\1", urls)
+  expect_true(all(format == "csv")) 
+  
+  
+  timestamp <- gsub(paste0(".*", GENTIME, "\\..*"), "\\1", urls)
+  chrono <- order(timestamp, decreasing = TRUE)
+  urls <- urls[chrono]
+  
 })
 
 
@@ -66,6 +73,7 @@ test_that("Big (rate-limited) tests of direct cloud access", {
     
     skip_if_offline()
     skip_on_cran()
+    skip("slow")
     # skip_on_os("windows")
     
   
@@ -73,7 +81,8 @@ test_that("Big (rate-limited) tests of direct cloud access", {
                                 product = "DP1.20288.001",
                                 start_date = "2018-01-01",
                                 end_date = "2023-08-01",
-                                type="basic"
+                                type="basic",
+                                unify_schemas = TRUE
   )
   
   expect_s3_class(df, "tbl_lazy")
