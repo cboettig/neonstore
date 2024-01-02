@@ -54,5 +54,8 @@ Suggests:
     openssl,
     digest,
     arrow,
-    dplyr
+    dplyr,
+    R.methodsS3,
+    R.oo,
+    storr
 Language: en-US

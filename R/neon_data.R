@@ -23,10 +23,6 @@ neon_data <- function(product,
                       .token = Sys.getenv("NEON_TOKEN")){
   
   
-  cache <- cachem::cache_disk(tempdir())
-  mGET <- memoise::memoise(httr::GET, cache = cache)
-  
-  
   data_api <- data_api_queries(product = product, 
                                start_date = start_date, 
                                end_date = end_date, 
@@ -53,7 +49,7 @@ neon_data <- function(product,
   resp <- vector("list", length = length(data_api))
   for(i in seq_along(data_api)){
     if(!quiet){ pb$tick() }
-    resp[[i]] <- mGET(data_api[[i]],
+    resp[[i]] <- GET(data_api[[i]],
                       httr::add_headers("X-API-Token" = .token))
     status <- neon_warn_http_errors(resp[[i]])
     

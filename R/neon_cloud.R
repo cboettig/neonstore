@@ -21,36 +21,45 @@ neon_cloud <-function(table,
                       unify_schemas = FALSE,
                       .token = Sys.getenv("NEON_TOKEN")){
   
-  df <- neon_data(product, start_date, end_date, site, type, release,
-                  quiet, api, .token = .token)
+  urls <- neon_urls(table, product, start_date, end_date, site, type, release,
+                    quiet, api, .token = .token)
   
-  # df <- neon_data(product = "DP1.10003.001", type="basic")
-  # table = "brd_countdata"
+  format <- gsub(".*(.\\w+)$", "\\1", urls)
+  if(all(format == "csv")) {
+    df <- cloud_csv(urls)
+  }
   
-  urls <- df$url[ grepl(table, df$name) ]
-  
+  df
+}
+ 
+cloud_csv <- function(urls) {   
   # Parse most recent first. Reduces the chance of int/char coercion failures
   # when hitting an all-empty column
-  meta <- neon_filename_parser(urls)
-  chrono <- order(meta$GENTIME, decreasing = TRUE)
-  urls <- urls[chrono]
+  #meta <- neon_filename_parser(urls)
+  #chrono <- order(meta$GENTIME, decreasing = TRUE)
+  #urls <- urls[chrono]
   ## discover or enforce extension
-  
   ## Detect product type from `meta` and dispatch appropriately.
   
   # https://duckdb.org/docs/data/csv/overview.html
-  # consider igonore_errors=1 as possible fallback? (drops those rows entirely, ick)
-  # consider all_varchar=1 as possible fallback (possibly avoided by coercion after parsing in chrono order?)
+  # consider all_varchar=1 as possible fallback 
+  # (possibly avoided by coercion after parsing in chrono order?)
   df <- duckdbfs::open_dataset(urls, format = "csv", filename = TRUE,
                                unify_schemas = unify_schemas)
+  cols <- colnames(df)
   
-  
-  
-  
+  # sensor metdata
+  if(! "siteID" %in% cols) {
+    df <- df |> dplyr::mutate(
+      file = split_part(filename, "/", 9L), 
+      siteID = regexp_extract(file, IS_DATA, 3L),
+      domainID = regexp_extract(file, IS_DATA, 2L),
+      horizontalPosition= regexp_extract(file, IS_DATA, 7L),
+      verticalPosition = regexp_extract(file, IS_DATA, 8L)
+      )
+  }
+  df
 }
-
-  
-
 
 
 neon_urls <- function(table,
@@ -64,6 +73,18 @@ neon_urls <- function(table,
                       api = "https://data.neonscience.org/api/v0", 
                       .token = Sys.getenv("NEON_TOKEN")){
   
+  cache <- cachem::cache_disk(tempdir())
+  neon_data_mem <- memoise::memoise(neon_data, cache = cache)
   
+  df <- neon_data_mem(product, 
+                  start_date, 
+                  end_date, 
+                  site, 
+                  type, 
+                  release,
+                  quiet, 
+                  api, 
+                  .token = .token)
+  urls <- df$url[ grepl(table, df$name) ]
   
 }
