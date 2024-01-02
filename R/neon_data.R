@@ -54,7 +54,7 @@ neon_data <- function(product,
     status <- neon_warn_http_errors(resp[[i]])
     
     if(status == 429){ # retry once
-      resp[[i]] <- mGET(data_api[[i]],
+      resp[[i]] <- GET(data_api[[i]],
                         httr::add_headers("X-API-Token" = .token))
     }
     
