@@ -26,13 +26,16 @@ neon_cloud <-function(table,
   
   format <- gsub(".*(.\\w+)$", "\\1", urls)
   if(all(format == "csv")) {
-    df <- cloud_csv(urls)
+    df <- cloud_csv(urls, unify_schemas = unify_schemas)
+  } else {
+    stop("Only csv formatted data are accessible without download at this time.")
   }
   
   df
 }
  
-cloud_csv <- function(urls) {   
+
+cloud_csv <- function(urls, unify_schemas = FALSE) {   
   # Parse most recent first. Reduces the chance of int/char coercion failures
   # when hitting an all-empty column
   #meta <- neon_filename_parser(urls)
@@ -88,3 +91,9 @@ neon_urls <- function(table,
   urls <- df$url[ grepl(table, df$name) ]
   
 }
+
+
+
+
+globalVariables(c("regexp_extract", "split_part", "filename"),
+                package = "neonstore")

@@ -38,7 +38,8 @@ Imports:
     zip,
     duckdbfs,
     memoise,
-    cachem
+    cachem,
+    glue
 RoxygenNote: 7.2.3
 Suggests: 
     tibble,
