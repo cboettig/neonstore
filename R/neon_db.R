@@ -74,7 +74,7 @@ neon_db <- function (dir = neon_db_dir(),
   }
   
   e <- globalenv()
-  reg.finalizer(e, function(e) neon_disconnect(db),TRUE)
+  reg.finalizer(e, function(e) neon_disconnect(),TRUE)
   
   db
 }
@@ -86,7 +86,9 @@ neon_db <- function (dir = neon_db_dir(),
 #' @importFrom DBI dbDisconnect
 neon_disconnect <- function (db = neon_db()) {
   if (inherits(db, "DBIConnection")) {
+    if(DBI::dbIsValid(db)) {
       DBI::dbDisconnect(db, shutdown = TRUE)
+    }
   }
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(

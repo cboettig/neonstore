@@ -25,15 +25,14 @@ and the productCode needed for \link{neon_download}.
 (including list-columns).
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 products <- neon_products()
 
 # Or search for a keyword
 i <- grepl("bird", products$keywords)
 products[i, c("productCode", "productName")]
-
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \link{neon_download}

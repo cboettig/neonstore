@@ -77,8 +77,7 @@
 #' @export
 #' @importFrom R.utils gunzip
 #' @importFrom tools file_path_sans_ext
-#' @examples 
-#' \donttest{
+#' @examplesIf interactive()
 #'  
 #'  ## Omit dir=tempfile() to use persistent storage
 #'  neon_download("DP1.10003.001", 
@@ -95,7 +94,7 @@
 #'                table = "countdata",
 #'                dir = tempfile())
 #' 
-#' }
+#'
 neon_download <- function(product, 
                           table =  NA,
                           site = NA,

@@ -102,11 +102,12 @@ NEON sensor data products may start including this information in
 the raw data files, as is already the case for observational data.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 neon_read("brd_countdata-expanded")
 
 ## Sensor inputs will add metadata columns by default
 neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
 
-
+\dontshow{\}) # examplesIf}
 }
