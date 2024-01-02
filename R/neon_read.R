@@ -49,7 +49,7 @@
 #' @importFrom vroom vroom spec
 #' @export
 #' 
-#' @examples 
+#' @examplesIf interactive()
 #' 
 #' neon_read("brd_countdata-expanded")
 #' 

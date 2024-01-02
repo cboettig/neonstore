@@ -7,8 +7,7 @@
 #' @inheritParams neon_download
 #' @seealso [neon_download]
 #' @export
-#' @examples 
-#' \donttest{
+#' @examplesIf interactive()
 #' 
 #' products <- neon_products()
 #' 
@@ -16,7 +15,6 @@
 #' i <- grepl("bird", products$keywords)
 #' products[i, c("productCode", "productName")]
 #' 
-#' }
 neon_products <- function(
   api = "https://data.neonscience.org/api/v0",
   .token = Sys.getenv("NEON_TOKEN")){

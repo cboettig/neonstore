@@ -112,7 +112,7 @@ These duplicates are also packaged within the \code{.zip} downloads where it
 is not possible to exclude them from the download.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
  
  ## Omit dir=tempfile() to use persistent storage
  neon_download("DP1.10003.001", 
@@ -129,5 +129,5 @@ is not possible to exclude them from the download.
                table = "countdata",
                dir = tempfile())
 
-}
+\dontshow{\}) # examplesIf}
 }

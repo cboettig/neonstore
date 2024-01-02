@@ -36,7 +36,10 @@ Imports:
     thor,
     vroom (>= 1.5.1),
     zip,
-    duckdbfs
+    duckdbfs,
+    memoise,
+    cachem,
+    glue
 RoxygenNote: 7.2.3
 Suggests: 
     tibble,
@@ -52,5 +55,8 @@ Suggests:
     openssl,
     digest,
     arrow,
-    dplyr
+    dplyr,
+    R.methodsS3,
+    R.oo,
+    storr
 Language: en-US

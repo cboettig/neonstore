@@ -41,6 +41,7 @@ neon_db <- function (dir = neon_db_dir(),
 
   ## Cannot open read-only on a database that does not exist
   if (!file.exists(dbname) && read_only) {
+    message("initializing database")
     db <- DBI::dbConnect(duckdb::duckdb(), 
                          dbdir = dbname, read_only = FALSE)
     DBI::dbWriteTable(db, "init", data.frame(NEON="NEON"))
@@ -73,6 +74,9 @@ neon_db <- function (dir = neon_db_dir(),
     assign("neon_db", db, envir = neonstore_cache)
   }
   
+  #e <- globalenv()
+  #reg.finalizer(e, function(e) neon_disconnect(db),TRUE)
+  
   db
 }
 
@@ -82,14 +86,23 @@ neon_db <- function (dir = neon_db_dir(),
 #' @export
 #' @importFrom DBI dbDisconnect
 neon_disconnect <- function (db = neon_db()) {
-  if (inherits(db, "DBIConnection")) {
-      DBI::dbDisconnect(db, shutdown = TRUE)
+  default = getOption("warn")
+  
+  options(warn=-1)
+  
+  if(DBI::dbIsValid(db)) {
+    DBI::dbDisconnect(db, shutdown = TRUE)
   }
+
   if (exists("neon_db", envir = neonstore_cache)) {
     suppressWarnings(
     rm("neon_db", envir = neonstore_cache)
     )
   }
+  
+  gc(FALSE)
+  options(warn=default)
+  invisible(TRUE)
 }
 
 neonstore_cache <- new.env()
