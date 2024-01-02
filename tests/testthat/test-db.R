@@ -6,7 +6,6 @@ context("db")
 
 test_that("neon_db", {
   
-  
   db <- neon_db()
   expect_is(db, "DBIConnection")
 
@@ -14,11 +13,11 @@ test_that("neon_db", {
   
   ## Confirm cached connection
   expect_identical(db, db2)
-  
   neon_disconnect(db)
+  gc()
+
   
   neon_delete_db(ask = FALSE)
-  
 })
 
 

@@ -71,7 +71,7 @@ neon_store <- function(table = NA,
     DBI::dbWriteTable(db, "provenance", as.data.frame(index), append = TRUE)
   }
   
-  db <- duckdb_memory_manager(db)
+  #db <- duckdb_memory_manager(db)
   neon_disconnect(db = db)
   invisible(index)
 }
