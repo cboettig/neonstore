@@ -64,7 +64,6 @@ neon_cloud_ <-function(table,
                     release, quiet, api, .token = .token)
   
   if(length(urls) < 1) {
-    warning(paste("no data matching query"))
     return(NULL)
   }
   
