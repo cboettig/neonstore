@@ -28,7 +28,17 @@ neon_cloud <-function(table,
     rel <- neon_cloud_(table, product, start_date, end_date, site, type,
                 release = "RELEASE", quiet, api, 
                 unify_schemas, .token = .token)
-    dplyr::union_all(prov, rel)
+    
+    if(!is.null(rel) & ! is.null(prov)) {
+      return( dplyr::union_all(prov, rel) )
+    } else {
+      ## return the one that isn't null
+      set <- list(prov, rel)
+      i <- !vapply(set, is.null, TRUE)
+      return(set[i][[1]])
+    }
+    
+    
   } else {
     neon_cloud_(table, product, start_date, end_date, site, type,
                 release, quiet, api, unify_schemas, .token = .token)
