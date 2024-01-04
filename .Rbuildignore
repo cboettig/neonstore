@@ -13,3 +13,4 @@
 ^paper$
 ^docs$
 ^neon_parquet$
+^CRAN-SUBMISSION$

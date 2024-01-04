@@ -21,8 +21,42 @@ neon_cloud <-function(table,
                       unify_schemas = FALSE,
                       .token = Sys.getenv("NEON_TOKEN")){
   
-  urls <- neon_urls(table, product, start_date, end_date, site, type, release,
-                    quiet, api, .token = .token)
+  if(is.na(release)) {
+    prov <- neon_cloud_(table, product, start_date, end_date, site, type,
+                release = "PROVISIONAL", 
+                quiet, api, unify_schemas, .token = .token)
+    rel <- neon_cloud_(table, product, start_date, end_date, site, type,
+                release = "RELEASE", quiet, api, 
+                unify_schemas, .token = .token)
+    dplyr::union_all(prov, rel)
+  } else {
+    neon_cloud_(table, product, start_date, end_date, site, type,
+                release, quiet, api, unify_schemas, .token = .token)
+  }
+}
+  
+neon_cloud_ <-function(table,
+                      product, 
+                      start_date = NA,
+                      end_date = NA,
+                      site = NA,
+                      type = "basic",
+                      release = NA,
+                      quiet = FALSE,
+                      api = "https://data.neonscience.org/api/v0", 
+                      unify_schemas = FALSE,
+                      .token = Sys.getenv("NEON_TOKEN")){
+  
+  ## Do release and non-release separately and union the result!
+
+  
+  urls <- neon_urls(table, product, start_date, end_date, site, type,
+                    release, quiet, api, .token = .token)
+  
+  if(length(urls) < 1) {
+    warning(paste("no data matching query"))
+    return(NULL)
+  }
   
   format <- gsub(".*\\.(\\w+)$", "\\1", urls)
   if(all(format == "csv")) {
@@ -81,16 +115,21 @@ neon_urls <- function(table,
   cache <- cachem::cache_disk(tempdir())
   neon_data_mem <- memoise::memoise(neon_data, cache = cache)
   
+  # manually filter on release, so we can grepl for latest RELEASE
   df <- neon_data_mem(product, 
-                  start_date, 
-                  end_date, 
-                  site, 
-                  type, 
-                  release,
-                  quiet, 
-                  api, 
-                  .token = .token)
-  urls <- df$url[ grepl(table, df$name) ]
+                      start_date, 
+                      end_date, 
+                      site, 
+                      type, 
+                      release=NA,
+                      quiet, 
+                      api, 
+                      .token = .token)
+  if(is.na(release)) {
+    return(df$url[ grepl(table, df$name) ])
+  } else {
+    return( df$url[ grepl(table, df$name) & grepl(release, df$release)  ] )
+  }
   
 }
 

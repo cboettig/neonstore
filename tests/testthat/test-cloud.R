@@ -7,11 +7,11 @@ test_that("Direct cloud access", {
   skip_on_cran()
   # skip_on_os("windows")
   
-  urls <-  neonstore:::neon_urls(table = "waq_instantaneous",
-                                product = "DP1.20288.001",
-                                start_date = "2023-06-01",
-                                end_date = "2023-08-01",
-                                type="basic"
+  urls <-  neon_urls(table = "waq_instantaneous",
+                      product = "DP1.20288.001",
+                      start_date = "2023-06-01",
+                      end_date = "2023-08-01",
+                      type="basic"
   )
   
   format <- gsub(".*\\.(\\w+)$", "\\1", urls)
@@ -31,7 +31,7 @@ test_that("Direct cloud access", {
   skip_on_cran()
  # skip_on_os("windows")
   
-  df <-  neonstore:::neon_cloud(table = "waq_instantaneous",
+  df <-  neon_cloud(table = "waq_instantaneous",
                                product = "DP1.20288.001",
                                start_date = "2023-06-01",
                                end_date = "2023-08-01",
@@ -47,12 +47,12 @@ test_that("Direct cloud access", {
     dplyr::collect()
 
   df_local <- dplyr::collect(df)
-  expect_s3_class(df, "tbl")
+  expect_s3_class(df_local, "tbl")
   
   
   
   
-  df <-  neonstore:::neon_cloud(table = "bet_sorting",
+  df <-  neon_cloud(table = "bet_sorting",
                                 product = "DP1.10022.001",
                                 start_date = "2020-06-01",
                                 end_date = "2023-08-01",
@@ -65,6 +65,7 @@ test_that("Direct cloud access", {
   expect_true("siteID" %in% cols)
   expect_s3_class(df, "tbl")
   df_local <- dplyr::collect(df)
+  expect_s3_class(df_local, "tbl")
   
 })  
   
@@ -77,7 +78,7 @@ test_that("Big (rate-limited) tests of direct cloud access", {
     # skip_on_os("windows")
     
   
-  df <-  neonstore:::neon_cloud(table = "waq_instantaneous",
+  df <-  neon_cloud(table = "waq_instantaneous",
                                 product = "DP1.20288.001",
                                 start_date = "2018-01-01",
                                 end_date = "2023-08-01",
@@ -91,4 +92,15 @@ test_that("Big (rate-limited) tests of direct cloud access", {
   
 })
 
-
+test_that("union", {
+  
+  df <- neon_cloud("mappingandtagging",
+                   product = "DP1.10098.001",
+                   site = "BART")
+  
+  expect_s3_class(df, "tbl_lazy")
+  df_local <- dplyr::collect(df)
+  expect_s3_class(df_local, "tbl")
+  
+  
+})
