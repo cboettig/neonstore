@@ -87,7 +87,6 @@ neon_db <- function (dir = neon_db_dir(),
 #' @importFrom DBI dbDisconnect
 neon_disconnect <- function (db = neon_db()) {
   default = getOption("warn")
-  
   options(warn=-1)
   
   if(DBI::dbIsValid(db)) {
@@ -100,6 +99,15 @@ neon_disconnect <- function (db = neon_db()) {
     )
   }
   
+  gc(FALSE)
+  options(warn=default)
+  invisible(TRUE)
+}
+
+
+silent_gc <- function() {
+  default = getOption("warn")
+  options(warn=-1)
   gc(FALSE)
   options(warn=default)
   invisible(TRUE)

@@ -5,3 +5,5 @@
 .Renviron
 README_cache
 neon_parquet/*
+paper/paper_cache
+paper/store

@@ -15,6 +15,8 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 library(neonstore)
+library(dplyr)
+library(stringr)
 Sys.setenv("NEONSTORE_HOME" = tempfile())
 Sys.setenv("NEONSTORE_DB" = tempfile())
 
@@ -43,29 +45,29 @@ devtools::install_github("cboettig/neonstore")
 ```
 ## Quickstart
 
-```{r}
+```{r, message=FALSE}
 library(neonstore)
+library(tidyverse)
 ```
 
 Discover data products of interest:
 
 ```{r}
 products <- neon_products()
-
-i <- grepl("Populations", products$themes)
-products[i, c("productCode", "productName")]
- 
-i <- grepl("bird", products$keywords)
-products[i, c("productCode", "productName")]
+products |>
+  filter(str_detect(keywords, "bird")) |> 
+  select(productName, productCode)
 ```
 
-Download all data files in the bird survey data products.  
+You may also prefer to explore the [NEON Data Portal](https://data.neonscience.org/) website interactively.
+
+## Download-based workflow
+
+Once we have identified a data product code, we can download all associated data files, e.g. in the bird survey data.  Optionally, we can restrict this download to a set of sites or date ranges of interest, (see function documentation for details).  
 
 ```{r}
 neon_download("DP1.10003.001")
-
 ```
-
 
 View your store of NEON products:
 
@@ -77,25 +79,10 @@ These files will persist between sessions, so you only need to download once
 or to retrieve updates. `neon_index()` can take arguments to filter by product
 or pattern (regular expression) in table name, e.g. `neon_index(table = "brd")`.
 
-Once you determine the table of interest, you can
-read in all the component tables into a single `data.frame`
-
-```{r}
-neon_read("brd_countdata-expanded")
-```
-
-
-
 ## Database backend
 
 `neonstore` now supports a backend relation database as well. Import data from
 the raw downloaded files using `neon_store()`:
-
-```{r}
-neon_store(table = "brd_countdata-expanded")
-```
-
-Alternately, we could import all data tables associated with a given product:
 
 ```{r}
 neon_store(product = "DP1.10003.001")
@@ -108,22 +95,36 @@ neon_table("brd_countdata")
 ```
 
 
+Note that we need to include the product name in the table name when accessing the database, as table names alone may not be unique. RStudio users can also list and explore all tables interactively in the Connections pane in RStudio using the function `neon_pane()`.  
 
+## Larger-than-RAM data
 
-Access the remote database using `neon_db()`.  This is a `DBIConnection` that
-can easily be used with `dplyr` functions like `tbl()` or `filter()`.  
-Remember that `dplyr` translates these into SQL queries that run directly
-on the database.  
+When working across data from many sites or years simultaneously, it is easy for data to be too big for R to fit into working memory.  This is especially true when working with sensor data.  `neonstore` makes it easy to work with such data using dplyr-operations though.  Just include the option `lazy = TRUE`, and [most dplyr](https://dbplyr.tidyverse.org/reference/index.html) operations will execute quickly on disk instead (by leveraging the `dbplyr` backend and the power of the `duckdb` database). 
 
 ```{r}
-library(dplyr)
-con <- neon_db()
-brd <- tbl(con, "brd_countdata-basic-DP1.10003.001")
-brd %>% filter(siteID == "ORNL")
-
+brd <- neon_table("brd_countdata", lazy=TRUE)
+# unique species per site?
+brd |> 
+  distinct(siteID, scientificName) |> 
+  count(siteID, sort=TRUE) |> 
+  collect()
 ```
 
-Note that we need to include the product name in the table name when accessing the database, as table names alone may not be unique. RStudio users can also list and explore all tables interactively in the Connections pane in RStudio using `neon_pane()`.  
+Use the function `collect()` at the end of a chain of dplyr functions to bring the resulting data into R.
+
+## NEW: Cloud-based workflow
+
+It is now possible to access data directly from NEON's cloud storage system without downloading.  (Note: this still must ping the NEON API to obtain the most recent list of files, and this list is subject to rate limits).  Like the local database approach, this strategy works for larger-than-RAM data, and can be substantially faster than downloading.  However, if you work frequently with the same data products and have ample disk space available, you will find the one-time wait for downloading to be faster.
+
+```{r}
+brd <- neon_cloud("brd_countdata", product="DP1.10003.001")
+
+brd |> 
+  distinct(siteID, scientificName) |> 
+  count(siteID, sort=TRUE) |> 
+  collect()
+```
+
 
 
 ## Note on API limits
@@ -159,32 +160,7 @@ At it's core, `neonstore` is simply a mechanism to download files from the NEON 
 While the `.csv` files from the Observation Systems (OS, e.g. bird count surveys),
 and Instrument Systems (e.g. aquatic sensors) are typically stacked into large
 tables, other products, such as the `.laz` and `.tif` images produced by the
-airborne observation platform LIDAR and cameras may require a different approach.
-
-
-
-```{r}
-# Read in a large file list for illustration purposes
-cper_data <- readr::read_csv("https://minio.thelio.carlboettiger.info/shared-data/neon_data_catalog.csv.gz")
-
-## Typically one would read all files in local store, e.g. list.file(neon_dir())
-df <- neon_filename_parser(cper_data$name)
-```
-
-```{r}
-library(dplyr)
-df %>% count(EXT, sort=TRUE)
-```
-
-We can take a look at all `laz` LIDAR files:
-
-```{r}
-df %>% 
-  filter(EXT == "laz")
-```
-
-Note that many of the airborne observation platform (AOP) products, such as
-these LIDAR files, do not include the PRNUM or REV components that make up part
-of the `productCode`s used in the NEON `product` tables.  
-
-
+airborne observation platform (AOP) sensors such as LIDAR and cameras still
+require the user to work directly with the downloaded files returned
+by `neon_index()`.  Note that the local database can process Eddy Covariance 
+data (h5 files), but at present this does not work with `neon_cloud()`.
