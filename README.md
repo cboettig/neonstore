@@ -145,10 +145,6 @@ and the power of the `duckdb` database).
 
 ``` r
 brd <- neon_table("brd_countdata", lazy=TRUE)
-#> It looks like you tried to incorrectly use a table in a schema as source.
-#> ℹ If you want to specify a schema use `in_schema()` or `in_catalog()`.
-#> ℹ If your table actually contains "." in the name use `check_from = FALSE` to
-#>   silence this message.
 # unique species per site?
 brd |> 
   distinct(siteID, scientificName) |> 
@@ -165,8 +161,8 @@ brd |>
 #>  6 KONZ     120
 #>  7 SJER     117
 #>  8 ORNL     116
-#>  9 SRER     111
-#> 10 HARV     111
+#>  9 HARV     111
+#> 10 SRER     111
 #> # ℹ 37 more rows
 ```
 
@@ -198,8 +194,8 @@ brd |>
 #>  2 CLBJ     134
 #>  3 UNDE     124
 #>  4 DCFS     123
-#>  5 KONZ     120
-#>  6 OAES     120
+#>  5 OAES     120
+#>  6 KONZ     120
 #>  7 SJER     117
 #>  8 ORNL     116
 #>  9 HARV     111
