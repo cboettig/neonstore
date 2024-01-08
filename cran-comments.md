@@ -1,6 +1,6 @@
 Dear CRAN,
 
-Bugfix, see NEWS.md
+This release makes the changes described in NEWS.md
 
 
 ## R CMD check results
