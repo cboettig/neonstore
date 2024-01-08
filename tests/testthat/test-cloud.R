@@ -94,6 +94,9 @@ test_that("Big (rate-limited) tests of direct cloud access", {
 
 test_that("union", {
   
+  skip_if_offline()
+  skip_on_cran()
+  
   df <- neon_cloud("mappingandtagging",
                    product = "DP1.10098.001",
                    site = "BART")
