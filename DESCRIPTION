@@ -26,6 +26,8 @@ Description: The National Ecological Observatory Network (NEON) provides access
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+URL: https://cboettig.github.io/neonstore/, https://github.com/cboettig/neonstore
+BugReports: https://github.com/cboettig/neonstor/issues
 Depends: R (>= 4.0.0)
 Imports: 
     DBI,
