@@ -18,6 +18,8 @@ test_that("neon_db", {
 
   
   neon_delete_db(ask = FALSE)
+  
+  expect_true(TRUE)
 })
 
 

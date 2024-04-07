@@ -1,3 +1,7 @@
+# v0.5.1
+
+- bugfix tests on CRAN
+
 # v0.5.0
 
 - New function `neon_cloud()` leverages NEON's migration to 
