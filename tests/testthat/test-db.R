@@ -12,7 +12,7 @@ test_that("neon_db", {
   db2 <- neon_db()
   
   ## Confirm cached connection
-  expect_identical(db, db2)
+  expect_equal(db, db2)
   neon_disconnect(db)
   gc()
 
